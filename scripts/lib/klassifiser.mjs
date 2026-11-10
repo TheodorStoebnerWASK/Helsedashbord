@@ -62,6 +62,7 @@ export async function kiKlassifiser(items, taks, { token, modell, maksForesporsl
   const gyldigeTemaer = new Set(taks.temaer.map((t) => t.id).concat('annet'));
   const gyldigeKat = new Set(taks.kategorier.map((k) => k.id));
   let forespørsler = 0;
+  let feilPaRad = 0;
   for (let i = 0; i < items.length; i += batch) {
     if (forespørsler >= maksForesporsler) { logg(`KI: nådde maks ${maksForesporsler} forespørsler – resten tas neste kjøring`); break; }
     const del = items.slice(i, i + batch);
@@ -71,19 +72,31 @@ export async function kiKlassifiser(items, taks, { token, modell, maksForesporsl
       forespørsler++;
       const res = await fetch('https://models.github.ai/inference/chat/completions', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
         body: JSON.stringify({
           model: modell,
           temperature: 0,
-          response_format: { type: 'json_object' },
+          // Noen modeller/versjoner avviser response_format – andre forsøk sendes uten
+          ...(forsøk === 0 ? { response_format: { type: 'json_object' } } : {}),
           messages: [
             { role: 'system', content: SYSTEM(taks) },
             { role: 'user', content: JSON.stringify(input) },
           ],
         }),
       }).catch((e) => ({ ok: false, status: 0, text: async () => String(e) }));
-      if (res.ok) { svar = await res.json(); break; }
       const tekst = await res.text();
+      if (res.ok) {
+        try { svar = JSON.parse(tekst); break; } catch {
+          logg(`KI: uventet svar (ikke JSON, status ${res.status}): ${tekst.slice(0, 200).replace(/\s+/g, ' ')}`);
+          await sleep(3000);
+          continue;
+        }
+      }
       if (res.status === 429) {
         const vent = Number(res.headers?.get?.('retry-after') || 0);
         if (vent > 0 && vent < 90) { logg(`KI: rate limit, venter ${vent}s`); await sleep(vent * 1000); continue; }
@@ -93,7 +106,11 @@ export async function kiKlassifiser(items, taks, { token, modell, maksForesporsl
       if (res.status === 401 || res.status === 403) return ut;
       await sleep(5000);
     }
-    if (!svar) continue;
+    if (!svar) {
+      if (++feilPaRad >= 3) { logg('KI: tre mislykkede forsøk på rad – bruker nøkkelord resten av denne kjøringen'); return ut; }
+      continue;
+    }
+    feilPaRad = 0;
     try {
       const innhold = JSON.parse(svar.choices[0].message.content);
       for (const r of innhold.resultater || []) {

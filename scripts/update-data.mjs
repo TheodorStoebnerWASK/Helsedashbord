@@ -216,7 +216,9 @@ if (BRUK_KI && trengerKi.length) {
   else {
     trengerKi.sort((a, b) => (b.direkte - a.direkte) || String(b.data.dato).localeCompare(String(a.data.dato)));
     logg(`KI: ${trengerKi.length} saker skal klassifiseres`);
-    const res = await kiKlassifiser(trengerKi, taks, { token, modell: process.env.KI_MODELL || 'openai/gpt-4.1-mini', logg });
+    // KI-feil skal aldri stoppe datahentingen – da brukes nøkkelordreglene til neste kjøring
+    const res = await kiKlassifiser(trengerKi, taks, { token, modell: process.env.KI_MODELL || 'openai/gpt-4.1-mini', logg })
+      .catch((e) => { logg(`KI: feilet (${e.message}) – bruker nøkkelord`); return new Map(); });
     for (const [id, r] of res) {
       const k = kandidater.find((x) => x.id === id);
       if (k) cache[id] = { ...r, relevant: k.direkte || r.relevant, h: cache[id].h };
