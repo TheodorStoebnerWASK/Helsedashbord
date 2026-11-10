@@ -1,0 +1,194 @@
+/* =========================================================================
+   WASK – designtokens
+   Wergeland / Apenes sitt designsystem. Hentet fra Claude Design-leveransen
+   (wask-design-system-c9705af0) og lagt inn uendret, bortsett fra at
+   @font-face peker på våre woff2-filer i stedet for de leverte TTF-ene.
+
+   ENDRE IKKE VERDIENE HER for å justere en enkelt komponent. Dette er
+   merkevaren. Komponentstiler hører hjemme i site.css, og skal bruke de
+   semantiske aliasene (--text-body, --surface-card, --border-hairline)
+   framfor de rå --wa-*-variablene.
+   ========================================================================= */
+
+/* --- Merkevarefonter ------------------------------------------------------
+   DM Sans og Source Serif 4, begge under SIL Open Font License, så de kan
+   serveres fra vår egen server. Konvertert fra TTF til woff2: 1335 kB -> 354 kB.
+   font-display:swap gjør at teksten vises i reservefonten mens fila lastes. */
+
+@font-face{font-family:"DM Sans";src:url("/fonts/DMSans-Light.woff2") format("woff2");font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:"DM Sans";src:url("/fonts/DMSans-Regular.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"DM Sans";src:url("/fonts/DMSans-Bold.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Source Serif 4";src:url("/fonts/SourceSerif4-Light.woff2") format("woff2");font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:"Source Serif 4";src:url("/fonts/SourceSerif4-LightItalic.woff2") format("woff2");font-weight:300;font-style:italic;font-display:swap}
+@font-face{font-family:"Source Serif 4";src:url("/fonts/SourceSerif4-Regular.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Source Serif 4";src:url("/fonts/SourceSerif4-Bold.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+
+
+/* --- tokens/colors.css ---------------------------------------------------- */
+/* Primary palette — extracted from "WASK typography.pdf" (page 2, primary colours). */
+:root{
+  /* Base — ink & paper */
+  --wa-black:#0a0a0a;
+  --wa-white:#ffffff;
+  --wa-paper:#f8f7f3;
+
+  /* Primary accents */
+  --wa-blue:#3d99c7;
+  --wa-blue-pale:#d8ebf4;
+  --wa-pink:#ffc8d0;
+  --wa-red:#fd3b25;
+  --wa-clay:#685048;
+
+  /* Warm neutral ramp, interpolated between paper and ink in oklch */
+  --wa-neutral-100:oklch(97.4% 0.004 85);
+  --wa-neutral-200:oklch(93.5% 0.005 85);
+  --wa-neutral-300:oklch(87% 0.006 85);
+  --wa-neutral-400:oklch(74% 0.007 85);
+  --wa-neutral-500:oklch(60% 0.008 70);
+  --wa-neutral-600:oklch(47% 0.009 60);
+  --wa-neutral-700:oklch(34% 0.008 60);
+  --wa-neutral-800:oklch(22% 0.006 60);
+
+  /* Tints for washes and hovers */
+  --wa-blue-wash:oklch(from var(--wa-blue) 96% 0.02 h);
+  --wa-pink-wash:oklch(from var(--wa-pink) 97% 0.02 h);
+  --wa-red-wash:oklch(from var(--wa-red) 96% 0.03 h);
+  --wa-blue-deep:oklch(from var(--wa-blue) 46% c h);
+  --wa-red-deep:oklch(from var(--wa-red) 46% c h);
+
+  /* ---- Semantic aliases ---- */
+  --text-primary:var(--wa-black);
+  --text-body:var(--wa-neutral-800);
+  --text-secondary:var(--wa-neutral-600);
+  --text-muted:var(--wa-neutral-500);
+  --text-inverse:var(--wa-white);
+  --text-accent:var(--wa-blue-deep);
+  --text-link:var(--wa-black);
+  --text-link-hover:var(--wa-blue-deep);
+
+  --surface-page:var(--wa-paper);
+  --surface-card:var(--wa-white);
+  --surface-raised:var(--wa-white);
+  --surface-inverse:var(--wa-black);
+  --surface-sunken:var(--wa-neutral-100);
+  --surface-accent:var(--wa-blue-pale);
+  --surface-accent-soft:var(--wa-pink);
+  --surface-alert:var(--wa-red);
+
+  --border-hairline:var(--wa-neutral-300);
+  --border-strong:var(--wa-black);
+  --border-subtle:var(--wa-neutral-200);
+  --border-accent:var(--wa-blue);
+
+  --focus-ring:var(--wa-blue);
+}
+
+
+/* --- tokens/typography.css ---------------------------------------------------- */
+:root{
+  --font-serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-sans:"DM Sans","Helvetica Neue",Helvetica,sans-serif;
+  --font-display:var(--font-serif);
+  --font-body:var(--font-sans);
+
+  --weight-light:300;
+  --weight-regular:400;
+  --weight-bold:700;
+
+  /* Display / editorial — Source Serif 4 Light */
+  --type-display-1:300 clamp(52px,7vw,104px)/0.98 var(--font-serif);
+  --type-display-2:300 clamp(40px,4.6vw,68px)/1.04 var(--font-serif);
+  --type-display-3:300 clamp(30px,2.8vw,44px)/1.1 var(--font-serif);
+  --type-subhead:300 clamp(20px,1.6vw,28px)/1.35 var(--font-serif);
+  --type-quote:300 italic clamp(24px,2.4vw,38px)/1.28 var(--font-serif);
+
+  /* Body — DM Sans Light */
+  --type-lead:300 20px/1.55 var(--font-sans);
+  --type-body:300 16px/1.65 var(--font-sans);
+  --type-body-sm:300 14px/1.6 var(--font-sans);
+  --type-caption:300 12px/1.5 var(--font-sans);
+
+  /* Tracked uppercase — eyebrows, labels, buttons, nav */
+  --type-eyebrow:400 12px/1.2 var(--font-sans);
+  --type-label:400 11px/1.2 var(--font-sans);
+  --type-button:400 13px/1 var(--font-sans);
+
+  --tracking-display:-0.015em;
+  --tracking-tight:-0.01em;
+  --tracking-normal:0;
+  --tracking-wide:0.08em;
+  --tracking-caps:0.16em;
+  --tracking-caps-loose:0.24em;
+
+  --measure-narrow:34ch;
+  --measure-body:62ch;
+  --measure-wide:78ch;
+}
+
+
+/* --- tokens/spacing.css ---------------------------------------------------- */
+:root{
+  /* 4px base, doubling toward editorial whitespace */
+  --space-0:0;
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:24px;
+  --space-6:32px;
+  --space-7:48px;
+  --space-8:64px;
+  --space-9:96px;
+  --space-10:128px;
+  --space-11:180px;
+
+  --gutter:var(--space-5);
+  --section-y:var(--space-9);
+  --section-y-lg:var(--space-10);
+  --page-margin:clamp(20px,5vw,80px);
+  --container-max:1280px;
+  --container-text:720px;
+  --grid-columns:12;/* @kind other */
+}
+
+
+/* --- tokens/surfaces.css ---------------------------------------------------- */
+:root{
+  /* Corners stay nearly square — printed-memo geometry */
+  --radius-none:0;
+  --radius-xs:1px;
+  --radius-sm:2px;
+  --radius-md:3px;
+  --radius-pill:999px;
+
+  --border-width:1px;
+  --border-width-strong:1.5px;
+  --rule:1px solid var(--border-hairline);
+  --rule-strong:1px solid var(--border-strong);
+
+  /* Shadows are rare and low; paper does not float much */
+  --shadow-none:none;
+  --shadow-1:0 1px 2px oklch(0% 0 0/0.05);
+  --shadow-2:0 8px 24px -12px oklch(0% 0 0/0.14);
+  --shadow-3:0 24px 64px -24px oklch(0% 0 0/0.22);
+  --shadow-inset-hairline:inset 0 0 0 1px var(--border-hairline);
+
+  --overlay-scrim:oklch(0% 0 0/0.42);
+  --blur-veil:saturate(120%) blur(12px);/* @kind other */
+}
+
+
+/* --- tokens/motion.css ---------------------------------------------------- */
+:root{
+  --ease-standard:cubic-bezier(0.2,0,0.2,1);/* @kind other */
+  --ease-out:cubic-bezier(0.16,1,0.3,1);/* @kind other */
+  --ease-in-out:cubic-bezier(0.6,0,0.4,1);/* @kind other */
+  --duration-instant:90ms;/* @kind other */
+  --duration-fast:160ms;/* @kind other */
+  --duration-base:240ms;/* @kind other */
+  --duration-slow:420ms;/* @kind other */
+  --duration-reveal:700ms;/* @kind other */
+  --transition-ui:color var(--duration-fast) var(--ease-standard),background-color var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard),opacity var(--duration-fast) var(--ease-standard);
+}
+@media (prefers-reduced-motion:reduce){:root{--duration-fast:0ms;/* @kind other */--duration-base:0ms;/* @kind other */--duration-slow:0ms;/* @kind other */--duration-reveal:0ms/* @kind other */}}
+

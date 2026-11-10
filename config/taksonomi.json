@@ -1,0 +1,546 @@
+{
+  "_kommentar": "Kategorier og temaer brukes både av KI-klassifiseringen og av reservereglene (nøkkelord). Rediger fritt – nye temaer plukkes opp ved neste datakjøring. Nøkkelord er regulære uttrykk (små bokstaver, matcher ordstart).",
+  "kategorier": [
+    {
+      "id": "legemidler",
+      "navn": "Legemidler & Biotek",
+      "farge": "#2F86B8"
+    },
+    {
+      "id": "medtek",
+      "navn": "Medtek & diagnostikk",
+      "farge": "#2E9E6E"
+    },
+    {
+      "id": "digital",
+      "navn": "Digital Helse",
+      "farge": "#DDA21A"
+    },
+    {
+      "id": "regulering",
+      "navn": "Regulering & Politikk",
+      "farge": "#E5402A"
+    }
+  ],
+  "temaer": [
+    {
+      "id": "kreft",
+      "navn": "Kreft",
+      "kategori": "legemidler",
+      "ord": [
+        "*kreft",
+        "onkolog",
+        "cancer",
+        "cellegift",
+        "strålebehandl",
+        "lymfom",
+        "leukemi",
+        "myelom",
+        "car-t",
+        "immunterapi",
+        "mammografi"
+      ]
+    },
+    {
+      "id": "legemiddeltilgang",
+      "navn": "Nye metoder & legemiddeltilgang",
+      "kategori": "legemidler",
+      "ord": [
+        "nye metoder",
+        "beslutningsforum",
+        "metodevurder",
+        "*legemid",
+        "medisiner",
+        "medikament",
+        "blåresept",
+        "refusjon",
+        "tidlig tilgang",
+        "terskelverdi",
+        "betalingsvilje",
+        "kostnadseffektiv",
+        "h-resept",
+        "sykehusinnkjøp",
+        "apotek",
+        "legemiddelmangel",
+        "dmp",
+        "legemiddelverket"
+      ]
+    },
+    {
+      "id": "sjeldne",
+      "navn": "Sjeldne sykdommer",
+      "kategori": "legemidler",
+      "ord": [
+        "sjeldne",
+        "sjelden sykdom",
+        "sjeldne diagnoser",
+        "spinal muskelatrofi",
+        "duchenne",
+        "\\bals\\b",
+        "genterapi",
+        "cystisk fibrose"
+      ]
+    },
+    {
+      "id": "vaksiner",
+      "navn": "Vaksiner & smittevern",
+      "kategori": "legemidler",
+      "ord": [
+        "*vaksin",
+        "smittevern",
+        "smitte",
+        "pandemi",
+        "influensa",
+        "antibiotika",
+        "antimikrobiell",
+        "hepatitt",
+        "hiv",
+        "covid",
+        "korona"
+      ]
+    },
+    {
+      "id": "biotek",
+      "navn": "Bioteknologi, forskning & helsenæring",
+      "kategori": "legemidler",
+      "ord": [
+        "bioteknologi",
+        "klinisk forskning",
+        "kliniske studier",
+        "klinisk studie",
+        "helseforskning",
+        "life science",
+        "helsenæring",
+        "persontilpasset",
+        "presisjonsmedisin",
+        "genom",
+        "gentest"
+      ]
+    },
+    {
+      "id": "medisinsk-utstyr",
+      "navn": "Medisinsk utstyr & hjelpemidler",
+      "kategori": "medtek",
+      "ord": [
+        "medisinsk utstyr",
+        "hjelpemid",
+        "implantat",
+        "protese",
+        "høreapparat",
+        "insulinpumpe",
+        "sensor",
+        "cgm",
+        "glukosemål",
+        "rullestol",
+        "utstyr",
+        "eøs-komiteen",
+        "forordning"
+      ]
+    },
+    {
+      "id": "diagnostikk",
+      "navn": "Screening & diagnostikk",
+      "kategori": "medtek",
+      "ord": [
+        "screening",
+        "diagnost",
+        "laborator",
+        "patologi",
+        "bildediagnost",
+        "\\bmr\\b",
+        "\\bct\\b",
+        "\\bpet\\b",
+        "røntgen",
+        "prøvesvar",
+        "testing"
+      ]
+    },
+    {
+      "id": "ehelse",
+      "navn": "E-helse & journalsystemer",
+      "kategori": "digital",
+      "ord": [
+        "journal",
+        "helseplattformen",
+        "e-helse",
+        "ehelse",
+        "helsenorge",
+        "kjernejournal",
+        "norsk helsenett",
+        "digital",
+        "videokonsultasjon",
+        "e-konsultasjon",
+        "samhandlingsløsning"
+      ]
+    },
+    {
+      "id": "helsedata-ki",
+      "navn": "Helsedata & KI",
+      "kategori": "digital",
+      "ord": [
+        "kunstig intelligens",
+        "\\bki\\b",
+        "helsedata",
+        "helseregist",
+        "helseanalyseplattform",
+        "personvern",
+        "velferdsteknologi",
+        "app\\b",
+        "algoritme",
+        "syntetiske"
+      ]
+    },
+    {
+      "id": "sykehus",
+      "navn": "Sykehus & spesialisthelsetjeneste",
+      "kategori": "regulering",
+      "ord": [
+        "*sykehus",
+        "*helseforetak",
+        "helse sør-øst",
+        "helse vest",
+        "helse midt",
+        "helse nord",
+        "fødeavdeling",
+        "akuttmottak",
+        "ventetid",
+        "ventelist",
+        "spesialisthelsetjenest",
+        "poliklinikk",
+        "operasjon",
+        "kirurgi",
+        "nedlegg",
+        "rehabiliter",
+        "\\bpci\\b",
+        "slagbehandl",
+        "hjerte",
+        "nye rikshospitalet",
+        "\\bous\\b"
+      ]
+    },
+    {
+      "id": "kommunehelse",
+      "navn": "Fastlege & kommunehelse",
+      "kategori": "regulering",
+      "ord": [
+        "fastleg",
+        "legevakt",
+        "kommunehelse",
+        "allmennleg",
+        "helsestasjon",
+        "helsesykepleier",
+        "skolehelse",
+        "primærhelse",
+        "kommunale helse",
+        "optiker",
+        "øyehelse",
+        "fysioterap",
+        "kiropraktor"
+      ]
+    },
+    {
+      "id": "omsorg",
+      "navn": "Eldreomsorg & omsorgstjenester",
+      "kategori": "regulering",
+      "ord": [
+        "eldre",
+        "sykehjem",
+        "hjemmetjenest",
+        "omsorg",
+        "demens",
+        "\\bbpa\\b",
+        "pleie",
+        "avlastning",
+        "omsorgsbolig",
+        "pårørende"
+      ]
+    },
+    {
+      "id": "psykisk-rus",
+      "navn": "Psykisk helse & rus",
+      "kategori": "regulering",
+      "ord": [
+        "psykisk",
+        "*psykiatri",
+        "\\brus",
+        "narkotika",
+        "alkohol",
+        "\\blar\\b",
+        "overdose",
+        "selvmord",
+        "\\bdps\\b",
+        "\\bbup\\b",
+        "spiseforstyrr",
+        "avhengighet",
+        "cannabis"
+      ]
+    },
+    {
+      "id": "personell",
+      "navn": "Helsepersonell & bemanning",
+      "kategori": "regulering",
+      "ord": [
+        "helsepersonell",
+        "sykepleier",
+        "bemanning",
+        "rekrutter",
+        "spesialistutdann",
+        "turnus",
+        "\\blis1",
+        "autorisasjon",
+        "jordmødre",
+        "jordmor",
+        "helsefagarbeider",
+        "legemangel",
+        "vikar"
+      ]
+    },
+    {
+      "id": "akutt-beredskap",
+      "navn": "Akuttmedisin & beredskap",
+      "kategori": "regulering",
+      "ord": [
+        "ambulanse",
+        "luftambulanse",
+        "akuttmedisin",
+        "\\bamk\\b",
+        "beredskap",
+        "redningshelikopter",
+        "forsyningssikkerhet",
+        "helseberedskap",
+        "beredskapslag",
+        "nukleær",
+        "atomberedskap",
+        "strålevern"
+      ]
+    },
+    {
+      "id": "folkehelse",
+      "navn": "Folkehelse & forebygging",
+      "kategori": "regulering",
+      "ord": [
+        "folkehelse",
+        "forebygg",
+        "tobakk",
+        "snus",
+        "nikotin",
+        "e-sigarett",
+        "vape",
+        "fysisk aktivitet",
+        "kosthold",
+        "sukker",
+        "overvekt",
+        "fedme",
+        "pollen",
+        "allergi",
+        "astma",
+        "luftkvalitet",
+        "solarium",
+        "ernæring",
+        "ultraprosesser",
+        "\\bmat\\b",
+        "helse blant"
+      ]
+    },
+    {
+      "id": "tannhelse",
+      "navn": "Tannhelse",
+      "kategori": "regulering",
+      "ord": [
+        "tannhelse",
+        "tannleg",
+        "tannbehandl",
+        "tannpleie"
+      ]
+    },
+    {
+      "id": "finansiering",
+      "navn": "Finansiering & budsjett",
+      "kategori": "regulering",
+      "ord": [
+        "statsbudsjett",
+        "budsjett",
+        "bevilgning",
+        "finansiering",
+        "egenandel",
+        "frikort",
+        "innsatsstyrt",
+        "\\bisf\\b",
+        "takst",
+        "underskudd",
+        "økonomi",
+        "kroner"
+      ]
+    },
+    {
+      "id": "lov-rettigheter",
+      "navn": "Helselovgivning & pasientrettigheter",
+      "kategori": "regulering",
+      "ord": [
+        "pasientrettighet",
+        "pasient- og brukerrettighet",
+        "helsepersonelloven",
+        "spesialisthelsetjenesteloven",
+        "abort",
+        "bioteknologiloven",
+        "aktiv dødshjelp",
+        "tvang",
+        "\\blov\\b",
+        "loven",
+        "forskrift",
+        "prioritering",
+        "klage",
+        "pasientskade",
+        "fritt behandlingsvalg",
+        "erstatning",
+        "gransking",
+        "tilsyn",
+        "helsetilsyn",
+        "statsforvalter"
+      ]
+    },
+    {
+      "id": "privat-helse",
+      "navn": "Private & ideelle aktører",
+      "kategori": "regulering",
+      "ord": [
+        "privat",
+        "kommersiell",
+        "ideell",
+        "anbud",
+        "avtalespesialist",
+        "helseforsikring",
+        "nærklinikk",
+        "konkurranseutsett"
+      ]
+    },
+    {
+      "id": "kvinnehelse",
+      "navn": "Kvinnehelse & fødsel",
+      "kategori": "regulering",
+      "ord": [
+        "kvinnehelse",
+        "fødsel",
+        "føde",
+        "svangerskap",
+        "endometriose",
+        "barsel",
+        "gynekolog",
+        "overgangsalder",
+        "\\bpcos\\b"
+      ]
+    },
+    {
+      "id": "helsereform",
+      "navn": "Helsereform & styring",
+      "kategori": "regulering",
+      "ord": [
+        "helsereform",
+        "én helsetjeneste",
+        "helsefellesskap",
+        "foretaksmodell",
+        "styring",
+        "helse- og samhandlingsplan",
+        "organisering",
+        "regionale helseforetak",
+        "strategi for",
+        "nasjonal plan"
+      ]
+    }
+  ],
+  "storEndring": {
+    "_kommentar": "«ord» brukes for saker, høringer og regjeringsdokumenter; «sporsmalOrd» (strengere) for spørsmål. KI-en vurderer i tillegg selv.",
+    "ord": [
+      "prop\\. \\d+ l",
+      "prop\\. \\d+ ls",
+      "lovendring",
+      "endringer i .*loven",
+      "endringar i .*lova",
+      "endring i .*loven",
+      "ny lov",
+      "lovforslag",
+      "forskriftsendring",
+      "endringer i forskrift",
+      "forslag om endringer i forskrift",
+      "\\bnou\\b",
+      "meld\\. st\\.",
+      "stortingsmelding",
+      "reform",
+      "terskelverdi",
+      "betalingsvilje",
+      "alvorlighetsgrad",
+      "prioriteringsmelding",
+      "finansieringsordning",
+      "finansieringsansvar",
+      "ny modell",
+      "nedlegging",
+      "nedleggelse",
+      "strukturendring",
+      "omorganiser",
+      "avvikle",
+      "nasjonal strategi",
+      "handlingsplan",
+      "opptrappingsplan"
+    ],
+    "sporsmalOrd": [
+      "terskelverdi",
+      "betalingsvilje",
+      "lovendring",
+      "lovforslag",
+      "forskriftsendring",
+      "nedlegg",
+      "nedleggelse",
+      "omorganiser",
+      "avvikle",
+      "reform",
+      "finansieringsmodell",
+      "ny finansieringsordning"
+    ]
+  },
+  "helseord": [
+    "*helse",
+    "*sykehus",
+    "pasient",
+    "\\bleger?\\b",
+    "\\blegen\\b",
+    "\\blegene\\b",
+    "legevakt",
+    "fastleg",
+    "*legemid",
+    "medisiner",
+    "psykisk helse",
+    "*psykiatri",
+    "\\brusbehandl",
+    "\\brusomsorg",
+    "\\brusreform",
+    "\\brusavhengig",
+    "omsorgstjenest",
+    "sykehjem",
+    "eldreomsorg",
+    "tannhelse",
+    "tannleg",
+    "*kreft",
+    "ambulanse",
+    "folkehelse",
+    "*vaksin",
+    "fødeavdeling",
+    "fødetilbud",
+    "jordmor",
+    "sykepleie",
+    "apotek",
+    "demens",
+    "hjelpemidl",
+    "overdose",
+    "\\bbpa\\b",
+    "habilitering",
+    "helseplattform",
+    "e-helse",
+    "pollen",
+    "allergi",
+    "nærklinikk",
+    "spesialisthelse",
+    "kommunehelse",
+    "\\bdps\\b",
+    "\\bbup\\b"
+  ]
+}
