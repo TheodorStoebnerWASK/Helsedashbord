@@ -6,6 +6,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { XMLParser } from 'fast-xml-parser';
 import { lagRegler, regelKlassifiser, kiKlassifiser, hashTekst } from './lib/klassifiser.mjs';
+import { hentVoteringer } from './lib/voteringer.mjs';
 
 const ROT = new URL('..', import.meta.url).pathname;
 const DATA = ROT + 'data/';
@@ -74,7 +75,8 @@ const komiteNavn = Object.fromEntries((await sth(`komiteer?sesjonid=${innevaeren
 logg(`Personer: ${Object.keys(personer).length}, komitémedlemmer: ${komiteMedlemmer.length}`);
 
 // ---------- Rådata → kandidater ----------
-const kandidater = []; // {id, type, typeNavn, tittel, direkte, kontekst, ekstra, data}
+const kandidater = [];
+const alleSaker = new Map(); // alle saker i perioden (også ikke-helse), for voteringsmatrisen // {id, type, typeNavn, tittel, direkte, kontekst, ekstra, data}
 const SP_TYPER = [
   { sti: 'skriftligesporsmal', type: 'skriftlig', navn: 'Skriftlig spørsmål', url: (q) => `https://www.stortinget.no/no/Saker-og-publikasjoner/Sporsmal/Skriftlige-sporsmal-og-svar/Skriftlig-sporsmal/?qnid=${q.id}` },
   { sti: 'sporretimesporsmal', type: 'muntlig', navn: 'Spørretimespørsmål', url: (q) => `https://www.stortinget.no/no/Saker-og-publikasjoner/Sporsmal/Sporretimesporsmal/?qnid=${q.id}` },
@@ -105,6 +107,7 @@ for (const sesjon of sesjoner) {
 
   // Saker
   const saker = (await sth(`saker?sesjonid=${sesjon}`)).saker_liste || [];
+  for (const s of saker) alleSaker.set(String(s.id), { id: s.id, sesjon, tittel: (s.korttittel || s.tittel || '').trim(), behandlet: s.status === 1, komite: s.komite?.id });
   const SAK_STATUS = { 1: 'Behandlet', 2: 'Til behandling', 3: 'Varslet', 5: 'Trukket/bortfalt' };
   const SAK_TYPE = { 1: 'Budsjettsak', 2: 'Alminnelig sak', 3: 'Lovsak' };
   const DOKGRUPPE = { 1: 'Proposisjon', 2: 'Melding', 4: 'Representantforslag', 5: 'Grunnlovsforslag', 6: 'Riksrevisjon/kontroll', 7: 'Innstilling', 8: 'Innberetning' };
@@ -248,6 +251,27 @@ const nevnt = new Set(komiteMedlemmer);
 for (const e of elementer) for (const id of [e.fra, ...(e.forslagstillere || []), ...(e.saksordforere || [])]) if (id) nevnt.add(id);
 const personerUt = Object.fromEntries(Object.entries(personer).filter(([id, p]) => nevnt.has(id) || p.aktiv));
 
+// ---------- Voteringer (alle ferdigbehandlede saker i perioden) ----------
+const voteringFil = DATA + 'voteringer.json';
+const voteringCache = await lesJson(voteringFil, {});
+try {
+  await hentVoteringer([...alleSaker.values()].filter((s) => s.behandlet), voteringCache, { sth, logg });
+} catch (e) {
+  logg(`ADVARSEL: voteringer feilet (${e.message})`);
+}
+await writeFile(voteringFil, JSON.stringify(voteringCache));
+const helseSakId = new Map(elementer.filter((e) => e.type === 'sak').map((e) => [e.id.replace('sak-', ''), e]));
+const voteringSaker = {};
+const voteringer = [];
+for (const [sakId, { v }] of Object.entries(voteringCache)) {
+  const sak = alleSaker.get(sakId);
+  if (!sak || !v?.length) continue;
+  const h = helseSakId.get(sakId);
+  voteringSaker[sakId] = rens({ tittel: sak.tittel, sesjon: sak.sesjon, komite: sak.komite, helse: h ? true : undefined, kategori: h?.kategori, temaer: h?.temaer });
+  for (const x of v) voteringer.push(rens({ s: Number(sakId), id: x.id, t: x.tid, ty: x.type, tema: x.tema, p: x.p }));
+}
+logg(`Voteringer: ${voteringer.length} personlige voteringer i ${Object.keys(voteringSaker).length} saker (${Object.values(voteringSaker).filter((s) => s.helse).length} helsesaker)`);
+
 const roller = await lesJson(ROT + 'config/komite-roller.json', {});
 const hod = await lesJson(ROT + 'config/hod-ledelse.json', { personer: [] });
 // Ta bare med bilder som faktisk finnes i public/hod/
@@ -261,6 +285,8 @@ const ut = {
   taksonomi: { kategorier: taks.kategorier, temaer: taks.temaer.map(({ id, navn, kategori }) => ({ id, navn, kategori })).concat({ id: 'annet', navn: 'Annet', kategori: 'regulering' }) },
   komite: { id: KOMITE, navn: komiteNavn[KOMITE], medlemmer: komiteMedlemmer, roller: roller.roller || {} },
   komiteNavn,
+  voteringSaker,
+  voteringer,
   hod: { personer: hod.personer, kilde: hod.kilde, sistKontrollert: hod.sistKontrollert },
   personer: personerUt,
   elementer,

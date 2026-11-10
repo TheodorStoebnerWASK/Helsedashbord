@@ -53,6 +53,9 @@ export interface Person {
   epost?: string;
 }
 
+/** Én personlig votering. p = partienes standpunkt: 1 for, -1 mot (mangler = ikke standpunkt). */
+export interface Votering { s: number; id: number; t?: string; ty: 'innstilling' | 'forslag' | 'annet'; tema?: string; p: Record<string, 1 | -1> }
+
 export interface HodPerson { navn: string; rolle: string; parti?: string; fra?: string; bilde?: string; statsraad?: boolean }
 
 export interface Kategori { id: string; navn: string; farge: string }
@@ -71,6 +74,8 @@ export interface Data {
   taksonomi: { kategorier: Kategori[]; temaer: Tema[] };
   komite: { id: string; navn: string; medlemmer: string[]; roller: Record<string, string> };
   komiteNavn: Record<string, string>;
+  voteringSaker?: Record<string, { tittel: string; sesjon: string; komite?: string; helse?: boolean; kategori?: string; temaer?: string[] }>;
+  voteringer?: Votering[];
   hod?: { personer: HodPerson[]; kilde?: string; sistKontrollert?: string };
   personer: Record<string, Person>;
   elementer: Element[];

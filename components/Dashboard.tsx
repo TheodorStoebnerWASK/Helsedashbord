@@ -12,6 +12,7 @@ import { Saker } from './visninger/Saker';
 import { Regjeringen } from './visninger/Regjeringen';
 import { Temaer } from './visninger/Temaer';
 import { StoreEndringer } from './visninger/StoreEndringer';
+import { Voteringer } from './visninger/Voteringer';
 
 const FANER = [
   { id: 'oversikt', navn: 'Oversikt' },
@@ -19,6 +20,7 @@ const FANER = [
   { id: 'temaer', navn: 'Temaer' },
   { id: 'sporsmal', navn: 'Spørsmål' },
   { id: 'komite', navn: 'Komiteen' },
+  { id: 'voteringer', navn: 'Voteringer' },
   { id: 'saker', navn: 'Saker & høringer' },
   { id: 'regjeringen', navn: 'Regjeringen' },
 ] as const;
@@ -140,6 +142,7 @@ export default function Dashboard() {
           {fane === 'temaer' && <Temaer valgt={tema} setValgt={setTema} />}
           {fane === 'sporsmal' && <Sporsmal />}
           {fane === 'komite' && <Komite />}
+          {fane === 'voteringer' && <Voteringer />}
           {fane === 'saker' && <Saker />}
           {fane === 'regjeringen' && <Regjeringen />}
         </main>

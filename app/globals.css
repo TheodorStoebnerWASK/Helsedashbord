@@ -311,3 +311,12 @@ html:has(.login) { background: var(--surface-inverse); }
 .portrett-tom { display: flex; align-items: center; justify-content: center; font: var(--weight-light) 30px/1 var(--font-serif); color: var(--text-muted); background: var(--surface-sunken); border: 1px solid var(--border-subtle); }
 .leder .medlem-info strong { font: var(--weight-light) 21px/1.15 var(--font-serif); color: var(--text-primary); }
 @media (max-width: 719px) { .leder.statsraad { grid-column: auto; } }
+
+/* --- Voteringsmatrise -------------------------------------------------------------- */
+.velger { display: inline-flex; align-items: center; gap: var(--space-3); }
+.velger select { border: 1px solid var(--border-hairline); background: var(--surface-card); padding: 7px 12px; font: var(--type-body-sm); font-size: 14px; color: var(--text-primary); border-radius: 0; min-width: 260px; }
+.velger select:focus { outline: var(--border-width-strong) solid var(--focus-ring); }
+.matrise { width: 100%; max-width: 720px; margin: var(--space-3) auto 0; cursor: pointer; }
+.skala { display: flex; align-items: center; justify-content: center; gap: 2px; margin: var(--space-4) 0 var(--space-3); font: var(--type-body-sm); color: var(--text-secondary); }
+.skala i { display: block; width: 26px; height: 10px; }
+.skala span { margin: 0 var(--space-2); }
