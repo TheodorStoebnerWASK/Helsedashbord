@@ -56,6 +56,12 @@ For HVER sak, returner:
 - "begrunnelse": maks 15 ord, kun hvis storEndring er true
 Svar KUN med JSON: {"resultater": [ ... ]}`;
 
+// GitHub Models: hovedadressen, og den eldre adressen som reserve. Begge tar GITHUB_TOKEN fra Actions.
+const ENDEPUNKTER = [
+  { navn: 'models.github.ai', url: 'https://models.github.ai/inference/chat/completions', headers: { Accept: 'application/json', 'X-GitHub-Api-Version': '2022-11-28' } },
+  { navn: 'models.inference.ai.azure.com', url: 'https://models.inference.ai.azure.com/chat/completions', modell: 'gpt-4o-mini', headers: { Accept: 'application/json' } },
+];
+
 /** Klassifiserer en liste saker med GitHub Models. Returnerer map id -> resultat. Stopper rolig ved rate limit. */
 export async function kiKlassifiser(items, taks, { token, modell, maksForesporsler = 120, batch = 20, logg = console.log }) {
   const ut = new Map();
@@ -63,6 +69,8 @@ export async function kiKlassifiser(items, taks, { token, modell, maksForesporsl
   const gyldigeKat = new Set(taks.kategorier.map((k) => k.id));
   let forespørsler = 0;
   let feilPaRad = 0;
+  let aktivt = 0;
+  let virket = false;
   for (let i = 0; i < items.length; i += batch) {
     if (forespørsler >= maksForesporsler) { logg(`KI: nådde maks ${maksForesporsler} forespørsler – resten tas neste kjøring`); break; }
     const del = items.slice(i, i + batch);
@@ -70,18 +78,14 @@ export async function kiKlassifiser(items, taks, { token, modell, maksForesporsl
     let svar;
     for (let forsøk = 0; forsøk < 3; forsøk++) {
       forespørsler++;
-      const res = await fetch('https://models.github.ai/inference/chat/completions', {
+      const ep = ENDEPUNKTER[aktivt];
+      const res = await fetch(ep.url, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          Accept: 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...ep.headers },
         body: JSON.stringify({
-          model: modell,
+          model: ep.modell || modell,
           temperature: 0,
-          // Noen modeller/versjoner avviser response_format – andre forsøk sendes uten
+          // Første forsøk ber om ren JSON; senere forsøk sendes uten, i tilfelle modellen ikke støtter det
           ...(forsøk === 0 ? { response_format: { type: 'json_object' } } : {}),
           messages: [
             { role: 'system', content: SYSTEM(taks) },
@@ -91,8 +95,9 @@ export async function kiKlassifiser(items, taks, { token, modell, maksForesporsl
       }).catch((e) => ({ ok: false, status: 0, text: async () => String(e) }));
       const tekst = await res.text();
       if (res.ok) {
-        try { svar = JSON.parse(tekst); break; } catch {
-          logg(`KI: uventet svar (ikke JSON, status ${res.status}): ${tekst.slice(0, 200).replace(/\s+/g, ' ')}`);
+        try { svar = JSON.parse(tekst); if (!virket) { virket = true; logg(`KI: ${ep.navn} virker (modell ${ep.modell || modell})`); } break; } catch {
+          logg(`KI: uventet svar fra ${ep.navn} (status ${res.status}, content-type ${res.headers?.get?.('content-type')}): ${tekst.slice(0, 200).replace(/\s+/g, ' ')}`);
+          if (aktivt < ENDEPUNKTER.length - 1) { aktivt++; logg(`KI: prøver reserveadressen ${ENDEPUNKTER[aktivt].navn}`); }
           await sleep(3000);
           continue;
         }
@@ -102,8 +107,11 @@ export async function kiKlassifiser(items, taks, { token, modell, maksForesporsl
         if (vent > 0 && vent < 90) { logg(`KI: rate limit, venter ${vent}s`); await sleep(vent * 1000); continue; }
         logg('KI: dagskvoten er brukt opp – fortsetter neste kjøring'); return ut;
       }
-      logg(`KI: feil ${res.status}: ${tekst.slice(0, 200)}`);
-      if (res.status === 401 || res.status === 403) return ut;
+      logg(`KI: feil ${res.status} fra ${ep.navn}: ${tekst.slice(0, 200)}`);
+      if ([401, 403, 404].includes(res.status)) {
+        if (aktivt < ENDEPUNKTER.length - 1) { aktivt++; logg(`KI: prøver reserveadressen ${ENDEPUNKTER[aktivt].navn}`); continue; }
+        return ut;
+      }
       await sleep(5000);
     }
     if (!svar) {
@@ -112,7 +120,8 @@ export async function kiKlassifiser(items, taks, { token, modell, maksForesporsl
     }
     feilPaRad = 0;
     try {
-      const innhold = JSON.parse(svar.choices[0].message.content);
+      // Uten response_format kan modellen pakke svaret i ```json … ``` – fjern det
+      const innhold = JSON.parse(String(svar.choices[0].message.content).replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, ''));
       for (const r of innhold.resultater || []) {
         if (!r || r.id == null) continue;
         const temaer = (r.temaer || []).filter((t) => gyldigeTemaer.has(t)).slice(0, 3);
