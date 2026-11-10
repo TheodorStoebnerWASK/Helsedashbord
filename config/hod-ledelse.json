@@ -1,0 +1,12 @@
+{
+  "_kommentar": "Politisk ledelse i Helse- og omsorgsdepartementet. Regjeringen.no blokkerer automatisk henting, så lista vedlikeholdes her. Bilder legges i public/hod/ med filnavnet i «bilde». Kilde: regjeringen.no/no/dep/hod/org/politisk-ledelse (sjekk ved regjeringsendringer).",
+  "sistKontrollert": "2026-11-10",
+  "kilde": "https://www.regjeringen.no/en/dep/hod/organisation-and-management-of-the-ministry-of-health-and-care-services/other-political-staff/id443/",
+  "personer": [
+    { "navn": "Jan Christian Vestre", "rolle": "Helse- og omsorgsminister", "parti": "A", "bilde": "vestre.jpg", "statsraad": true },
+    { "navn": "Usman Ahmad Mushtaq", "rolle": "Statssekretær", "parti": "A", "fra": "2024-08-09", "bilde": "mushtaq.jpg" },
+    { "navn": "Ellen Moen Rønning-Arnesen", "rolle": "Statssekretær", "parti": "A", "fra": "2021-11-26", "bilde": "ronning-arnesen.jpg" },
+    { "navn": "Renate Tårnes", "rolle": "Statssekretær", "parti": "A", "fra": "2025-10-31", "bilde": "tarnes.jpg" },
+    { "navn": "Andreas Skretting Jansen", "rolle": "Politisk rådgiver", "parti": "A", "fra": "2025-05-12", "bilde": "jansen.jpg" }
+  ]
+}

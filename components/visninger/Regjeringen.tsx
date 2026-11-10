@@ -4,6 +4,7 @@ import { useData, Seksjon, ElementListe, Chips } from '../felles';
 import { Graf } from '../Graf';
 import { kategoriOverTid } from '@/lib/byggere';
 import { telle } from '@/lib/analyse';
+import { HodLedelse } from '../HodLedelse';
 
 export function Regjeringen() {
   const c = useData();
@@ -17,6 +18,7 @@ export function Regjeringen() {
   );
   return (
     <>
+      <HodLedelse />
       <div className="rutenett-2">
         <Graf spec={spec} />
         <div className="infoboks">

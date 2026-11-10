@@ -249,6 +249,9 @@ for (const e of elementer) for (const id of [e.fra, ...(e.forslagstillere || [])
 const personerUt = Object.fromEntries(Object.entries(personer).filter(([id, p]) => nevnt.has(id) || p.aktiv));
 
 const roller = await lesJson(ROT + 'config/komite-roller.json', {});
+const hod = await lesJson(ROT + 'config/hod-ledelse.json', { personer: [] });
+// Ta bare med bilder som faktisk finnes i public/hod/
+for (const p of hod.personer) if (p.bilde && !existsSync(ROT + 'public/hod/' + p.bilde)) delete p.bilde;
 const ut = {
   meta: {
     oppdatert: new Date().toISOString(), sesjoner, innevaerende, periode: PERIODE,
@@ -258,6 +261,7 @@ const ut = {
   taksonomi: { kategorier: taks.kategorier, temaer: taks.temaer.map(({ id, navn, kategori }) => ({ id, navn, kategori })).concat({ id: 'annet', navn: 'Annet', kategori: 'regulering' }) },
   komite: { id: KOMITE, navn: komiteNavn[KOMITE], medlemmer: komiteMedlemmer, roller: roller.roller || {} },
   komiteNavn,
+  hod: { personer: hod.personer, kilde: hod.kilde, sistKontrollert: hod.sistKontrollert },
   personer: personerUt,
   elementer,
 };

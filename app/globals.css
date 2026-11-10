@@ -300,3 +300,14 @@ aside .seksjon-hode h2 { font-size: 24px; }
 }
 /* Innloggingssiden er mørk helt ut i kanten (også under plassen som holdes av til rullefeltet) */
 html:has(.login) { background: var(--surface-inverse); }
+
+/* --- Politisk ledelse i HOD ----------------------------------------------------- */
+.ledelse { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: var(--space-4); }
+.leder { display: grid; grid-template-columns: 88px 1fr; gap: var(--space-4); background: var(--surface-card); border: 1px solid var(--border-hairline); border-top: 2px solid var(--wa-black); padding: var(--space-4); }
+.leder .portrett { width: 88px; height: 110px; }
+.leder.statsraad { grid-column: span 2; grid-template-columns: 120px 1fr; }
+.leder.statsraad .portrett { width: 120px; height: 150px; }
+.leder.statsraad strong { font-size: 28px; }
+.portrett-tom { display: flex; align-items: center; justify-content: center; font: var(--weight-light) 30px/1 var(--font-serif); color: var(--text-muted); background: var(--surface-sunken); border: 1px solid var(--border-subtle); }
+.leder .medlem-info strong { font: var(--weight-light) 21px/1.15 var(--font-serif); color: var(--text-primary); }
+@media (max-width: 719px) { .leder.statsraad { grid-column: auto; } }

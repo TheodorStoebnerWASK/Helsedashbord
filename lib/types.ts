@@ -53,6 +53,8 @@ export interface Person {
   epost?: string;
 }
 
+export interface HodPerson { navn: string; rolle: string; parti?: string; fra?: string; bilde?: string; statsraad?: boolean }
+
 export interface Kategori { id: string; navn: string; farge: string }
 export interface Tema { id: string; navn: string; kategori: string }
 
@@ -69,6 +71,7 @@ export interface Data {
   taksonomi: { kategorier: Kategori[]; temaer: Tema[] };
   komite: { id: string; navn: string; medlemmer: string[]; roller: Record<string, string> };
   komiteNavn: Record<string, string>;
+  hod?: { personer: HodPerson[]; kilde?: string; sistKontrollert?: string };
   personer: Record<string, Person>;
   elementer: Element[];
 }
