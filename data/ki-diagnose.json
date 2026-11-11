@@ -1,0 +1,35 @@
+{
+  "tid": "2026-11-11T13:27:46.629Z",
+  "harToken": true,
+  "tokenPrefiks": "ghs_",
+  "tester": [
+    {
+      "navn": "katalog",
+      "status": 200,
+      "location": null,
+      "contentType": "text/plain",
+      "headere": {},
+      "kropp": "OK\r\n"
+    },
+    {
+      "navn": "github.ai gpt-4.1-mini",
+      "status": 200,
+      "location": null,
+      "contentType": "text/plain",
+      "headere": {},
+      "kropp": "OK\r\n"
+    },
+    {
+      "navn": "github.ai gpt-4o-mini",
+      "status": 200,
+      "location": null,
+      "contentType": "text/plain",
+      "headere": {},
+      "kropp": "OK\r\n"
+    },
+    {
+      "navn": "azure gpt-4o-mini",
+      "feil": "TypeError: fetch failed"
+    }
+  ]
+}
