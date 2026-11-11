@@ -1,1 +1,8 @@
-{"roller":{}}
+{
+  "_kommentar": "Roller i helse- og omsorgskomiteen. Nøkkel = person-ID fra stortinget.no (perid=… i lenken til representanten).",
+  "roller": {
+    "KJT": "Leder",
+    "ERLBE1": "Første nestleder",
+    "TRV": "Andre nestleder"
+  }
+}

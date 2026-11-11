@@ -7,6 +7,10 @@ on:
     - cron: '17 5 * * *'
     - cron: '30 10 * * *'
   workflow_dispatch: {}
+  # Kjør også når koden eller oppsettet endres (ikke ved endringer i data/, så det blir ingen løkke)
+  push:
+    branches: [main]
+    paths: ['scripts/**', 'config/**', '.github/workflows/**']
 
 permissions:
   contents: write
@@ -27,6 +31,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: KI-diagnose
+        run: node scripts/ki-diagnose.mjs
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Hent og klassifiser
         run: node scripts/update-data.mjs --ki
         env:
