@@ -19,6 +19,7 @@ interface Ctx {
   visPerson: (id: string | null) => void;
   visTema: (id: string) => void;
   temaNavn: (id: string) => string;
+  undertemaNavn: (id: string) => string;
   katFarge: (id: string) => string;
   katNavn: (id: string) => string;
 }
@@ -134,7 +135,7 @@ export function Segment<T extends string>({ valg, verdi, sett, etikett }: { valg
 
 // ---------- Elementliste ----------
 export function ElementRad({ e }: { e: Element }) {
-  const { data, temaNavn, visTema } = useData();
+  const { data, temaNavn, undertemaNavn, visTema } = useData();
   const [apen, setApen] = useState(false);
   const lang = e.tittel.length > 220;
   const tid = e.type === 'horing' && e.tider?.length ? e.tider[0].tid : e.dato;
@@ -165,6 +166,9 @@ export function ElementRad({ e }: { e: Element }) {
           <KategoriMerke id={e.kategori} />
           {e.temaer.filter((t) => t !== 'annet').map((t) => (
             <button key={t} className="tema-merke" onClick={() => visTema(t)}>{temaNavn(t)}</button>
+          ))}
+          {e.undertemaer?.map((u) => (
+            <button key={u} className="tema-merke under" onClick={() => visTema(u)} title={`Undertema under ${temaNavn(u.split('/')[0])}`}>› {undertemaNavn(u)}</button>
           ))}
           {e.stikkord?.map((s) => <span key={s} className="stikkord">#{s}</span>)}
           {!e.direkte && e.type !== 'regjering' && <span className="stikkord" title="Fanget opp utenfor helse- og omsorgskomiteen/-ministeren">Andre komiteer</span>}

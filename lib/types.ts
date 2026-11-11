@@ -36,6 +36,7 @@ export interface Element {
   // klassifisering
   kategori: string;
   temaer: string[];
+  undertemaer?: string[];
   stikkord?: string[];
   storEndring?: boolean;
   begrunnelse?: string;
@@ -59,7 +60,7 @@ export interface Votering { s: number; id: number; t?: string; ty: 'innstilling'
 export interface HodPerson { navn: string; rolle: string; parti?: string; fra?: string; bilde?: string; statsraad?: boolean }
 
 export interface Kategori { id: string; navn: string; farge: string }
-export interface Tema { id: string; navn: string; kategori: string }
+export interface Tema { id: string; navn: string; kategori: string; undertemaer?: { id: string; navn: string }[] }
 
 export interface Data {
   meta: {

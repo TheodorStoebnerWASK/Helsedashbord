@@ -1,5 +1,5 @@
 {
-  "_kommentar": "Kategorier og temaer brukes både av KI-klassifiseringen og av reservereglene (nøkkelord). Rediger fritt – nye temaer plukkes opp ved neste datakjøring. Nøkkelord er regulære uttrykk (små bokstaver, matcher ordstart).",
+  "_kommentar": "Tre nivåer: kategori → tema → undertema. Temaene klassifiseres av KI (med nøkkelord som reserve); undertemaene settes alltid med nøkkelordene under. Rediger fritt – endringer brukes ved neste datakjøring. Ordregler: ordet matcher fra ordstart («fastleg» treffer «fastlegene»). «*ord» treffer også inni sammensatte ord («*kreft» treffer «brystkreft»). «\\b» på slutten krever helt ord («ki\\b» treffer ikke «kino»).",
   "kategorier": [
     {
       "id": "legemidler",
@@ -25,7 +25,7 @@
   "temaer": [
     {
       "id": "kreft",
-      "navn": "Kreft",
+      "navn": "Kreft og onkologi",
       "kategori": "legemidler",
       "ord": [
         "*kreft",
@@ -38,12 +38,113 @@
         "myelom",
         "car-t",
         "immunterapi",
-        "mammografi"
+        "mammografi",
+        "svulst",
+        "tumor",
+        "metastas",
+        "pakkeforløp"
+      ],
+      "undertemaer": [
+        {
+          "id": "kreft/brystkreft",
+          "navn": "Brystkreft",
+          "ord": [
+            "brystkreft",
+            "mammografi",
+            "brystkreftscreening"
+          ]
+        },
+        {
+          "id": "kreft/prostatakreft",
+          "navn": "Prostatakreft",
+          "ord": [
+            "prostata"
+          ]
+        },
+        {
+          "id": "kreft/lungekreft",
+          "navn": "Lungekreft",
+          "ord": [
+            "lungekreft",
+            "lungescreening"
+          ]
+        },
+        {
+          "id": "kreft/tarmkreft",
+          "navn": "Tarmkreft",
+          "ord": [
+            "tarmkreft",
+            "kolorektal",
+            "tarmscreening"
+          ]
+        },
+        {
+          "id": "kreft/blodkreft",
+          "navn": "Blodkreft og lymfom",
+          "ord": [
+            "blodkreft",
+            "leukemi",
+            "lymfom",
+            "myelom"
+          ]
+        },
+        {
+          "id": "kreft/gynkreft",
+          "navn": "Gynekologisk kreft",
+          "ord": [
+            "livmorhalskreft",
+            "eggstokkreft",
+            "livmorkreft",
+            "hpv"
+          ]
+        },
+        {
+          "id": "kreft/hudkreft",
+          "navn": "Hudkreft og føflekkreft",
+          "ord": [
+            "hudkreft",
+            "føflekkreft",
+            "melanom"
+          ]
+        },
+        {
+          "id": "kreft/barnekreft",
+          "navn": "Barnekreft",
+          "ord": [
+            "barnekreft",
+            "kreftsyke barn"
+          ]
+        },
+        {
+          "id": "kreft/kreftbehandling",
+          "navn": "Stråling, cellegift og immunterapi",
+          "ord": [
+            "strålebehandl",
+            "stråleterapi",
+            "protonterapi",
+            "protonsenter",
+            "cellegift",
+            "kjemoterapi",
+            "immunterapi",
+            "car-t",
+            "celleterapi"
+          ]
+        },
+        {
+          "id": "kreft/kreftomsorg",
+          "navn": "Kreftomsorg og pakkeforløp",
+          "ord": [
+            "pakkeforløp",
+            "kreftkoordinator",
+            "kreftomsorg",
+            "kreftrehabilitering"
+          ]
+        }
       ]
     },
     {
       "id": "legemiddeltilgang",
-      "navn": "Nye metoder & legemiddeltilgang",
+      "navn": "Nye metoder og legemiddeltilgang",
       "kategori": "legemidler",
       "ord": [
         "nye metoder",
@@ -63,7 +164,96 @@
         "apotek",
         "legemiddelmangel",
         "dmp",
-        "legemiddelverket"
+        "legemiddelverket",
+        "legemid",
+        "*legemiddel"
+      ],
+      "undertemaer": [
+        {
+          "id": "legemiddeltilgang/nye-metoder",
+          "navn": "Nye metoder og Beslutningsforum",
+          "ord": [
+            "nye metoder",
+            "beslutningsforum",
+            "metodevurder",
+            "hta\\b",
+            "innføring av"
+          ]
+        },
+        {
+          "id": "legemiddeltilgang/prioritering-pris",
+          "navn": "Terskelverdier, prioritering og pris",
+          "ord": [
+            "terskelverdi",
+            "betalingsvilje",
+            "alvorlighet",
+            "kostnadseffektiv",
+            "prioriteringskriter",
+            "prisforhandl",
+            "legemiddelpris",
+            "sykehusinnkjøp",
+            "lis-avtal"
+          ]
+        },
+        {
+          "id": "legemiddeltilgang/refusjon",
+          "navn": "Blåresept og refusjon",
+          "ord": [
+            "blåresept",
+            "refusjon",
+            "individuell stønad",
+            "h-resept",
+            "forhåndsgodkjent"
+          ]
+        },
+        {
+          "id": "legemiddeltilgang/tidlig-tilgang",
+          "navn": "Tidlig tilgang og utprøvende behandling",
+          "ord": [
+            "tidlig tilgang",
+            "utprøvende behandling",
+            "eksperimentell behandling",
+            "compassionate"
+          ]
+        },
+        {
+          "id": "legemiddeltilgang/legemiddelmangel",
+          "navn": "Legemiddelmangel og forsyning",
+          "ord": [
+            "legemiddelmangel",
+            "mangel på legemidler",
+            "restsituasjon",
+            "beredskapslager",
+            "forsyning av legemidler"
+          ]
+        },
+        {
+          "id": "legemiddeltilgang/apotek",
+          "navn": "Apotek og legemiddelbruk",
+          "ord": [
+            "apotek",
+            "farmasøyt",
+            "multidose",
+            "legemiddelgjennomgang",
+            "feilmedisinering",
+            "reseptfri",
+            "legemiddelbruk",
+            "vanedannende"
+          ]
+        },
+        {
+          "id": "legemiddeltilgang/legemiddelregelverk",
+          "navn": "Legemiddelregelverk og myndigheter",
+          "ord": [
+            "legemiddelloven",
+            "legemiddelforskrift",
+            "ema\\b",
+            "dmp\\b",
+            "legemiddelverket",
+            "direktoratet for medisinske produkter",
+            "markedsføringstillatelse"
+          ]
+        }
       ]
     },
     {
@@ -79,11 +269,44 @@
         "\\bals\\b",
         "genterapi",
         "cystisk fibrose"
+      ],
+      "undertemaer": [
+        {
+          "id": "sjeldne/genterapi",
+          "navn": "Genterapi og avanserte terapier",
+          "ord": [
+            "genterapi",
+            "avansert terapi",
+            "atmp"
+          ]
+        },
+        {
+          "id": "sjeldne/nevromuskulaer",
+          "navn": "Nevromuskulære sykdommer (SMA, ALS, Duchenne)",
+          "ord": [
+            "spinal muskelatrofi",
+            "sma\\b",
+            "duchenne",
+            "als\\b",
+            "muskelsyk",
+            "nevromuskulær"
+          ]
+        },
+        {
+          "id": "sjeldne/andre-sjeldne",
+          "navn": "Andre sjeldne diagnoser",
+          "ord": [
+            "cystisk fibrose",
+            "huntington",
+            "kompetansesenter for sjeldne",
+            "sjeldenfelt"
+          ]
+        }
       ]
     },
     {
       "id": "vaksiner",
-      "navn": "Vaksiner & smittevern",
+      "navn": "Vaksiner og smittevern",
       "kategori": "legemidler",
       "ord": [
         "*vaksin",
@@ -97,11 +320,55 @@
         "hiv",
         "covid",
         "korona"
+      ],
+      "undertemaer": [
+        {
+          "id": "vaksiner/vaksinasjon",
+          "navn": "Vaksinasjon",
+          "ord": [
+            "*vaksin",
+            "barnevaksinasjonsprogram"
+          ]
+        },
+        {
+          "id": "vaksiner/smittevern",
+          "navn": "Smittevern og pandemi",
+          "ord": [
+            "smittevern",
+            "pandemi",
+            "covid",
+            "korona",
+            "utbrudd",
+            "influensa",
+            "rs-virus"
+          ]
+        },
+        {
+          "id": "vaksiner/amr",
+          "navn": "Antibiotikaresistens",
+          "ord": [
+            "antibiotika",
+            "resistens",
+            "antimikrobiell"
+          ]
+        },
+        {
+          "id": "vaksiner/hiv-hepatitt",
+          "navn": "Hiv, hepatitt og seksuell helse",
+          "ord": [
+            "hiv\\b",
+            "hepatitt",
+            "prep\\b",
+            "kjønnssykdom",
+            "seksuelt overførbar",
+            "seksuell helse"
+          ]
+        }
       ]
     },
     {
       "id": "biotek",
-      "navn": "Bioteknologi, forskning & helsenæring",
+      "navn": "Bioteknologi, forskning og helsenæring",
       "kategori": "legemidler",
       "ord": [
         "bioteknologi",
@@ -115,11 +382,58 @@
         "presisjonsmedisin",
         "genom",
         "gentest"
+      ],
+      "undertemaer": [
+        {
+          "id": "biotek/kliniske-studier",
+          "navn": "Kliniske studier",
+          "ord": [
+            "klinisk studie",
+            "kliniske studier",
+            "klinisk forskning",
+            "studiedeltak",
+            "utprøving"
+          ]
+        },
+        {
+          "id": "biotek/helsenaering",
+          "navn": "Helsenæring og life science",
+          "ord": [
+            "helsenæring",
+            "life science",
+            "legemiddelindustri",
+            "biotek",
+            "helseindustri",
+            "veikart for helsenæringen"
+          ]
+        },
+        {
+          "id": "biotek/presisjonsmedisin",
+          "navn": "Presisjonsmedisin og genetikk",
+          "ord": [
+            "persontilpasset",
+            "presisjonsmedisin",
+            "genom",
+            "gentest",
+            "genetisk",
+            "biobank"
+          ]
+        },
+        {
+          "id": "biotek/helseforskning",
+          "navn": "Helseforskning",
+          "ord": [
+            "helseforskning",
+            "forskningsmidler",
+            "forskningsråd",
+            "forskningsinfrastruktur"
+          ]
+        }
       ]
     },
     {
       "id": "medisinsk-utstyr",
-      "navn": "Medisinsk utstyr & hjelpemidler",
+      "navn": "Medisinsk utstyr og hjelpemidler",
       "kategori": "medtek",
       "ord": [
         "medisinsk utstyr",
@@ -135,11 +449,49 @@
         "utstyr",
         "eøs-komiteen",
         "forordning"
+      ],
+      "undertemaer": [
+        {
+          "id": "medisinsk-utstyr/hjelpemidler",
+          "navn": "Hjelpemidler",
+          "ord": [
+            "hjelpemid",
+            "rullestol",
+            "høreapparat",
+            "protese",
+            "ortopedisk",
+            "synshjelpemid",
+            "hjelpemiddelsentral"
+          ]
+        },
+        {
+          "id": "medisinsk-utstyr/diabetesteknologi",
+          "navn": "Diabetes og diabetesteknologi",
+          "ord": [
+            "diabetes",
+            "insulinpumpe",
+            "cgm\\b",
+            "glukosemål",
+            "insulin"
+          ]
+        },
+        {
+          "id": "medisinsk-utstyr/utstyr-regelverk",
+          "navn": "Medisinsk utstyr og regelverk",
+          "ord": [
+            "medisinsk utstyr",
+            "implantat",
+            "pacemaker",
+            "mdr\\b",
+            "ivd\\b",
+            "utstyrsforordning"
+          ]
+        }
       ]
     },
     {
       "id": "diagnostikk",
-      "navn": "Screening & diagnostikk",
+      "navn": "Screening og diagnostikk",
       "kategori": "medtek",
       "ord": [
         "screening",
@@ -153,11 +505,54 @@
         "røntgen",
         "prøvesvar",
         "testing"
+      ],
+      "undertemaer": [
+        {
+          "id": "diagnostikk/screening",
+          "navn": "Screening og masseundersøkelser",
+          "ord": [
+            "*screening",
+            "masseundersøkelse"
+          ]
+        },
+        {
+          "id": "diagnostikk/bildediagnostikk",
+          "navn": "Bildediagnostikk",
+          "ord": [
+            "bildediagnost",
+            "røntgen",
+            "mr\\b",
+            "ct\\b",
+            "pet\\b",
+            "ultralyd",
+            "radiolog"
+          ]
+        },
+        {
+          "id": "diagnostikk/lab-patologi",
+          "navn": "Laboratorie og patologi",
+          "ord": [
+            "laborator",
+            "patologi",
+            "prøvesvar",
+            "blodprøve",
+            "biopsi"
+          ]
+        },
+        {
+          "id": "diagnostikk/gentesting",
+          "navn": "Gentesting og genetisk utredning",
+          "ord": [
+            "gentest",
+            "genetisk testing",
+            "genetisk utredning"
+          ]
+        }
       ]
     },
     {
       "id": "ehelse",
-      "navn": "E-helse & journalsystemer",
+      "navn": "E-helse og journalsystemer",
       "kategori": "digital",
       "ord": [
         "journal",
@@ -171,11 +566,57 @@
         "videokonsultasjon",
         "e-konsultasjon",
         "samhandlingsløsning"
+      ],
+      "undertemaer": [
+        {
+          "id": "ehelse/helseplattformen",
+          "navn": "Helseplattformen",
+          "ord": [
+            "helseplattformen",
+            "epic\\b"
+          ]
+        },
+        {
+          "id": "ehelse/journal-samhandling",
+          "navn": "Journal og samhandling",
+          "ord": [
+            "journal",
+            "kjernejournal",
+            "pasientjournal",
+            "epj\\b",
+            "samhandlingsløsning",
+            "e-resept",
+            "pasientens journaldokument"
+          ]
+        },
+        {
+          "id": "ehelse/digitale-tjenester",
+          "navn": "Helsenorge og digitale tjenester",
+          "ord": [
+            "helsenorge",
+            "videokonsultasjon",
+            "e-konsultasjon",
+            "digital hjemmeoppfølging",
+            "digitale helsetjenester",
+            "digitale helsetenester",
+            "app\\b"
+          ]
+        },
+        {
+          "id": "ehelse/infrastruktur",
+          "navn": "Norsk helsenett og infrastruktur",
+          "ord": [
+            "norsk helsenett",
+            "nhn\\b",
+            "e-helseinfrastruktur",
+            "felleskomponent"
+          ]
+        }
       ]
     },
     {
       "id": "helsedata-ki",
-      "navn": "Helsedata & KI",
+      "navn": "Helsedata og KI",
       "kategori": "digital",
       "ord": [
         "kunstig intelligens",
@@ -188,11 +629,59 @@
         "app\\b",
         "algoritme",
         "syntetiske"
+      ],
+      "undertemaer": [
+        {
+          "id": "helsedata-ki/ki",
+          "navn": "Kunstig intelligens",
+          "ord": [
+            "kunstig intelligens",
+            "ki\\b",
+            "maskinlæring",
+            "algoritme",
+            "språkmodell"
+          ]
+        },
+        {
+          "id": "helsedata-ki/helsedata",
+          "navn": "Helsedata og registre",
+          "ord": [
+            "helsedata",
+            "helseregist",
+            "helseanalyseplattform",
+            "kvalitetsregist",
+            "syntetiske",
+            "dataprioritering",
+            "datadeling"
+          ]
+        },
+        {
+          "id": "helsedata-ki/personvern-sikkerhet",
+          "navn": "Personvern og informasjonssikkerhet",
+          "ord": [
+            "personvern",
+            "informasjonssikkerhet",
+            "dataangrep",
+            "cyberangrep",
+            "datainnbrudd",
+            "digital sårbarhet"
+          ]
+        },
+        {
+          "id": "helsedata-ki/velferdsteknologi",
+          "navn": "Velferdsteknologi",
+          "ord": [
+            "velferdsteknologi",
+            "trygghetsalarm",
+            "digitalt tilsyn",
+            "sensorteknologi"
+          ]
+        }
       ]
     },
     {
       "id": "sykehus",
-      "navn": "Sykehus & spesialisthelsetjeneste",
+      "navn": "Sykehus og spesialisthelsetjeneste",
       "kategori": "regulering",
       "ord": [
         "*sykehus",
@@ -216,11 +705,89 @@
         "hjerte",
         "nye rikshospitalet",
         "\\bous\\b"
+      ],
+      "undertemaer": [
+        {
+          "id": "sykehus/lokalsykehus",
+          "navn": "Lokalsykehus og akuttfunksjoner",
+          "ord": [
+            "lokalsykehus",
+            "akuttfunksjon",
+            "akuttmottak",
+            "nedlegg",
+            "sammenslå",
+            "funksjonsfordeling",
+            "sentraliser"
+          ]
+        },
+        {
+          "id": "sykehus/ventetider",
+          "navn": "Ventetider og fristbrudd",
+          "ord": [
+            "ventetid",
+            "ventelist",
+            "fristbrudd",
+            "helsekø"
+          ]
+        },
+        {
+          "id": "sykehus/sykehusbygg",
+          "navn": "Sykehusbygg og investeringer",
+          "ord": [
+            "sykehusbygg",
+            "nye rikshospitalet",
+            "nytt sykehus",
+            "byggeprosjekt",
+            "investeringslån",
+            "sykehusutbygging"
+          ]
+        },
+        {
+          "id": "sykehus/helseforetak",
+          "navn": "Regionale helseforetak og styring",
+          "ord": [
+            "helse sør-øst",
+            "helse vest",
+            "helse midt",
+            "helse nord",
+            "*helseforetak",
+            "ous\\b",
+            "oppdragsdokument"
+          ]
+        },
+        {
+          "id": "sykehus/rehabilitering",
+          "navn": "Rehabilitering og habilitering",
+          "ord": [
+            "rehabiliter",
+            "habiliter",
+            "opptrening"
+          ]
+        },
+        {
+          "id": "sykehus/spesialiteter",
+          "navn": "Hjerte, slag, kirurgi og andre fagfelt",
+          "ord": [
+            "pci\\b",
+            "kirurgi",
+            "ortoped",
+            "dialyse",
+            "nyre",
+            "øyeoperasjon",
+            "hjerneslag",
+            "slagbehandl",
+            "slagenhet",
+            "hjertesyk",
+            "hjerteinfarkt",
+            "hjertekirurgi",
+            "hjerte- og kar"
+          ]
+        }
       ]
     },
     {
       "id": "kommunehelse",
-      "navn": "Fastlege & kommunehelse",
+      "navn": "Fastlege og kommunehelse",
       "kategori": "regulering",
       "ord": [
         "fastleg",
@@ -236,11 +803,51 @@
         "øyehelse",
         "fysioterap",
         "kiropraktor"
+      ],
+      "undertemaer": [
+        {
+          "id": "kommunehelse/fastlege",
+          "navn": "Fastlegeordningen",
+          "ord": [
+            "fastleg",
+            "allmennleg",
+            "legeliste",
+            "listelengde"
+          ]
+        },
+        {
+          "id": "kommunehelse/legevakt",
+          "navn": "Legevakt",
+          "ord": [
+            "legevakt"
+          ]
+        },
+        {
+          "id": "kommunehelse/helsestasjon",
+          "navn": "Helsestasjon og skolehelsetjeneste",
+          "ord": [
+            "helsestasjon",
+            "helsesykepleier",
+            "skolehelse"
+          ]
+        },
+        {
+          "id": "kommunehelse/andre-kommunale",
+          "navn": "Fysioterapi og andre kommunale tjenester",
+          "ord": [
+            "fysioterap",
+            "kiropraktor",
+            "optiker",
+            "øyehelse",
+            "ergoterap",
+            "logoped"
+          ]
+        }
       ]
     },
     {
       "id": "omsorg",
-      "navn": "Eldreomsorg & omsorgstjenester",
+      "navn": "Eldreomsorg og omsorgstjenester",
       "kategori": "regulering",
       "ord": [
         "eldre",
@@ -253,11 +860,60 @@
         "avlastning",
         "omsorgsbolig",
         "pårørende"
+      ],
+      "undertemaer": [
+        {
+          "id": "omsorg/sykehjem",
+          "navn": "Sykehjem",
+          "ord": [
+            "sykehjem",
+            "institusjonsplass",
+            "langtidsplass"
+          ]
+        },
+        {
+          "id": "omsorg/hjemmetjenester",
+          "navn": "Hjemmetjenester og omsorgsboliger",
+          "ord": [
+            "hjemmetjenest",
+            "hjemmesykepleie",
+            "omsorgsbolig",
+            "bo trygt hjemme"
+          ]
+        },
+        {
+          "id": "omsorg/demens",
+          "navn": "Demens",
+          "ord": [
+            "demens",
+            "alzheimer"
+          ]
+        },
+        {
+          "id": "omsorg/parorende-bpa",
+          "navn": "Pårørende, BPA og avlastning",
+          "ord": [
+            "pårørende",
+            "bpa\\b",
+            "brukerstyrt personlig assistanse",
+            "avlastning",
+            "omsorgsstønad"
+          ]
+        },
+        {
+          "id": "omsorg/eldrepolitikk",
+          "navn": "Eldrepolitikk",
+          "ord": [
+            "eldre",
+            "eldrereform",
+            "aldersvennlig"
+          ]
+        }
       ]
     },
     {
       "id": "psykisk-rus",
-      "navn": "Psykisk helse & rus",
+      "navn": "Psykisk helse og rus",
       "kategori": "regulering",
       "ord": [
         "psykisk",
@@ -273,11 +929,80 @@
         "spiseforstyrr",
         "avhengighet",
         "cannabis"
+      ],
+      "undertemaer": [
+        {
+          "id": "psykisk-rus/psykisk-barn-unge",
+          "navn": "Psykisk helse hos barn og unge",
+          "ord": [
+            "bup\\b",
+            "barne- og ungdomspsykiatri",
+            "psykisk helse hos barn",
+            "ungdomspsykiatri"
+          ]
+        },
+        {
+          "id": "psykisk-rus/psykisk-helsevern",
+          "navn": "Psykisk helsevern og DPS",
+          "ord": [
+            "dps\\b",
+            "*psykiatri",
+            "psykisk helsevern",
+            "tvang",
+            "sengeplass"
+          ]
+        },
+        {
+          "id": "psykisk-rus/rus",
+          "navn": "Rus og avhengighet",
+          "ord": [
+            "\\brus",
+            "narkotika",
+            "avhengighet",
+            "lar\\b",
+            "overdose",
+            "rusreform",
+            "avrusing",
+            "cannabis"
+          ]
+        },
+        {
+          "id": "psykisk-rus/alkohol",
+          "navn": "Alkoholpolitikk",
+          "ord": [
+            "alkohol",
+            "vinmonopol",
+            "skjenk"
+          ]
+        },
+        {
+          "id": "psykisk-rus/selvmord",
+          "navn": "Selvmordsforebygging",
+          "ord": [
+            "selvmord"
+          ]
+        },
+        {
+          "id": "psykisk-rus/spiseforstyrrelser",
+          "navn": "Spiseforstyrrelser",
+          "ord": [
+            "spiseforstyrr"
+          ]
+        },
+        {
+          "id": "psykisk-rus/psykisk-generelt",
+          "navn": "Psykisk helse generelt",
+          "ord": [
+            "psykisk",
+            "psykolog",
+            "opptrappingsplan for psykisk"
+          ]
+        }
       ]
     },
     {
       "id": "personell",
-      "navn": "Helsepersonell & bemanning",
+      "navn": "Helsepersonell og bemanning",
       "kategori": "regulering",
       "ord": [
         "helsepersonell",
@@ -293,11 +1018,67 @@
         "helsefagarbeider",
         "legemangel",
         "vikar"
+      ],
+      "undertemaer": [
+        {
+          "id": "personell/rekruttering",
+          "navn": "Legemangel og rekruttering",
+          "ord": [
+            "legemangel",
+            "rekrutter",
+            "stabiliser",
+            "bemanning"
+          ]
+        },
+        {
+          "id": "personell/sykepleiere",
+          "navn": "Sykepleiere og helsefagarbeidere",
+          "ord": [
+            "sykepleier",
+            "helsefagarbeider",
+            "spesialsykepleier",
+            "jordmødre",
+            "jordmor"
+          ]
+        },
+        {
+          "id": "personell/utdanning",
+          "navn": "Utdanning og spesialisering",
+          "ord": [
+            "spesialistutdann",
+            "lis1",
+            "utdanningsplass",
+            "studieplass",
+            "medisinstudi",
+            "praksisplass"
+          ]
+        },
+        {
+          "id": "personell/autorisasjon",
+          "navn": "Autorisasjon og utenlandsk utdanning",
+          "ord": [
+            "autorisasjon",
+            "utenlandsk utdann",
+            "helsepersonellregister"
+          ]
+        },
+        {
+          "id": "personell/arbeidsvilkar",
+          "navn": "Arbeidsvilkår og innleie",
+          "ord": [
+            "arbeidstid",
+            "turnus",
+            "vikar",
+            "innleie",
+            "deltid",
+            "lønn"
+          ]
+        }
       ]
     },
     {
       "id": "akutt-beredskap",
-      "navn": "Akuttmedisin & beredskap",
+      "navn": "Akuttmedisin og beredskap",
       "kategori": "regulering",
       "ord": [
         "ambulanse",
@@ -312,11 +1093,45 @@
         "nukleær",
         "atomberedskap",
         "strålevern"
+      ],
+      "undertemaer": [
+        {
+          "id": "akutt-beredskap/ambulanse",
+          "navn": "Ambulanse og luftambulanse",
+          "ord": [
+            "ambulanse",
+            "luftambulanse",
+            "redningshelikopter",
+            "amk\\b",
+            "responstid"
+          ]
+        },
+        {
+          "id": "akutt-beredskap/helseberedskap",
+          "navn": "Helseberedskap og forsyning",
+          "ord": [
+            "beredskap",
+            "forsyningssikkerhet",
+            "helseberedskapsloven",
+            "totalforsvar",
+            "beredskapslag"
+          ]
+        },
+        {
+          "id": "akutt-beredskap/cbrn",
+          "navn": "Atom- og strålevern",
+          "ord": [
+            "atom",
+            "nukleær",
+            "strålevern",
+            "cbrn"
+          ]
+        }
       ]
     },
     {
       "id": "folkehelse",
-      "navn": "Folkehelse & forebygging",
+      "navn": "Folkehelse og forebygging",
       "kategori": "regulering",
       "ord": [
         "folkehelse",
@@ -340,6 +1155,73 @@
         "ultraprosesser",
         "\\bmat\\b",
         "helse blant"
+      ],
+      "undertemaer": [
+        {
+          "id": "folkehelse/tobakk",
+          "navn": "Tobakk og nikotin",
+          "ord": [
+            "tobakk",
+            "snus",
+            "nikotin",
+            "e-sigarett",
+            "vape",
+            "røyk"
+          ]
+        },
+        {
+          "id": "folkehelse/kosthold",
+          "navn": "Kosthold og overvekt",
+          "ord": [
+            "kosthold",
+            "sukker",
+            "overvekt",
+            "fedme",
+            "ultraprosesser",
+            "ernæring",
+            "mat\\b",
+            "matsystem"
+          ]
+        },
+        {
+          "id": "folkehelse/fysisk-aktivitet",
+          "navn": "Fysisk aktivitet",
+          "ord": [
+            "fysisk aktivitet",
+            "aktivitetsnivå",
+            "stillesitt"
+          ]
+        },
+        {
+          "id": "folkehelse/allergi-pollen",
+          "navn": "Allergi, astma og pollen",
+          "ord": [
+            "pollen",
+            "allergi",
+            "astma",
+            "luftkvalitet",
+            "luftforurensning"
+          ]
+        },
+        {
+          "id": "folkehelse/skjerm",
+          "navn": "Skjermbruk og sosiale medier",
+          "ord": [
+            "skjermbruk",
+            "skjermtid",
+            "sosiale medier"
+          ]
+        },
+        {
+          "id": "folkehelse/ulikhet",
+          "navn": "Sosial ulikhet i helse",
+          "ord": [
+            "sosial ulikhet",
+            "ulikhet i helse",
+            "levekår",
+            "helse blant innvandrere"
+          ]
+        }
       ]
     },
     {
@@ -351,11 +1233,34 @@
         "tannleg",
         "tannbehandl",
         "tannpleie"
+      ],
+      "undertemaer": [
+        {
+          "id": "tannhelse/tannhelsestotte",
+          "navn": "Tannhelsestøtte og egenandeler",
+          "ord": [
+            "tannhelsestøtte",
+            "billigere tannhelse",
+            "gratis tannhelse",
+            "tannbehandling",
+            "stønad til tannbehandling"
+          ]
+        },
+        {
+          "id": "tannhelse/tannhelsetjenesten",
+          "navn": "Den offentlige tannhelsetjenesten",
+          "ord": [
+            "tannhelsetjeneste",
+            "fylkeskommunale tannhelse",
+            "tannlegemangel",
+            "tannleg"
+          ]
+        }
       ]
     },
     {
       "id": "finansiering",
-      "navn": "Finansiering & budsjett",
+      "navn": "Finansiering og budsjett",
       "kategori": "regulering",
       "ord": [
         "statsbudsjett",
@@ -370,11 +1275,44 @@
         "underskudd",
         "økonomi",
         "kroner"
+      ],
+      "undertemaer": [
+        {
+          "id": "finansiering/statsbudsjett",
+          "navn": "Statsbudsjett og bevilgninger",
+          "ord": [
+            "statsbudsjett",
+            "budsjett",
+            "revidert nasjonalbudsjett",
+            "bevilgning"
+          ]
+        },
+        {
+          "id": "finansiering/finansieringsordninger",
+          "navn": "Finansieringsordninger",
+          "ord": [
+            "innsatsstyrt",
+            "isf\\b",
+            "takst",
+            "basisramme",
+            "finansieringsmodell",
+            "toppfinansiering",
+            "kommuneøkonomi"
+          ]
+        },
+        {
+          "id": "finansiering/egenandeler",
+          "navn": "Egenandeler og frikort",
+          "ord": [
+            "egenandel",
+            "frikort"
+          ]
+        }
       ]
     },
     {
       "id": "lov-rettigheter",
-      "navn": "Helselovgivning & pasientrettigheter",
+      "navn": "Helselovgivning og pasientrettigheter",
       "kategori": "regulering",
       "ord": [
         "pasientrettighet",
@@ -397,11 +1335,72 @@
         "tilsyn",
         "helsetilsyn",
         "statsforvalter"
+      ],
+      "undertemaer": [
+        {
+          "id": "lov-rettigheter/pasientrettigheter",
+          "navn": "Pasientrettigheter, klage og erstatning",
+          "ord": [
+            "pasientrettighet",
+            "pasient- og brukerrettighet",
+            "klage",
+            "pasientombud",
+            "pasientskade",
+            "npe\\b",
+            "erstatning"
+          ]
+        },
+        {
+          "id": "lov-rettigheter/abort-bioteknologi",
+          "navn": "Abort og bioteknologi",
+          "ord": [
+            "abort",
+            "bioteknologiloven",
+            "eggdonasjon",
+            "surrogati",
+            "assistert befruktning"
+          ]
+        },
+        {
+          "id": "lov-rettigheter/livets-slutt",
+          "navn": "Livets slutt og palliasjon",
+          "ord": [
+            "aktiv dødshjelp",
+            "selvbestemt livsavslutning",
+            "palliati",
+            "lindrende"
+          ]
+        },
+        {
+          "id": "lov-rettigheter/tilsyn-kvalitet",
+          "navn": "Tilsyn, kvalitet og pasientsikkerhet",
+          "ord": [
+            "tilsyn",
+            "helsetilsyn",
+            "statsforvalter",
+            "gransking",
+            "pasientsikkerhet",
+            "uønskede hendelser",
+            "avvik"
+          ]
+        },
+        {
+          "id": "lov-rettigheter/lovverk",
+          "navn": "Lovverk og forskrifter",
+          "ord": [
+            "\\blov\\b",
+            "loven",
+            "forskrift",
+            "helsepersonelloven",
+            "spesialisthelsetjenesteloven",
+            "helse- og omsorgstjenesteloven"
+          ]
+        }
       ]
     },
     {
       "id": "privat-helse",
-      "navn": "Private & ideelle aktører",
+      "navn": "Private og ideelle aktører",
       "kategori": "regulering",
       "ord": [
         "privat",
@@ -412,11 +1411,48 @@
         "helseforsikring",
         "nærklinikk",
         "konkurranseutsett"
+      ],
+      "undertemaer": [
+        {
+          "id": "privat-helse/private-klinikker",
+          "navn": "Private sykehus og klinikker",
+          "ord": [
+            "privat",
+            "kommersiell",
+            "nærklinikk",
+            "privatklinikk"
+          ]
+        },
+        {
+          "id": "privat-helse/fbv-anbud",
+          "navn": "Fritt behandlingsvalg, anbud og avtalespesialister",
+          "ord": [
+            "fritt behandlingsvalg",
+            "anbud",
+            "avtalespesialist",
+            "konkurranseutsett"
+          ]
+        },
+        {
+          "id": "privat-helse/ideelle",
+          "navn": "Ideelle og frivillige",
+          "ord": [
+            "ideell",
+            "frivillig"
+          ]
+        },
+        {
+          "id": "privat-helse/helseforsikring",
+          "navn": "Helseforsikring",
+          "ord": [
+            "helseforsikring"
+          ]
+        }
       ]
     },
     {
       "id": "kvinnehelse",
-      "navn": "Kvinnehelse & fødsel",
+      "navn": "Kvinnehelse og fødsel",
       "kategori": "regulering",
       "ord": [
         "kvinnehelse",
@@ -428,11 +1464,37 @@
         "gynekolog",
         "overgangsalder",
         "\\bpcos\\b"
+      ],
+      "undertemaer": [
+        {
+          "id": "kvinnehelse/fodsel",
+          "navn": "Fødsel og svangerskap",
+          "ord": [
+            "fødsel",
+            "føde",
+            "svangerskap",
+            "barsel",
+            "jordmor"
+          ]
+        },
+        {
+          "id": "kvinnehelse/kvinnesykdommer",
+          "navn": "Kvinnesykdommer",
+          "ord": [
+            "endometriose",
+            "pcos\\b",
+            "overgangsalder",
+            "kvinnehelse",
+            "gynekolog",
+            "lipødem",
+            "pmdd"
+          ]
+        }
       ]
     },
     {
       "id": "helsereform",
-      "navn": "Helsereform & styring",
+      "navn": "Helsereform og styring",
       "kategori": "regulering",
       "ord": [
         "helsereform",
@@ -445,6 +1507,39 @@
         "regionale helseforetak",
         "strategi for",
         "nasjonal plan"
+      ],
+      "undertemaer": [
+        {
+          "id": "helsereform/reform-organisering",
+          "navn": "Helsereform og organisering",
+          "ord": [
+            "helsereform",
+            "én helsetjeneste",
+            "foretaksmodell",
+            "organisering",
+            "styring"
+          ]
+        },
+        {
+          "id": "helsereform/samhandling",
+          "navn": "Samhandling og helsefellesskap",
+          "ord": [
+            "helsefellesskap",
+            "samhandling",
+            "helse- og samhandlingsplan"
+          ]
+        },
+        {
+          "id": "helsereform/nasjonale-planer",
+          "navn": "Nasjonale planer og strategier",
+          "ord": [
+            "nasjonal plan",
+            "nasjonal strategi",
+            "handlingsplan",
+            "stortingsmelding",
+            "meld. st"
+          ]
+        }
       ]
     }
   ],
@@ -454,9 +1549,9 @@
       "prop\\. \\d+ l",
       "prop\\. \\d+ ls",
       "lovendring",
-      "endringer i .*loven",
-      "endringar i .*lova",
-      "endring i .*loven",
+      "endringer i \\S*loven",
+      "endringar i \\S*lova",
+      "endring i \\S*loven",
       "ny lov",
       "lovforslag",
       "forskriftsendring",

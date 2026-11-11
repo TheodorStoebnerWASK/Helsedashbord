@@ -5,7 +5,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { XMLParser } from 'fast-xml-parser';
-import { lagRegler, regelKlassifiser, kiKlassifiser, hashTekst } from './lib/klassifiser.mjs';
+import { lagRegler, regelKlassifiser, kiKlassifiser, hashTekst, finnUndertemaer } from './lib/klassifiser.mjs';
 import { hentVoteringer } from './lib/voteringer.mjs';
 
 const ROT = new URL('..', import.meta.url).pathname;
@@ -209,7 +209,8 @@ const trengerKi = [];
 for (const k of kandidater) {
   const h = hashTekst(k.tittel + (k.kontekst || ''));
   const c = cache[k.id];
-  if (!c || c.h !== h) cache[k.id] = { ...regelKlassifiser(k, regler, kategoriAv), h };
+  // Regelbaserte resultater regnes ut på nytt hver gang, så endrede nøkkelord slår inn med en gang
+  if (!c || c.h !== h || c.kilde !== 'ki') cache[k.id] = { ...regelKlassifiser(k, regler, kategoriAv), h };
   if (BRUK_KI && cache[k.id].kilde !== 'ki') trengerKi.push(k);
 }
 let kiStatus = BRUK_KI ? 'ikke kjørt' : 'av';
@@ -240,7 +241,7 @@ const elementer = kandidater
     const c = cache[k.id];
     return rens({
       id: k.id, type: k.type, tittel: k.tittel, ...k.data, direkte: k.direkte || undefined,
-      kategori: c.kategori, temaer: c.temaer, stikkord: c.stikkord, storEndring: c.storEndring || undefined,
+      kategori: c.kategori, temaer: c.temaer, undertemaer: finnUndertemaer(k, c.temaer, regler), stikkord: c.stikkord, storEndring: c.storEndring || undefined,
       begrunnelse: c.begrunnelse, kilde: c.kilde,
     });
   })
@@ -282,7 +283,7 @@ const ut = {
     ki: kiStatus, kiAndel: elementer.length ? elementer.filter((e) => e.kilde === 'ki').length / elementer.length : 0,
     antall: Object.fromEntries(['skriftlig', 'muntlig', 'interpellasjon', 'sak', 'horing', 'regjering'].map((t) => [t, elementer.filter((e) => e.type === t).length])),
   },
-  taksonomi: { kategorier: taks.kategorier, temaer: taks.temaer.map(({ id, navn, kategori }) => ({ id, navn, kategori })).concat({ id: 'annet', navn: 'Annet', kategori: 'regulering' }) },
+  taksonomi: { kategorier: taks.kategorier, temaer: taks.temaer.map(({ id, navn, kategori, undertemaer }) => ({ id, navn, kategori, undertemaer: (undertemaer || []).map(({ id, navn }) => ({ id, navn })) })).concat({ id: 'annet', navn: 'Annet', kategori: 'regulering' }) },
   komite: { id: KOMITE, navn: komiteNavn[KOMITE], medlemmer: komiteMedlemmer, roller: roller.roller || {} },
   komiteNavn,
   voteringSaker,

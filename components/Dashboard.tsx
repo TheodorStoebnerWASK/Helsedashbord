@@ -60,6 +60,7 @@ export default function Dashboard() {
   const ctx = useMemo(() => {
     if (!data) return null;
     const tm = Object.fromEntries(data.taksonomi.temaer.map((t) => [t.id, t.navn]));
+    const um = Object.fromEntries(data.taksonomi.temaer.flatMap((t) => (t.undertemaer || []).map((u) => [u.id, u.navn])));
     const kf = Object.fromEntries(data.taksonomi.kategorier.map((k) => [k.id, k.farge]));
     const kn = Object.fromEntries(data.taksonomi.kategorier.map((k) => [k.id, k.navn]));
     return {
@@ -68,6 +69,7 @@ export default function Dashboard() {
       visPerson: setPerson,
       visTema: (id: string) => { setTema(id); setPerson(null); byttFane('temaer'); },
       temaNavn: (id: string) => tm[id] || id,
+      undertemaNavn: (id: string) => um[id] || id,
       katFarge: (id: string) => kf[id] || '#8A877F',
       katNavn: (id: string) => kn[id] || id,
     };

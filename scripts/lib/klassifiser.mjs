@@ -14,8 +14,22 @@ export function lagRegler(taks) {
     helse: tilRegex(taks.helseord, 'iu'),
     storEndring: tilRegex(taks.storEndring.ord, 'iu'),
     storEndringSp: tilRegex(taks.storEndring.sporsmalOrd || taks.storEndring.ord, 'iu'),
-    temaer: taks.temaer.map((t) => ({ ...t, rx: tilRegex(t.ord, 'giu') })),
+    // Temaets regex dekker både temaets egne ord og alle undertemaenes ord
+    temaer: taks.temaer.map((t) => ({ ...t, rx: tilRegex([...t.ord, ...(t.undertemaer || []).flatMap((u) => u.ord)], 'giu') })),
+    undertemaer: taks.temaer.flatMap((t) => (t.undertemaer || []).map((u) => ({ id: u.id, tema: t.id, rx: tilRegex(u.ord, 'giu') }))),
   };
+}
+
+/** Undertemaer (nivå 3) settes alltid med nøkkelord, også når KI har valgt temaene. Bare undertemaer under elementets temaer tas med. */
+export function finnUndertemaer(item, temaer, regler) {
+  const tekst = `${item.tittel} ${item.ekstra || ''}`.toLowerCase();
+  return regler.undertemaer
+    .filter((u) => temaer.includes(u.tema))
+    .map((u) => ({ id: u.id, n: (tekst.match(u.rx) || []).length }))
+    .filter((u) => u.n > 0)
+    .sort((a, b) => b.n - a.n)
+    .slice(0, 4)
+    .map((u) => u.id);
 }
 
 export const hashTekst = (s) => createHash('sha1').update(s).digest('hex').slice(0, 12);
@@ -35,11 +49,14 @@ export function regelKlassifiser(item, regler, kategoriAv) {
   let kategori = tema ? kategoriAv[tema] : 'regulering';
   const spesifikk = treff.find((t) => kategoriAv[t.id] !== 'regulering');
   if (spesifikk) kategori = kategoriAv[spesifikk.id];
+  // Store endringer: lagre ordet som utløste flagget, så det vises hvorfor saken er flagget
+  const endringTreff = (['skriftlig', 'muntlig', 'interpellasjon'].includes(item.type) ? regler.storEndringSp : regler.storEndring).exec(tekst);
   return {
     kategori,
     temaer: temaer.length ? temaer : ['annet'],
     stikkord: [],
-    storEndring: (['skriftlig', 'muntlig', 'interpellasjon'].includes(item.type) ? regler.storEndringSp : regler.storEndring).test(tekst),
+    storEndring: !!endringTreff,
+    begrunnelse: endringTreff ? `Nøkkelord: «${endringTreff[0].trim().slice(0, 50)}»` : undefined,
     relevant: item.direkte || regler.helse.test(tekst),
     kilde: 'regel',
   };
