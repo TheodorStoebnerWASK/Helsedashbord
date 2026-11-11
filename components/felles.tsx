@@ -137,7 +137,7 @@ export function Segment<T extends string>({ valg, verdi, sett, etikett }: { valg
 export function ElementRad({ e }: { e: Element }) {
   const { data, temaNavn, undertemaNavn, visTema } = useData();
   const [apen, setApen] = useState(false);
-  const lang = e.tittel.length > 220;
+  const lang = (e.tittel || '').length > 220;
   const tid = e.type === 'horing' && e.tider?.length ? e.tider[0].tid : e.dato;
   return (
     <li className={`element${e.storEndring ? ' stor' : ''}`}>

@@ -90,7 +90,8 @@ for (const sesjon of sesjoner) {
     for (const q of liste) {
       leggTilPerson(q.sporsmal_fra);
       const tilHod = [q.sporsmal_til_minister_id, q.besvart_av_minister_id, q.rette_vedkommende_minister_id].includes(HOD_MINISTER);
-      const tekst = q.tittel || '';
+      // Noen interpellasjoner har ikke fått tittel ennå i Stortingets data – lag en forklarende reservetittel
+      const tekst = (q.tittel || '').trim() || `${t.navn} nr. ${q.sporsmal_nummer} til ${q.sporsmal_til_minister_tittel} (tittel ikke publisert ennå)`;
       if (!tilHod && !regler.helse.test(tekst)) continue;
       kandidater.push({
         id: `${t.type}-${q.id}`, type: t.type, typeNavn: t.navn, tittel: tekst.trim(), direkte: tilHod,
