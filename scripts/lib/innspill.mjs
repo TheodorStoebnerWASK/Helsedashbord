@@ -22,8 +22,10 @@ export async function hentInnspill(horinger, cache, { sth, logg, utdrag = 900 })
   let nye = 0;
   for (const h of horinger) {
     const id = String(h.id).replace('horing-', '');
-    const ferdig = cache[id]?.status === 'Avholdt';
-    if (ferdig) continue;
+    const c = cache[id];
+    if (c?.status === 'Avholdt' && !c.utilgjengelig) continue;
+    // Stortingets API gir serverfeil for skriftlige høringer – prøv på nytt én gang i uka
+    if (c?.utilgjengelig && Date.now() - new Date(c.sjekket).getTime() < 7 * 86400000) continue;
     try {
       const inn = (await sth(`horingsinnspill?horingid=${id}`)).horingsinnspill_liste || [];
       let deltakere = [];
@@ -49,7 +51,8 @@ export async function hentInnspill(horinger, cache, { sth, logg, utdrag = 900 })
       };
       nye++;
     } catch (e) {
-      logg(`Innspill: hopper over høring ${id} (${e.message})`);
+      cache[id] = { status: h.horingStatus, innspill: [], deltakere: [], utilgjengelig: true, sjekket: new Date().toISOString() };
+      logg(`Innspill: høring ${id} er ikke tilgjengelig i API-et (${e.message.slice(0, 60)}) – prøver igjen om en uke`);
     }
   }
   return nye;
