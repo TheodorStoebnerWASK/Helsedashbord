@@ -2,9 +2,10 @@ name: Oppdater data
 
 on:
   schedule:
-    # Kl. 06:17 og 13:17 norsk vintertid (UTC+1) på hverdager, 06:17 i helgene
+    # GitHub bruker UTC og starter ofte 5–60 min forsinket. Tidene er satt så data er klare før møtene:
+    # 06:17 og 11:30 norsk vintertid (07:17 og 12:30 sommertid), hver dag.
     - cron: '17 5 * * *'
-    - cron: '17 12 * * 1-5'
+    - cron: '30 10 * * *'
   workflow_dispatch: {}
 
 permissions:
