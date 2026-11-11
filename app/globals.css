@@ -327,3 +327,15 @@ html:has(.login) { background: var(--surface-inverse); }
 .forklaring ul { margin: 0 0 var(--space-3); padding-left: 18px; }
 .forklaring li { margin-bottom: 4px; }
 .forklaring strong { font-weight: var(--weight-regular); color: var(--text-primary); }
+
+/* --- Høringsinnspill og debatter ------------------------------------------------- */
+.org-liste { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: var(--space-3) 0 var(--space-2); }
+.org { border: 1px solid var(--border-hairline); background: var(--surface-card); padding: 2px 8px; font: var(--type-caption); color: var(--text-primary); transition: var(--transition-ui); }
+.org:hover { border-color: var(--wa-blue-deep); color: var(--wa-blue-deep); }
+.innspill-liste { margin: var(--space-3) 0; border-left: 1px solid var(--border-strong); padding-left: var(--space-4); display: grid; gap: var(--space-4); }
+.innspill strong { font: var(--weight-light) 18px/1.3 var(--font-serif); color: var(--text-primary); }
+.innspill p { margin: 4px 0 0; font: var(--type-body-sm); max-width: 80ch; }
+.innspill.muntlig strong { font-size: 16px; }
+.innlegg-hode { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.innlegg-hode .portrett { width: 22px; height: 22px; border-radius: 50%; }
+.innlegg-hode strong { font-size: 17px; }

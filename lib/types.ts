@@ -92,3 +92,13 @@ export const TYPE_NAVN: Record<ElementType, string> = {
   horing: 'Høring',
   regjering: 'Regjeringen',
 };
+
+// ---------- Høringsinnspill (data/innspill.json) ----------
+export interface Innspill { id: string; org: string; tittel: string; dato: string; tekst: string; lengde: number }
+export interface Deltaker { org: string; tid: string; personer: string[] }
+export type InnspillData = Record<string, { status?: string; innspill: Innspill[]; deltakere: Deltaker[]; utilgjengelig?: boolean }>;
+
+// ---------- Debatter (data/debatter.json) ----------
+export interface Innlegg { p?: string; navn: string; parti?: string; tid?: string; type: 'innlegg' | 'replikk'; tekst: string; lengde: number }
+export interface Debattdel { type: 'sak' | 'spørretime'; sakId?: number; tittel: string; innlegg: Innlegg[]; kategori?: string; temaer?: string[]; undertemaer?: string[] }
+export type DebattData = Record<string, { sesjon: string; dato?: string; tittel: string; komplett: boolean; deler: Debattdel[] }>;

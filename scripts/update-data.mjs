@@ -299,6 +299,8 @@ try {
   // Tema per debattdel: fra saken hvis den finnes i dataene, ellers nøkkelord på tittel og første innlegg
   for (const ref of Object.values(debatter)) for (const d of ref.deler) {
     const sak = d.sakId ? helseSakId.get(String(d.sakId)) : null;
+    if (sak) d.tittel = sak.tittel; // korttittelen er mer lesbar enn innstillingens fulle tittel
+    else if (d.sakId && alleSaker.get(String(d.sakId))?.tittel) d.tittel = alleSaker.get(String(d.sakId)).tittel;
     const k = sak ? cache[sak.id] : regelKlassifiser({ tittel: d.tittel, ekstra: d.innlegg[0]?.tekst, type: 'sak' }, regler, kategoriAv);
     d.kategori = k?.kategori; d.temaer = k?.temaer;
     d.undertemaer = d.temaer ? finnUndertemaer({ tittel: d.tittel, ekstra: d.innlegg.slice(0, 3).map((i) => i.tekst).join(' ') }, d.temaer, regler) : undefined;

@@ -13,6 +13,8 @@ import { Regjeringen } from './visninger/Regjeringen';
 import { Temaer } from './visninger/Temaer';
 import { StoreEndringer } from './visninger/StoreEndringer';
 import { Voteringer } from './visninger/Voteringer';
+import { Innspill } from './visninger/Innspill';
+import { Debatter } from './visninger/Debatter';
 
 const FANER = [
   { id: 'oversikt', navn: 'Oversikt' },
@@ -22,6 +24,8 @@ const FANER = [
   { id: 'komite', navn: 'Komiteen' },
   { id: 'voteringer', navn: 'Voteringer' },
   { id: 'saker', navn: 'Saker & høringer' },
+  { id: 'innspill', navn: 'Høringsinnspill' },
+  { id: 'debatter', navn: 'Debatter' },
   { id: 'regjeringen', navn: 'Regjeringen' },
 ] as const;
 type Fane = (typeof FANER)[number]['id'];
@@ -146,6 +150,8 @@ export default function Dashboard() {
           {fane === 'komite' && <Komite />}
           {fane === 'voteringer' && <Voteringer />}
           {fane === 'saker' && <Saker />}
+          {fane === 'innspill' && <Innspill />}
+          {fane === 'debatter' && <Debatter />}
           {fane === 'regjeringen' && <Regjeringen />}
         </main>
         <footer className="bunn">
