@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // Henter data fra Stortinget (data.stortinget.no) og regjeringen.no (RSS), klassifiserer og skriver data/dashboard.json.
 // Bruk:  node scripts/update-data.mjs        (regelbasert klassifisering)
-//        node scripts/update-data.mjs --ki   (KI via GitHub Models; krever GITHUB_TOKEN med models:read)
+//        node scripts/update-data.mjs --ki   (KI via Claude; krever ANTHROPIC_API_KEY)
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { XMLParser } from 'fast-xml-parser';
 import { lagRegler, regelKlassifiser, kiKlassifiser, hashTekst, finnUndertemaer } from './lib/klassifiser.mjs';
 import { hentVoteringer } from './lib/voteringer.mjs';
+import { hentInnspill } from './lib/innspill.mjs';
+import { hentDebatter } from './lib/debatter.mjs';
 
 const ROT = new URL('..', import.meta.url).pathname;
 const DATA = ROT + 'data/';
@@ -216,13 +218,13 @@ for (const k of kandidater) {
 }
 let kiStatus = BRUK_KI ? 'ikke kjørt' : 'av';
 if (BRUK_KI && trengerKi.length) {
-  const token = process.env.GITHUB_TOKEN || process.env.GH_MODELS_TOKEN;
-  if (!token) logg('KI: mangler GITHUB_TOKEN – bruker regelbasert klassifisering');
+  const token = process.env.ANTHROPIC_API_KEY;
+  if (!token) logg('KI: mangler ANTHROPIC_API_KEY – bruker regelbasert klassifisering');
   else {
     trengerKi.sort((a, b) => (b.direkte - a.direkte) || String(b.data.dato).localeCompare(String(a.data.dato)));
     logg(`KI: ${trengerKi.length} saker skal klassifiseres`);
     // KI-feil skal aldri stoppe datahentingen – da brukes nøkkelordreglene til neste kjøring
-    const res = await kiKlassifiser(trengerKi, taks, { token, modell: process.env.KI_MODELL || 'openai/gpt-4.1-mini', logg })
+    const res = await kiKlassifiser(trengerKi, taks, { logg })
       .catch((e) => { logg(`KI: feilet (${e.message}) – bruker nøkkelord`); return new Map(); });
     for (const [id, r] of res) {
       const k = kandidater.find((x) => x.id === id);
@@ -273,6 +275,39 @@ for (const [sakId, { v }] of Object.entries(voteringCache)) {
   for (const x of v) voteringer.push(rens({ s: Number(sakId), id: x.id, t: x.tid, ty: x.type, tema: x.tema, p: x.p }));
 }
 logg(`Voteringer: ${voteringer.length} personlige voteringer i ${Object.keys(voteringSaker).length} saker (${Object.values(voteringSaker).filter((s) => s.helse).length} helsesaker)`);
+
+// ---------- Høringsinnspill og muntlige deltakere ----------
+const innspillFil = DATA + 'innspill.json';
+const innspill = await lesJson(innspillFil, {});
+try {
+  const n = await hentInnspill(elementer.filter((e) => e.type === 'horing'), innspill, { sth, logg });
+  logg(`Innspill: ${n} høringer oppdatert, ${Object.values(innspill).reduce((a, h) => a + h.innspill.length, 0)} skriftlige innspill totalt`);
+} catch (e) {
+  logg(`ADVARSEL: innspill feilet (${e.message})`);
+}
+await writeFile(innspillFil, JSON.stringify(innspill));
+
+// ---------- Debatter i salen (referater) ----------
+const debattFil = DATA + 'debatter.json';
+const debatter = await lesJson(debattFil, {});
+try {
+  const n = await hentDebatter(sesjoner, debatter, {
+    sth, hent, logg,
+    erHelse: (tekst) => regler.helse.test(tekst || ''),
+    erHelseSak: (id) => !!id && helseSakId.has(String(id)),
+  });
+  // Tema per debattdel: fra saken hvis den finnes i dataene, ellers nøkkelord på tittel og første innlegg
+  for (const ref of Object.values(debatter)) for (const d of ref.deler) {
+    const sak = d.sakId ? helseSakId.get(String(d.sakId)) : null;
+    const k = sak ? cache[sak.id] : regelKlassifiser({ tittel: d.tittel, ekstra: d.innlegg[0]?.tekst, type: 'sak' }, regler, kategoriAv);
+    d.kategori = k?.kategori; d.temaer = k?.temaer;
+    d.undertemaer = d.temaer ? finnUndertemaer({ tittel: d.tittel, ekstra: d.innlegg.slice(0, 3).map((i) => i.tekst).join(' ') }, d.temaer, regler) : undefined;
+  }
+  logg(`Debatter: ${n} nye referater, ${Object.values(debatter).reduce((a, r) => a + r.deler.length, 0)} helsedebatter/-spørsmål totalt`);
+} catch (e) {
+  logg(`ADVARSEL: debatter feilet (${e.message})`);
+}
+await writeFile(debattFil, JSON.stringify(debatter));
 
 const roller = await lesJson(ROT + 'config/komite-roller.json', {});
 const hod = await lesJson(ROT + 'config/hod-ledelse.json', { personer: [] });

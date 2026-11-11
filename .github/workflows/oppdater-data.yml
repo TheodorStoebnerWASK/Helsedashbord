@@ -14,7 +14,6 @@ on:
 
 permissions:
   contents: write
-  models: read # gratis KI-klassifisering via GitHub Models
 
 concurrency:
   group: oppdater-data
@@ -31,15 +30,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: KI-diagnose
-        run: node scripts/ki-diagnose.mjs
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Hent og klassifiser
         run: node scripts/update-data.mjs --ki
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }} # Claude – legges inn under Settings → Secrets and variables → Actions
       - name: Lagre endringer
         run: |
           git config user.name "helsedashbord-bot"

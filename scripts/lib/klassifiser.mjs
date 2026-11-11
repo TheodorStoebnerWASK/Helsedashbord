@@ -73,91 +73,77 @@ For HVER sak, returner:
 - "begrunnelse": maks 15 ord, kun hvis storEndring er true
 Svar KUN med JSON: {"resultater": [ ... ]}`;
 
-// GitHub Models: hovedadressen, og den eldre adressen som reserve. Begge tar GITHUB_TOKEN fra Actions.
-const ENDEPUNKTER = [
-  { navn: 'models.github.ai', url: 'https://models.github.ai/inference/chat/completions', headers: { Accept: 'application/json', 'X-GitHub-Api-Version': '2022-11-28' } },
-  { navn: 'models.inference.ai.azure.com', url: 'https://models.inference.ai.azure.com/chat/completions', modell: 'gpt-4o-mini', headers: { Accept: 'application/json' } },
-];
+// KI-klassifisering med Claude (Anthropic API). Krever ANTHROPIC_API_KEY (GitHub-secret i Actions).
+// Strukturert JSON-svar via skjema, så svaret alltid kan tolkes. Avviser Claude en forespørsel,
+// kjører API-et den automatisk på en reservemodell (server-side fallback).
+const MODELL = process.env.KI_MODELL || 'claude-opus-5-5';
 
-/** Klassifiserer en liste saker med GitHub Models. Returnerer map id -> resultat. Stopper rolig ved rate limit. */
-export async function kiKlassifiser(items, taks, { token, modell, maksForesporsler = 120, batch = 20, logg = console.log }) {
+export async function kiKlassifiser(items, taks, { batch = 25, parallelt = 3, logg = console.log } = {}) {
   const ut = new Map();
-  const gyldigeTemaer = new Set(taks.temaer.map((t) => t.id).concat('annet'));
-  const gyldigeKat = new Set(taks.kategorier.map((k) => k.id));
-  let forespørsler = 0;
-  let feilPaRad = 0;
-  let aktivt = 0;
-  let virket = false;
-  for (let i = 0; i < items.length; i += batch) {
-    if (forespørsler >= maksForesporsler) { logg(`KI: nådde maks ${maksForesporsler} forespørsler – resten tas neste kjøring`); break; }
-    const del = items.slice(i, i + batch);
-    const input = del.map((x) => ({ id: x.id, type: x.typeNavn, tittel: x.tittel.slice(0, 600), kontekst: x.kontekst || undefined }));
-    let svar;
-    for (let forsøk = 0; forsøk < 3; forsøk++) {
-      forespørsler++;
-      const ep = ENDEPUNKTER[aktivt];
-      const res = await fetch(ep.url, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...ep.headers },
-        body: JSON.stringify({
-          model: ep.modell || modell,
-          temperature: 0,
-          // Første forsøk ber om ren JSON; senere forsøk sendes uten, i tilfelle modellen ikke støtter det
-          ...(forsøk === 0 ? { response_format: { type: 'json_object' } } : {}),
-          messages: [
-            { role: 'system', content: SYSTEM(taks) },
-            { role: 'user', content: JSON.stringify(input) },
-          ],
-        }),
-      }).catch((e) => ({ ok: false, status: 0, text: async () => String(e) }));
-      const tekst = await res.text();
-      if (res.ok) {
-        try { svar = JSON.parse(tekst); if (!virket) { virket = true; logg(`KI: ${ep.navn} virker (modell ${ep.modell || modell})`); } break; } catch {
-          logg(`KI: uventet svar fra ${ep.navn} (status ${res.status}, content-type ${res.headers?.get?.('content-type')}): ${tekst.slice(0, 200).replace(/\s+/g, ' ')}`);
-          if (aktivt < ENDEPUNKTER.length - 1) { aktivt++; logg(`KI: prøver reserveadressen ${ENDEPUNKTER[aktivt].navn}`); }
-          await sleep(3000);
-          continue;
-        }
-      }
-      if (res.status === 429) {
-        const vent = Number(res.headers?.get?.('retry-after') || 0);
-        if (vent > 0 && vent < 90) { logg(`KI: rate limit, venter ${vent}s`); await sleep(vent * 1000); continue; }
-        logg('KI: dagskvoten er brukt opp – fortsetter neste kjøring'); return ut;
-      }
-      logg(`KI: feil ${res.status} fra ${ep.navn}: ${tekst.slice(0, 200)}`);
-      if ([401, 403, 404].includes(res.status)) {
-        if (aktivt < ENDEPUNKTER.length - 1) { aktivt++; logg(`KI: prøver reserveadressen ${ENDEPUNKTER[aktivt].navn}`); continue; }
-        return ut;
-      }
-      await sleep(5000);
+  if (!process.env.ANTHROPIC_API_KEY) { logg('KI: mangler ANTHROPIC_API_KEY – bruker nøkkelord'); return ut; }
+  const { default: Anthropic } = await import('@anthropic-ai/sdk');
+  const { betaZodOutputFormat } = await import('@anthropic-ai/sdk/helpers/beta/zod');
+  const { z } = await import('zod');
+  const client = new Anthropic({ maxRetries: 4 });
+
+  const temaIder = taks.temaer.map((t) => t.id).concat('annet');
+  const katIder = taks.kategorier.map((k) => k.id);
+  const Skjema = z.object({
+    resultater: z.array(z.object({
+      id: z.string(),
+      relevant: z.boolean(),
+      kategori: z.enum(katIder),
+      temaer: z.array(z.enum(temaIder)),
+      stikkord: z.array(z.string()),
+      storEndring: z.boolean(),
+      begrunnelse: z.string(),
+    })),
+  });
+  const system = SYSTEM(taks).replace(/Svar KUN med JSON[^\n]*$/, 'Svar med ett resultat per sak. «begrunnelse» er tom tekst når storEndring er false.');
+
+  const bunker = [];
+  for (let i = 0; i < items.length; i += batch) bunker.push(items.slice(i, i + batch));
+  let ferdig = 0, stopp = false, virket = false;
+
+  async function kjør(del) {
+    const input = del.map((x) => ({ id: x.id, type: x.typeNavn, tittel: x.tittel.slice(0, 1200), kontekst: x.kontekst || undefined }));
+    const svar = await client.beta.messages.parse({
+      model: MODELL,
+      max_tokens: 16000,
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
+      output_config: { effort: 'low', format: betaZodOutputFormat(Skjema) },
+      system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }], // fast systemprompt → hurtigbufres mellom bunkene
+      messages: [{ role: 'user', content: JSON.stringify(input) }],
+    });
+    if (svar.stop_reason === 'refusal') { logg(`KI: bunke avvist (${svar.stop_details?.category ?? 'ukjent'}) – nøkkelord brukes for disse`); return; }
+    if (!svar.parsed_output) { logg(`KI: kunne ikke tolke svaret (stop_reason ${svar.stop_reason})`); return; }
+    if (!virket) { virket = true; logg(`KI: Claude virker (modell ${svar.model})`); }
+    for (const r of svar.parsed_output.resultater) {
+      const temaer = [...new Set(r.temaer)].slice(0, 3);
+      ut.set(String(r.id), {
+        relevant: r.relevant, kategori: r.kategori, temaer: temaer.length ? temaer : ['annet'],
+        stikkord: r.stikkord.map(String).slice(0, 3), storEndring: r.storEndring,
+        begrunnelse: r.storEndring && r.begrunnelse ? r.begrunnelse.slice(0, 160) : undefined, kilde: 'ki',
+      });
     }
-    if (!svar) {
-      if (++feilPaRad >= 3) { logg('KI: tre mislykkede forsøk på rad – bruker nøkkelord resten av denne kjøringen'); return ut; }
-      continue;
-    }
-    feilPaRad = 0;
-    try {
-      // Uten response_format kan modellen pakke svaret i ```json … ``` – fjern det
-      const innhold = JSON.parse(String(svar.choices[0].message.content).replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, ''));
-      for (const r of innhold.resultater || []) {
-        if (!r || r.id == null) continue;
-        const temaer = (r.temaer || []).filter((t) => gyldigeTemaer.has(t)).slice(0, 3);
-        ut.set(String(r.id), {
-          relevant: !!r.relevant,
-          kategori: gyldigeKat.has(r.kategori) ? r.kategori : 'regulering',
-          temaer: temaer.length ? temaer : ['annet'],
-          stikkord: (r.stikkord || []).map(String).slice(0, 3),
-          storEndring: !!r.storEndring,
-          begrunnelse: r.storEndring ? String(r.begrunnelse || '').slice(0, 140) : undefined,
-          kilde: 'ki',
-        });
-      }
-    } catch (e) {
-      logg('KI: kunne ikke tolke svar: ' + e.message);
-    }
-    logg(`KI: ${Math.min(i + batch, items.length)}/${items.length} klassifisert`);
-    await sleep(4500); // gratisnivået tillater ca. 15 forespørsler i minuttet
   }
+
+  async function arbeider() {
+    while (bunker.length && !stopp) {
+      const del = bunker.shift();
+      try {
+        await kjør(del);
+      } catch (e) {
+        const status = e?.status;
+        logg(`KI: feil ${status ?? ''} ${String(e?.message || e).slice(0, 200)}`);
+        if (status === 401 || status === 403) { stopp = true; logg('KI: nøkkelen avvises – sjekk ANTHROPIC_API_KEY'); }
+      }
+      ferdig += del.length;
+      if (ferdig % 200 < batch) logg(`KI: ${Math.min(ferdig, items.length)}/${items.length} behandlet`);
+    }
+  }
+  await Promise.all(Array.from({ length: parallelt }, arbeider));
   return ut;
 }
 
