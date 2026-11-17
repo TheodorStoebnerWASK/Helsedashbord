@@ -314,6 +314,13 @@
   "type": "Dokument",
   "feed": "Dokument"
  },
+ "3139773": {
+  "tittel": "Nordisk veileder for tobakkindustrien",
+  "lenke": "https://www.regjeringen.no/no/dokumenter/nordisk-veileder-for-tobakkindustrien/id3139773/",
+  "dato": "2026-11-16T14:30:48.000Z",
+  "type": "Dokument",
+  "feed": "Dokument"
+ },
  "3140033": {
   "tittel": "Prop. 20 S (2025–2026) - Endringar i statsbudsjettet 2025 under Helse- og omsorgsdepartementet",
   "lenke": "https://www.regjeringen.no/no/dokumenter/prop.-20-s-20252026/id3140033/",
@@ -1561,6 +1568,14 @@
   "beskrivelse": "Regjeringen har over flere år prioritert fastlegeordningen, blant annet gjennom ALIS-tilskuddet. Tilskuddet bidrar til at flere leger blir spesialisert i allmennmedisin. Foreløpige tall for siste søknadsrunde viser at drøyt 270 kommuner vil få utbetalt til sammen 500 millioner kroner. Det vil ha betydning for mer enn 2680 leger i slik spesialisering.",
   "lenke": "https://www.regjeringen.no/no/aktuelt/500-millioner-kroner-til-styrking-av-allmennlegetjenesten/id3192783/",
   "dato": "2026-11-15T07:00:00.000Z",
+  "type": "Nyhet",
+  "feed": "Nyhet"
+ },
+ "3193151": {
+  "tittel": "38 land advarer mot risiko for atomhendelse i Ukraina",
+  "beskrivelse": "Strålevernsmyndigheter i flere land, inkludert Norge, advarer i dag mot økt risiko for en atomhendelse ved kjernekraftverk Ukraina. Årsaken er Russlands hurtige og stadig mer presise angrep på ukrainsk infrastruktur.",
+  "lenke": "https://www.regjeringen.no/no/aktuelt/38-land-advarer-mot-risiko-for-atomhendelse-i-ukraina/id3193151/",
+  "dato": "2026-11-16T12:52:11.000Z",
   "type": "Nyhet",
   "feed": "Nyhet"
  }
