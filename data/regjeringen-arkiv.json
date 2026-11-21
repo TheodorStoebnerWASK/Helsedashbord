@@ -1617,5 +1617,21 @@
   "dato": "2026-11-20T10:45:00.000Z",
   "type": "Proposisjon",
   "feed": "Dokument"
+ },
+ "3194232": {
+  "tittel": "Endring i spesialistforskriften for leger",
+  "beskrivelse": "Helse- og omsorgsdepartementet har foretatt en endring i spesialisthelseforskriften for å klargjøre det rettslige grunnlaget for adgangen til å godkjenne KBU og liknende utenlandske opplæringsprogrammer mot LIS1.",
+  "lenke": "https://www.regjeringen.no/no/aktuelt/endring-i-spesialistforskriften-for-leger/id3194232/",
+  "dato": "2026-11-20T12:45:48.000Z",
+  "type": "Forskrift",
+  "feed": "Nyhet"
+ },
+ "3194250": {
+  "tittel": "Et viktig skritt på veien mot ny sykmeldingsløsning",
+  "beskrivelse": "Regjeringen sender forslag til endringer i folketrygdloven på høring. Forslagene skal legge til rette for en ny digital sykmeldingsløsning, som vil gi bedre kvalitet på informasjonen, gjøre prosessen enklere og spare tid for både helsepersonell og Nav.",
+  "lenke": "https://www.regjeringen.no/no/aktuelt/et-viktig-skritt-pa-veien-mot-ny-sykmeldingslosning/id3194250/",
+  "dato": "2026-11-20T13:48:32.000Z",
+  "type": "Nyhet",
+  "feed": "Nyhet"
  }
 }
