@@ -1532,9 +1532,9 @@
   "feed": "Nyhet"
  },
  "3190681": {
-  "tittel": "Nytt skritt på veien mot helsereform: Vestre tok imot Helsereformutvalgets forslag",
+  "tittel": "Nytt skritt på veien mot helsereform: : Vestre tok imot Helsereformutvalgets forslag",
   "beskrivelse": "Helse- og omsorgsminister Jan Christian Vestre fikk i dag overlevert Helsereformutvalgets utredning. Den vil være med å legge grunnlaget for regjeringens helsereform. – Vi skal lage pasientenes, pårørendes og fagfolkenes helsereform, sier Vestre.",
-  "lenke": "https://www.regjeringen.no/no/aktuelt/nytt-skritt-pa-veien-mot-helsereform-vestre-tok-imot-helsereformutvalgets-forslag/id3190681/",
+  "lenke": "https://www.regjeringen.no/no/aktuelt/vestre-tok-imot-helsereformutvalgets-forslag/id3190681/",
   "dato": "2026-11-02T10:30:00.000Z",
   "type": "Nyhet",
   "feed": "Nyhet"
@@ -1647,6 +1647,14 @@
   "beskrivelse": "Helse- og omsorgsminister Jan Christian Vestre har sitt første innspillsmøte om helsereformen mandag 30. november i Fredrikstad. Møtene er en del av arbeidet med regjeringens helsereform, og skal gi innbyggere, pasienter, pårørende, helsepersonell, organisasjoner og andre interesserte mulighet til å komme med konkrete forslag til helsereformen.",
   "lenke": "https://www.regjeringen.no/no/aktuelt/forste-innspillsmote-om-helsereformen-holdes-i-fredrikstad/id3194400/",
   "dato": "2026-11-23T10:27:43.000Z",
+  "type": "Presseinvitasjon",
+  "feed": "Nyhet"
+ },
+ "3194451": {
+  "tittel": "Presseinvitasjon: Helse- og omsorgsministeren markerer byggestart av strålesenteret hjå Sjukehuset i Telemark i Skien tysdag 24. november",
+  "beskrivelse": "Helse- og omsorgsminister Jan Christian Vestre markerer tysdag 24. november klokka 08.30–09.45 byggestart av det nye strålesenteret hjå Sjukehuset i Telemark i Skien.",
+  "lenke": "https://www.regjeringen.no/no/aktuelt/presseinvitasjon-helse-og-omsorgsministeren-markerer-byggestart-av-stralesenteret-hja-sjukehuset-i-telemark-i-skien-tysdag-24.-november/id3194451/",
+  "dato": "2026-11-23T13:35:03.000Z",
   "type": "Presseinvitasjon",
   "feed": "Nyhet"
  }
