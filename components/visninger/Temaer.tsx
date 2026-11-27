@@ -63,7 +63,7 @@ function TemaDetalj({ id, startUndertema, tilbake }: { id: string; startUndertem
   const [under, setUnder] = useState<string[]>(startUndertema ? [startUndertema] : []);
   const helTema = useMemo(() => filtrert.filter((e) => e.temaer.includes(id)), [filtrert, id]);
   const liste = useMemo(() => (under.length ? helTema.filter((e) => e.undertemaer?.some((u) => under.includes(u))) : helTema), [helTema, under]);
-  const navnMedUtvalg = under.length ? `${temaNavn(id)} – ${under.map(c.undertemaNavn).join(', ')}` : temaNavn(id);
+  const navnMedUtvalg = under.length ? `${temaNavn(id)}: ${under.map(c.undertemaNavn).join(', ')}` : temaNavn(id);
   const underSpec: GrafSpec = useMemo(() => {
     const m = telle(helTema, (e) => e.undertemaer);
     const u = (tema?.undertemaer || []).map((x) => x.id).filter((x) => m.has(x)).sort((a, b) => m.get(b)! - m.get(a)!);

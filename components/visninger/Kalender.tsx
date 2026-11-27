@@ -20,11 +20,11 @@ function budsjettaret(aar: number): Hendelse[] {
     ({ dato: `${aar}-${String(mnd).padStart(2, '0')}-${String(dag).padStart(2, '0')}`, type: 'budsjett', tittel, detalj, omtrentlig: true });
   return [
     h(1, 15, 'Satsingsforslag: HOD melder inn behov til Finansdepartementet', 'Innspill til regjeringen fra november til mars'),
-    h(3, 20, 'Regjeringens budsjettkonferanse – rammene for neste år settes', 'Siste sjanse til å påvirke rammene'),
-    h(5, 12, 'Revidert nasjonalbudsjett (RNB) legges fram', 'Ment for uforutsette behov – unntaket, ikke regelen'),
-    h(6, 19, 'RNB vedtas – andre sjanse', ''),
-    h(8, 25, 'Augustkonferansen – budsjettet lukkes', ''),
-    h(10, 7, 'Prop. 1 S – statsbudsjettet legges fram', 'Start her: arbeidet med neste års budsjett starter allerede på senhøsten'),
+    h(3, 20, 'Regjeringens budsjettkonferanse: rammene for neste år settes', 'Siste sjanse til å påvirke rammene'),
+    h(5, 12, 'Revidert nasjonalbudsjett (RNB) legges fram', 'Ment for uforutsette behov, unntaket og ikke regelen'),
+    h(6, 19, 'RNB vedtas: andre sjanse', ''),
+    h(8, 25, 'Augustkonferansen: budsjettet lukkes', ''),
+    h(10, 7, 'Prop. 1 S: statsbudsjettet legges fram', 'Start her: arbeidet med neste års budsjett starter allerede på senhøsten'),
     h(10, 20, 'Budsjetthøringer i komiteene', 'Innspill og komitéhøring'),
     h(11, 20, 'Partienes alternative budsjetter og budsjettforlik', ''),
     h(12, 10, 'Finansdebatt og vedtak av statsbudsjettet', ''),

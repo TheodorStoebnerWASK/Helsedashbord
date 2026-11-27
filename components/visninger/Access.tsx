@@ -66,7 +66,7 @@ function Lopet({ b }: { b: Tall }) {
     <>
       <p className="ingress">
         Et nytt legemiddel må gjennom to løp før norske pasienter får det: først <b>godkjenning</b> (markedsføringstillatelse) og deretter <b>finansiering</b>.
-        Hvilket finansieringsløp det havner i, avhenger av hvem som skal betale – sykehusene eller folketrygden – og det avgjør hvem som bestemmer og om saken kan bli politisk.
+        Hvilket finansieringsløp det havner i, avhenger av hvem som skal betale: sykehusene eller folketrygden. Det avgjør hvem som bestemmer og om saken kan bli politisk.
       </p>
 
       <Seksjon tittel="1. Godkjenning: EMA → EU-kommisjonen → DMP">
@@ -74,7 +74,7 @@ function Lopet({ b }: { b: Tall }) {
           <li><b>Søknad til EMA.</b> Selskapet søker om markedsføringstillatelse for hele EU/EØS. Vurderingen tar normalt rundt ett år (kortere ved hurtigvurdering / PRIME).</li>
           <li><b>CHMP-opinion.</b> EMAs legemiddelkomité (CHMP) gir en positiv eller negativ anbefaling. <em>Dette er det første offentlige signalet om at et legemiddel kommer.</em></li>
           <li><b>Vedtak i EU-kommisjonen</b> om markedsføringstillatelse, normalt innen 67 dager etter opinion.</li>
-          <li><b>DMP</b> (Direktoratet for medisinske produkter) gjør vedtaket gjeldende i Norge, normalt innen 30 dager. Legemidlet kan da selges – men ingen betaler for det ennå.</li>
+          <li><b>DMP</b> (Direktoratet for medisinske produkter) gjør vedtaket gjeldende i Norge, normalt innen 30 dager. Legemidlet kan da selges, men ingen betaler for det ennå.</li>
         </ol>
         <p className="dempet liten-tekst">Siste 12 måneder: {b.emaOpinion} positive opinions og {b.emaGodkjent} nye markedsføringstillatelser. Se undervalget «EMA» og Marked › «Kommer til Norge».</p>
       </Seksjon>
@@ -83,11 +83,11 @@ function Lopet({ b }: { b: Tall }) {
         <div className="kanaler">
           <div className="kanal">
             <p className="eyebrow">Spesialisthelsetjenesten</p>
-            <h3>Sykehuslegemidler – Nye metoder</h3>
+            <h3>Sykehuslegemidler i Nye metoder</h3>
             <dl>
               <dt>Hvem betaler</dt><dd>De regionale helseforetakene (sykehusbudsjettene)</dd>
               <dt>Hvem vurderer</dt><dd>DMP, på oppdrag fra Bestillerforum. Sykehusinnkjøp forhandler pris</dd>
-              <dt>Hvem beslutter</dt><dd>Beslutningsforum – de fire administrerende direktørene i RHF-ene, etter anbefaling fra fagdirektørene</dd>
+              <dt>Hvem beslutter</dt><dd>Beslutningsforum, det vil si de fire administrerende direktørene i RHF-ene, etter anbefaling fra fagdirektørene</dd>
               <dt>Fullmaktsgrense</dt><dd><b>Ingen.</b> Beslutningsforum kan innføre et legemiddel uansett budsjettvirkning</dd>
               <dt>Politisk nivå</dt><dd>Ikke involvert i enkeltsaker. Stortinget har vedtatt prioriteringskriteriene (nytte, ressursbruk, alvorlighet) som beslutningene skal følge</dd>
               <dt>Typiske legemidler</dt><dd>Kreft, sjeldne sykdommer, biologiske legemidler, infusjoner og andre som gis eller startes på sykehus</dd>
@@ -95,13 +95,13 @@ function Lopet({ b }: { b: Tall }) {
           </div>
           <div className="kanal">
             <p className="eyebrow">Primærhelsetjenesten (fastlege, kommunen, apotek)</p>
-            <h3>Blå resept – folketrygden</h3>
+            <h3>Blå resept via folketrygden</h3>
             <dl>
-              <dt>Hvem betaler</dt><dd>Folketrygden (staten, via Helfo) – ikke kommunen</dd>
+              <dt>Hvem betaler</dt><dd>Folketrygden (staten, via Helfo), ikke kommunen</dd>
               <dt>Hvem vurderer</dt><dd>DMP, etter søknad fra selskapet</dd>
               <dt>Hvem beslutter</dt><dd><b>Under 100 mill. kr</b> i årlig merutgift (5. budsjettår): DMP vedtar selv.<br /><b>Over 100 mill. kr:</b> saken går til HOD, må inn i statsbudsjettet og vedtas av Stortinget</dd>
               <dt>Fullmaktsgrense</dt><dd>100 mill. kr per år (legemiddelforskriften § 14-7, presisert per bruksområde fra 1. juli 2026)</dd>
-              <dt>Politisk nivå</dt><dd>Avgjørende over fullmaktsgrensen. Ingen frist for når HOD må fremme saken – kommer den ikke med i oktober, er neste sjanse ett år senere</dd>
+              <dt>Politisk nivå</dt><dd>Avgjørende over fullmaktsgrensen. Ingen frist for når HOD må fremme saken. Kommer den ikke med i oktober, er neste sjanse ett år senere</dd>
               <dt>Typiske legemidler</dt><dd>Legemidler for kroniske sykdommer som brukes hjemme: diabetes, astma/KOLS, hjerte–kar, overvekt</dd>
             </dl>
           </div>
@@ -109,19 +109,19 @@ function Lopet({ b }: { b: Tall }) {
         <p className="dempet liten-tekst">Legemidler som kommunene selv gir i sykehjem og hjemmetjeneste betales over kommunebudsjettet. Medisinsk utstyr har ingen fullmaktsgrense, men kjøpes inn gjennom anbud (Sykehusinnkjøp) og vurderes i Nye metoder når det er en ny metode.</p>
       </Seksjon>
 
-      <Seksjon tittel="3. Tilgangsløpet i Nye metoder – med tall fra protokollene">
+      <Seksjon tittel="3. Tilgangsløpet i Nye metoder, med tall fra protokollene">
         <Lop steg={[
           { navn: 'Godkjenning', aktor: 'EMA → DMP', tall: `${b.emaOpinion + b.emaGodkjent}`, merk: `${b.emaOpinion} positive opinions, ${b.emaGodkjent} nye MT` },
           { nr: '1', navn: 'Bestilling', aktor: 'Bestillerforum', tall: `${b.bestilt}`, merk: `metoder bestilt · ${b.ikkeOppdrag} fikk ikke oppdrag`, flaskehals: 'Flaskehals 1' },
           { nr: '2', navn: 'Metodevurdering', aktor: 'DMP', tall: `${b.full}`, merk: 'fulle eller forenklede vurderinger bestilt', flaskehals: 'Flaskehals 2' },
           { nr: '3', navn: 'Prisforhandling', aktor: 'Sykehusinnkjøp', tall: `${b.prisnotat}`, merk: 'prisnotater bestilt', flaskehals: 'Flaskehals 3' },
-          { nr: '4', navn: 'Anbefaling', aktor: 'Fagdirektørene', merk: 'Lukket – anbefalingen publiseres ikke' },
+          { nr: '4', navn: 'Anbefaling', aktor: 'Fagdirektørene', merk: 'Lukket. Anbefalingen publiseres ikke' },
           { nr: '5', navn: 'Beslutning', aktor: 'Beslutningsforum', tall: `${b.innfort} / ${b.ikke}`, merk: `innført / ikke innført${b.innfort + b.ikke ? ` · ${Math.round((100 * b.ikke) / (b.innfort + b.ikke))} % nei` : ''}` },
         ]} />
         <div className="rutenett-3 forklaring-kort">
-          <div><p className="eyebrow">Flaskehals 1 · Bestillingen</p><p>Bestillerforum avgjør hvilken type vurdering som skal gjøres: full metodevurdering, forenklet vurdering eller bare et prisnotat. En uklar bestilling – for eksempel før indikasjonen er avklart – gir forsinkelser.</p></div>
+          <div><p className="eyebrow">Flaskehals 1 · Bestillingen</p><p>Bestillerforum avgjør hvilken type vurdering som skal gjøres: full metodevurdering, forenklet vurdering eller bare et prisnotat. En uklar bestilling, for eksempel før indikasjonen er avklart, gir forsinkelser.</p></div>
           <div><p className="eyebrow">Flaskehals 2 · Dokumentasjonen</p><p>DMP kan ikke starte før selskapet har levert komplett dokumentasjon. Det tar i snitt 208 dager. Selve vurderingen tar rundt 133 dager.</p></div>
-          <div><p className="eyebrow">Flaskehals 3 · Prisen</p><p>Avslag i Beslutningsforum er nesten alltid begrunnet med pris. Et nei kan snus med et nytt pristilbud – det tok i snitt 83 dager.</p></div>
+          <div><p className="eyebrow">Flaskehals 3 · Prisen</p><p>Avslag i Beslutningsforum er nesten alltid begrunnet med pris. Et nei kan snus med et nytt pristilbud, og det tok i snitt 83 dager.</p></div>
         </div>
         <p className="dempet liten-tekst">
           {b.median !== null && <>Median tid fra bestilling i Bestillerforum til beslutning i Beslutningsforum: <b>{b.median} dager</b> ({b.antallTider} metoder i dataene, inkludert forenklede løp). </>}
@@ -147,7 +147,7 @@ function MoteListe({ moter, kart, status, metoder, norsk }: { moter: ForumMote[]
             {m.dokumenter.saksliste && <a className="lenkeknapp liten" href={m.dokumenter.saksliste} target="_blank" rel="noreferrer">Saksliste</a>}
             {m.dokumenter.sakspapirer && <a className="lenkeknapp liten" href={m.dokumenter.sakspapirer} target="_blank" rel="noreferrer">Sakspapirer</a>}
           </h4>
-          {m.skannet && <p className="dempet liten-tekst">Protokollen er en skannet PDF og kan ikke leses automatisk – åpne den for å se beslutningene.</p>}
+          {m.skannet && <p className="dempet liten-tekst">Protokollen er en skannet PDF og kan ikke leses automatisk. Åpne den for å se beslutningene.</p>}
           <ul className="elementer">
             {m.saker.map((s, i) => (
               <li key={i} className="element">
@@ -180,7 +180,7 @@ function MetodeKort({ id, m, ema, norsk }: { id: string; m: Metode; ema?: EmaHen
     <li className="element">
       <div className="element-meta">
         <span className="type">{id}</span>
-        {bsf ? <Merke m={BSF[bsf.s]} /> : bf ? <span className="merke"><i className="prikk" style={{ background: '#2F86B8' }} />Bestilt – ikke besluttet ennå</span> : null}
+        {bsf ? <Merke m={BSF[bsf.s]} /> : bf ? <span className="merke"><i className="prikk" style={{ background: '#2F86B8' }} />Bestilt, ikke besluttet ennå</span> : null}
         {bf && bsf && <span className="dempet liten-tekst">{dagerMellom(bf.d, bsf.d)} dager fra bestilling til beslutning</span>}
       </div>
       <div className="element-innhold">
@@ -192,7 +192,7 @@ function MetodeKort({ id, m, ema, norsk }: { id: string; m: Metode; ema?: EmaHen
             <li key={i}>
               <time>{datoKort(h.d)}</time> {h.f === 'bf' ? 'Bestillerforum' : 'Beslutningsforum'}: <b>{(h.f === 'bf' ? BF : BSF)[h.s]?.navn || h.s}</b>
               {h.u && <> · <a href={h.u} target="_blank" rel="noreferrer">protokoll</a></>}
-              <span className="dempet liten-tekst"> – {h.b.slice(0, 220)}{h.b.length > 220 ? ' …' : ''}</span>
+              <span className="dempet liten-tekst"> · {h.b.slice(0, 220)}{h.b.length > 220 ? ' …' : ''}</span>
             </li>
           ))}
         </ol>
@@ -328,7 +328,7 @@ export function Access({ visning, gaTil }: { visning: AccessVisning; gaTil: (v: 
         </div>
       )}
       {visning === 'ema' && (
-        <Seksjon tittel={`EMA – siste to år (${emaVis.length})`}>
+        <Seksjon tittel={`EMA siste to år (${emaVis.length})`}>
           <div className="lokale-filtre">
             <Chips valg={(Object.keys(EMA) as EmaHendelse['type'][]).map((id) => ({ id, navn: EMA[id].navn }))} valgt={emaType} sett={setEmaType} farge={(id) => EMA[id].farge} />
             <Chips valg={[{ id: 'orphan', navn: 'Sjeldne (orphan)' }, { id: 'prime', navn: 'PRIME' }, { id: 'atmp', navn: 'Avansert terapi (ATMP)' }, { id: 'betinget', navn: 'Betinget godkjenning' }]} valgt={emaFlagg} sett={setEmaFlagg} />
@@ -363,7 +363,7 @@ export function Access({ visning, gaTil }: { visning: AccessVisning; gaTil: (v: 
       )}
       {visning === 'blaresept' && (
         <>
-          <Seksjon tittel="Det politiske løpet – blå resept (primærhelsetjenesten)">
+          <Seksjon tittel="Det politiske løpet for blå resept (primærhelsetjenesten)">
             <Lop steg={[
               { navn: 'Godkjenning', aktor: 'EMA → DMP' },
               { nr: '1', navn: 'Metodevurdering', aktor: 'DMP, blå resept', merk: 'Under 100 mill. kr i årlig merkostnad vedtar DMP selv', flaskehals: 'Flaskehals 1' },
@@ -378,7 +378,7 @@ export function Access({ visning, gaTil }: { visning: AccessVisning; gaTil: (v: 
               {etatNyheter.length === 0 ? <p className="tomt">Ingen saker ennå.</p> : <ul className="elementer">{etatNyheter.slice(0, 25).map((n) => <NyhetRad key={n.url} n={n} />)}</ul>}
             </Seksjon>
             <Seksjon tittel={`På Stortinget og i regjeringen (${politisk.length})`}>
-              <p className="dempet liten-tekst">Spørsmål, saker og høringer om blå resept, refusjon, Nye metoder, DMP og prioritering – i valgt periode.</p>
+              <p className="dempet liten-tekst">Spørsmål, saker og høringer om blå resept, refusjon, Nye metoder, DMP og prioritering i valgt periode.</p>
               <ElementListe liste={politisk} side={15} />
             </Seksjon>
           </div>

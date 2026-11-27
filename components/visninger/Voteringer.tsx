@@ -74,7 +74,7 @@ export function Voteringer() {
   const trinn = (v: number) => (isNaN(v) || max === min ? 4 : Math.round(((v - min) / (max - min)) * (SKALA.length - 1)));
 
   const utvalgNavn = utvalg === 'alle' ? 'Alle saker i Stortinget' : utvalg === 'helse' ? 'Helsesaker' : utvalg.startsWith('kat:') ? katNavn(utvalg.slice(4)) : temaNavn(utvalg.slice(5));
-  const tittel = `${vis === 'likt' ? 'Hvor ofte partiene stemmer likt' : vis === 'for' ? 'Hvor ofte partiene stemmer for det samme' : 'Hvor ofte partiene stemmer mot det samme'} – ${utvalgNavn.toLowerCase()}`;
+  const tittel = `${vis === 'likt' ? 'Hvor ofte partiene stemmer likt' : vis === 'for' ? 'Hvor ofte partiene stemmer for det samme' : 'Hvor ofte partiene stemmer mot det samme'}: ${utvalgNavn.toLowerCase()}`;
   const undertittel = `${voteringer.length} personlige voteringer · ${type === 'alle' ? 'alle voteringer' : type === 'innstilling' ? 'komiteens innstilling' : 'partienes forslag'} · ${filterNavn(filtre.sesjon, data)}`;
 
   // ---------- ECharts heatmap ----------
@@ -180,7 +180,7 @@ export function Voteringer() {
             <p className="dempet">{undertittel}</p>
           </div>
           <div className="graf-verktoy" role="toolbar" aria-label="Eksporter">
-            <button onClick={async () => { try { await kopierBilde(png()); vis2('Kopiert – lim inn i PowerPoint'); } catch { lastNed(png(), `${filnavn(tittel)}.png`); } }}>Kopier</button>
+            <button onClick={async () => { try { await kopierBilde(png()); vis2('Kopiert. Lim inn i PowerPoint'); } catch { lastNed(png(), `${filnavn(tittel)}.png`); } }}>Kopier</button>
             <button onClick={() => lastNed(png(), `${filnavn(tittel)}.png`)}>PNG</button>
             <button onClick={ppt}>PPT</button>
           </div>

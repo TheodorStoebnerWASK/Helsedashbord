@@ -1,7 +1,7 @@
 // Forklarer status og datoer for kliniske studier (ClinicalTrials.gov) på vanlig norsk.
 export const STATUS: Record<string, string> = {
   RECRUITING: 'Rekrutterer pasienter',
-  ACTIVE_NOT_RECRUITING: 'Pågår – tar ikke inn flere pasienter',
+  ACTIVE_NOT_RECRUITING: 'Pågår, tar ikke inn flere pasienter',
   NOT_YET_RECRUITING: 'Ikke startet ennå',
   ENROLLING_BY_INVITATION: 'Rekrutterer etter invitasjon',
 };
@@ -16,5 +16,5 @@ const mnd = (d: string) => `${MND[Number(d.slice(5, 7)) - 1] || ''} ${d.slice(0,
 export function resultatTekst(ferdig?: string) {
   if (!ferdig) return 'Dato for resultater ikke oppgitt';
   const passert = ferdig.slice(0, 7) < new Date().toISOString().slice(0, 7);
-  return passert ? `Hovedresultat samlet inn ${mnd(ferdig)} – oppfølging pågår` : `Hovedresultater ventes ${mnd(ferdig)}`;
+  return passert ? `Hovedresultat samlet inn ${mnd(ferdig)}, oppfølging pågår` : `Hovedresultater ventes ${mnd(ferdig)}`;
 }

@@ -4,7 +4,7 @@ import { useData, Seksjon, Stat, KategoriMerke, Chips, Segment, PartiMerke, Port
 import { Graf } from '../Graf';
 import { useLat } from './Innspill';
 import { datoKort } from '@/lib/analyse';
-import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort } from '@/lib/parti';
+import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort, partiLogo } from '@/lib/parti';
 import type { DebattData, Debattdel, Innlegg } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
 
@@ -18,7 +18,7 @@ const partiAv = (i: Innlegg) => (i.parti === 'Ap' ? 'A' : i.parti);
 
 export function Debatter() {
   const { data: rå, feil } = useLat<DebattData>('/api/debatter');
-  const { filtre, sesjoner } = useData();
+  const { filtre, sesjoner, data } = useData();
   const [type, setType] = useState<'alle' | 'sak' | 'spørretime'>('alle');
   const [partier, setPartier] = useState<string[]>([]);
   const [sok, setSok] = useState('');
@@ -46,15 +46,18 @@ export function Debatter() {
     for (const i of innlegg) { const p = partiAv(i); if (p && PARTIER[p]) m.set(p, (m.get(p) || 0) + 1); }
     const ps = PARTI_REKKEFOLGE.filter((p) => m.has(p)).sort((a, b) => m.get(b)! - m.get(a)!);
     return { id: `debatt-parti-${q}`, tittel: q ? `Innlegg som nevner «${q}», per parti` : 'Innlegg i helsedebatter per parti', undertittel: 'Hovedinnlegg og replikker. Statsråder uten parti er ikke med.', form: 'liggende', enhet: 'innlegg',
-      kategorier: ps.map((p) => PARTIER[p].navn), serier: [{ navn: 'Innlegg', data: ps.map((p) => m.get(p)!), fargerPerPunkt: ps.map(partiFarge) }] };
+      kategorier: ps.map((p) => PARTIER[p].navn), kategoriBilder: ps.map(partiLogo), serier: [{ navn: 'Innlegg', data: ps.map((p) => m.get(p)!), fargerPerPunkt: ps.map(partiFarge) }] };
   }, [innlegg, q]);
   const talerSpec: GrafSpec = useMemo(() => {
-    const m = new Map<string, { n: number; parti?: string }>();
-    for (const i of innlegg) { const k = i.navn; const x = m.get(k) || { n: 0, parti: partiAv(i) }; x.n++; m.set(k, x); }
+    const m = new Map<string, { n: number; parti?: string; p?: string }>();
+    for (const i of innlegg) { const k = i.navn; const x = m.get(k) || { n: 0, parti: partiAv(i), p: i.p }; x.n++; m.set(k, x); }
     const topp = [...m.entries()].sort((a, b) => b[1].n - a[1].n).slice(0, 15);
-    return { id: `debatt-talere-${q}`, tittel: 'Mest aktive i helsedebattene', undertittel: 'Antall innlegg og replikker', form: 'liggende', enhet: 'innlegg',
+    const iKomite = (x: { p?: string }) => !!x.p && data.komite.medlemmer.includes(x.p);
+    return { id: `debatt-talere-${q}`, tittel: 'Mest aktive i helsedebattene', form: 'liggende', enhet: 'innlegg',
+      undertittel: `Antall innlegg og replikker${topp.some(([, x]) => !iKomite(x)) ? ' · Kursiv: ikke medlem av helse- og omsorgskomiteen (andre representanter, vara og statsråder)' : ''}`,
+      kategoriStil: topp.map(([, x]) => (iKomite(x) ? null : 'dempet')),
       kategorier: topp.map(([n, x]) => (x.parti ? `${n} (${partiKort(x.parti)})` : n)), serier: [{ navn: 'Innlegg', data: topp.map(([, x]) => x.n), fargerPerPunkt: topp.map(([, x]) => partiFarge(x.parti)) }] };
-  }, [innlegg, q]);
+  }, [innlegg, q, data]);
 
   if (feil) return <p className="tomt">Kunne ikke laste debatter.</p>;
   if (!rå) return <div className="laster"><span className="spinner" /> Laster debatter …</div>;
@@ -68,9 +71,9 @@ export function Debatter() {
         <Stat tall={new Set(innlegg.map((i) => i.navn)).size} etikett="talere" />
       </div>
       <div className="lokale-filtre">
-        <input className="sokefelt" type="search" placeholder="Hvem sa hva? Søk i debattene – f.eks. «fritt behandlingsvalg», «terskelverdi»" value={sok} onChange={(e) => setSok(e.target.value)} aria-label="Søk i debattene" />
+        <input className="sokefelt" type="search" placeholder="Hvem sa hva? Søk i debattene, for eksempel «fritt behandlingsvalg», «terskelverdi»" value={sok} onChange={(e) => setSok(e.target.value)} aria-label="Søk i debattene" />
         <Segment etikett="Type" verdi={type} sett={setType} valg={[{ id: 'alle', navn: 'Alle' }, { id: 'sak', navn: 'Debatter' }, { id: 'spørretime', navn: 'Spørretimen' }]} />
-        <Chips valg={PARTI_REKKEFOLGE.map((p) => ({ id: p, navn: partiKort(p) }))} valgt={partier} sett={setPartier} farge={partiFarge} />
+        <Chips valg={PARTI_REKKEFOLGE.map((p) => ({ id: p, navn: partiKort(p) }))} valgt={partier} sett={setPartier} farge={partiFarge} bilde={(p) => partiLogo(p)?.src} />
       </div>
       <div className="rutenett-2">
         <Graf spec={partiSpec} />

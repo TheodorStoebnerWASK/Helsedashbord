@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useData, Seksjon, ElementListe, Chips, Segment } from '../felles';
 import { Graf } from '../Graf';
 import { perParti, perRepresentant, perTema, sammenlignOverTid, sammenlignPerSesjon, type Enhet } from '@/lib/byggere';
-import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort } from '@/lib/parti';
+import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort, partiLogo } from '@/lib/parti';
 import { SPORSMAL_TYPER, TYPE_NAVN, type ElementType } from '@/lib/types';
 import { filterNavn } from '@/lib/analyse';
 
@@ -44,7 +44,7 @@ export function Sporsmal() {
         <Chips valg={SPORSMAL_TYPER.map((t) => ({ id: t, navn: TYPE_NAVN[t] }))} valgt={typer} sett={(v) => setTyper(v.length ? v : typer)} />
         <label className="bryter"><input type="checkbox" checked={kunKomite} onChange={(e) => setKunKomite(e.target.checked)} /> Kun komiteens medlemmer</label>
         <label className="bryter"><input type="checkbox" checked={andre} onChange={(e) => setAndre(e.target.checked)} /> Ta med helsespørsmål til andre statsråder</label>
-        <Chips valg={PARTI_REKKEFOLGE.map((p) => ({ id: p, navn: partiKort(p) }))} valgt={partier} sett={setPartier} farge={partiFarge} />
+        <Chips valg={PARTI_REKKEFOLGE.map((p) => ({ id: p, navn: partiKort(p) }))} valgt={partier} sett={setPartier} farge={partiFarge} bilde={(p) => partiLogo(p)?.src} />
       </div>
       <p className="dempet liten-tekst">{liste.length} spørsmål i utvalget</p>
 
@@ -98,7 +98,7 @@ export function Sammenligning({ liste, standardDim = 'parti' }: { liste: ReturnT
   const spec = useMemo(() => {
     const base = { id: `sammenlign-${dim}-${visning}-${aktive.join('_')}`, tittel: `Sammenligning av ${dimNavn}` };
     if (visning === 'sesjon' || visning === 'samme')
-      return sammenlignPerSesjon(liste, enheter, c.sesjoner, { ...base, sammePeriode: visning === 'samme', undertittel: visning === 'samme' ? `Antall spørsmål per sesjon – like mange dager inn i hver sesjon` : 'Antall spørsmål per sesjon' });
+      return sammenlignPerSesjon(liste, enheter, c.sesjoner, { ...base, sammePeriode: visning === 'samme', undertittel: visning === 'samme' ? `Antall spørsmål per sesjon, like mange dager inn i hver sesjon` : 'Antall spørsmål per sesjon' });
     return sammenlignOverTid(liste, enheter, { ...base, kumulativ: visning === 'kumulativ', undertittel: visning === 'kumulativ' ? 'Kumulativt antall spørsmål' : 'Antall spørsmål per måned' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liste, dim, visning, aktive.join(','), data]);

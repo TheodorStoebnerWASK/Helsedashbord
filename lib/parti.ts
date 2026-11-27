@@ -21,3 +21,7 @@ export const bildeUrl = (personId: string, storrelse: 'lite' | 'middels' | 'stor
 
 export const representantUrl = (personId: string) =>
   `https://www.stortinget.no/no/Representanter-og-komiteer/Representantene/Representant/?perid=${encodeURIComponent(personId)}`;
+
+// Partilogoer (symbolversjon for små flater). Forholdet bredde/høyde trengs for å tegne dem riktig i grafene.
+const LOGO_FORHOLD: Record<string, number> = {"H": 1.829, "SV": 1.702, "V": 1.086, "FrP": 1.071, "Sp": 0.97, "A": 0.932, "R": 1.129, "MDG": 1.616, "KrF": 1.389};
+export const partiLogo = (id?: string) => (id && LOGO_FORHOLD[id] ? { src: `/parti/${id}-ikon.png`, forhold: LOGO_FORHOLD[id] } : null);

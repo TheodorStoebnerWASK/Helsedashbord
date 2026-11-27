@@ -85,13 +85,13 @@ export function Innspill() {
         <Stat tall={utvalg.filter((b) => b.type === 'skriftlig').length} etikett="skriftlige innspill" />
         <Stat tall={utvalg.filter((b) => b.type === 'muntlig').length} etikett="muntlige innlegg" />
         <Stat tall={new Set(utvalg.map((b) => nokkel(b.org))).size} etikett="organisasjoner" />
-        <Stat tall={`${horinger.length - utilgjengelige.length - uten.length} av ${horinger.length}`} etikett="høringer med innspill" hint={utilgjengelige.length + uten.length ? `${utilgjengelige.length + uten.length} mangler – se forklaring` : 'full dekning'} />
+        <Stat tall={`${horinger.length - utilgjengelige.length - uten.length} av ${horinger.length}`} etikett="høringer med innspill" hint={utilgjengelige.length + uten.length ? `${utilgjengelige.length + uten.length} mangler, se forklaringen` : 'full dekning'} />
       </div>
       {(utilgjengelige.length + uten.length) > 0 && (
         <div className="infoboks bred">
           <p>
             <strong>Dekning:</strong> innspill er hentet for {horinger.length - utilgjengelige.length - uten.length} av {horinger.length} høringer i utvalget.
-            For {utilgjengelige.length + uten.length} høringer – nesten alle <em>skriftlige</em> høringer – gir Stortingets API serverfeil, så innspillene mangler her
+            For {utilgjengelige.length + uten.length} høringer (nesten alle <em>skriftlige</em> høringer) gir Stortingets API serverfeil, så innspillene mangler her
             selv om de finnes. Dashbordet prøver automatisk igjen hver uke. Til da kan innspillene leses på stortinget.no (lenkene under «Mangler innspill»).
             Innspill til departementenes høringer på regjeringen.no er ikke med.
           </p>
@@ -99,7 +99,7 @@ export function Innspill() {
       )}
 
       <div className="lokale-filtre">
-        <input className="sokefelt" type="search" placeholder="Søk i innspillene – f.eks. «terskelverdi», «legemiddelindustrien», «LMI»" value={sok} onChange={(e) => setSok(e.target.value)} aria-label="Søk i innspill" />
+        <input className="sokefelt" type="search" placeholder="Søk i innspillene, for eksempel «terskelverdi», «legemiddelindustrien», «LMI»" value={sok} onChange={(e) => setSok(e.target.value)} aria-label="Søk i innspill" />
         {org && <button className="chip på" onClick={() => setOrg(null)}>{orgNavn.get(org)} ×</button>}
       </div>
 

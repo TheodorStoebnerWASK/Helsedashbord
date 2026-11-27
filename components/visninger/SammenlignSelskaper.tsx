@@ -120,7 +120,7 @@ export function SammenlignSelskaper({ marked, acc }: { marked: MarkedData; acc: 
       <Chips valg={valgbare.map((s) => ({ id: s.nokkel, navn: kort(s) }))} valgt={valgt} sett={setValgt} maks={6} farge={(id) => (valgt.includes(id) ? farge(valgt.indexOf(id)) : '#C9C6BE')} />
       {sel.length === 0 ? <p className="tomt">Velg minst ett selskap.</p> : (
         <>
-          <p className="dempet liten-tekst">Valgt: {undertittel}. Du kan blande sektorer – bytt sektor og velg flere.</p>
+          <p className="dempet liten-tekst">Valgt: {undertittel}. Du kan blande sektorer: bytt sektor og velg flere.</p>
           <Seksjon tittel="Nøkkeltall">
             <table className="tabell">
               <thead><tr><th>Selskap</th><th>Ansatte</th><th>Omsetning</th><th>Årsresultat</th><th>Fase 3</th></tr></thead>

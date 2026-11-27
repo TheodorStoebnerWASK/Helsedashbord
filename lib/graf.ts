@@ -16,6 +16,8 @@ export interface GrafSpec {
   form: 'stolpe' | 'liggende' | 'linje';
   stablet?: boolean;
   kategorier: string[];
+  kategoriBilder?: ({ src: string; forhold: number } | null)[]; // logo i stedet for tekst på aksen (f.eks. partier)
+  kategoriStil?: ('dempet' | null)[]; // kursiv og grå tekst, f.eks. representanter utenfor helsekomiteen
   serier: Serie[];
   enhet?: string;
 }
@@ -57,6 +59,17 @@ export function lagEchartsOpsjon(spec: GrafSpec): EChartsOption {
       width: liggende ? 170 : undefined, overflow: 'truncate' as const,
       rotate: !liggende && !linje && spec.kategorier.length > 8 ? 35 : 0,
       hideOverlap: linje,
+      ...(spec.kategoriBilder || spec.kategoriStil ? {
+        formatter: (v: string, i: number) => {
+          if (spec.kategoriBilder?.[i]) return `{b${i}|}`;
+          if (spec.kategoriStil?.[i] === 'dempet') return `{d|${v}}`;
+          return v;
+        },
+        rich: {
+          d: { fontStyle: 'italic' as const, color: WA.muted, fontFamily: FONT, fontSize: 12 },
+          ...Object.fromEntries((spec.kategoriBilder || []).map((b, i) => [`b${i}`, b ? { height: 26, width: Math.round(26 * Math.min(b.forhold, 2)), backgroundColor: { image: b.src } } : {}])),
+        },
+      } : {}),
     },
     axisLine: { lineStyle: { color: WA.ink } },
     axisTick: { show: false },
@@ -65,7 +78,8 @@ export function lagEchartsOpsjon(spec: GrafSpec): EChartsOption {
     animationDuration: 400,
     textStyle: { fontFamily: FONT },
     color: spec.serier.map((s) => s.farge || WA.blue),
-    grid: { left: 8, right: visVerdier ? 36 : 16, top: flere ? 40 : 16, bottom: 8, containLabel: true },
+    // Logoer på aksen måles ikke av ECharts, så de får fast plass til venstre
+    grid: { left: spec.kategoriBilder && liggende ? 64 : 8, right: visVerdier ? 36 : 16, top: flere ? 40 : 16, bottom: spec.kategoriBilder && !liggende ? 36 : 8, containLabel: true },
     legend: flere ? { top: 0, left: 0, icon: 'roundRect', itemWidth: 12, itemHeight: 12, textStyle: { color: WA.ink2, fontFamily: FONT, fontSize: 12 } } : undefined,
     tooltip: {
       trigger: 'axis',
@@ -155,7 +169,8 @@ function leggTilGrafSlide(pptx: any, spec: GrafSpec, logo: string) {
     }));
     overlapp = true;
   }
-  const data = serier.map((s) => ({ name: s.navn, labels: spec.kategorier, values: s.data }));
+  const etiketter = spec.kategorier.map((k, i) => (spec.kategoriStil?.[i] === 'dempet' ? `${k} *` : k));
+  const data = serier.map((s) => ({ name: s.navn, labels: etiketter, values: s.data }));
   const liggende = spec.form === 'liggende';
   const linje = spec.form === 'linje';
   const visLegend = spec.serier.length > 1;
@@ -188,7 +203,7 @@ export async function lagPowerPoint(specs: GrafSpec[], navn: string, medForside 
   const { default: PptxGenJS } = await import('pptxgenjs');
   const pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_WIDE';
-  pptx.author = 'Wergeland Apenes – Helsepolitisk dashbord';
+  pptx.author = 'Wergeland Apenes, WA Helse';
   pptx.title = navn;
   pptx.theme = { headFontFace: 'DM Sans', bodyFontFace: 'DM Sans Light' };
   if (medForside) {

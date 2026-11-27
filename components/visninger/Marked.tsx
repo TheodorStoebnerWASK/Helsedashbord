@@ -64,10 +64,10 @@ function SelskapDetalj({ s, k }: { s: Selskap; k: ReturnType<typeof useKoblinger
         </div>
         <div>
           <h4 className="eyebrow">EMA siste to år ({ema.length})</h4>
-          {ema.length ? <ul className="kortliste">{ema.slice(0, 8).map((e, i) => <li key={i}><time>{datoKort(e.dato)}</time> <a href={e.url} target="_blank" rel="noreferrer">{e.navn}</a> – {EMA_NAVN[e.type]}{e.nm ? ` · Nye metoder ${e.nm.join(', ')}` : ''}</li>)}</ul> : <p className="dempet liten-tekst">Ingen.</p>}
+          {ema.length ? <ul className="kortliste">{ema.slice(0, 8).map((e, i) => <li key={i}><time>{datoKort(e.dato)}</time> <a href={e.url} target="_blank" rel="noreferrer">{e.navn}</a> · {EMA_NAVN[e.type]}{e.nm ? ` · Nye metoder ${e.nm.join(', ')}` : ''}</li>)}</ul> : <p className="dempet liten-tekst">Ingen.</p>}
           {s.sponsor && <>
             <h4 className="eyebrow">Fase 3-studier pågår ({studier.length}, {studier.filter((x) => x.norge).length} med norske studiesentre)</h4>
-            <ul className="kortliste">{studier.slice(0, 8).map((x) => <li key={x.id}>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a> – {x.tilstand.join(', ')}<br /><span className="dempet liten-tekst">{STATUS[x.status] || x.status} · {resultatTekst(x.ferdig)}</span></li>)}</ul>
+            <ul className="kortliste">{studier.slice(0, 8).map((x) => <li key={x.id}>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a> · {x.tilstand.join(', ')}<br /><span className="dempet liten-tekst">{STATUS[x.status] || x.status} · {resultatTekst(x.ferdig)}</span></li>)}</ul>
           </>}
         </div>
       </div>
@@ -161,7 +161,7 @@ function KommerTilNorge({ marked, acc, k }: { marked: MarkedData; acc: AccessDat
     <>
       <p className="ingress">
         Nye legemidler som har fått positiv anbefaling (CHMP) eller markedsføringstillatelse i EU de siste 18 månedene, og som ennå ikke er bestilt i Nye metoder.
-        Dette er selskapene som er på vei inn i det norske markedet – og tidspunktet der Access-modellen sier gjennomslaget skapes.
+        Dette er selskapene som er på vei inn i det norske markedet, og dette er tidspunktet der Access-modellen sier gjennomslaget skapes.
       </p>
       <div className="lokale-filtre">
         <Chips valg={[{ id: 'opinion', navn: 'Positiv opinion' }, { id: 'godkjent', navn: 'Godkjent i EU' }]} valgt={typer} sett={(v) => setTyper(v.length ? v : typer)} />
@@ -233,9 +233,9 @@ function Pipeline({ marked }: { marked: MarkedData }) {
           <b>Pipeline</b> er legemidlene et selskap har under utvikling, men som ennå ikke er godkjent. Før et legemiddel kan søkes godkjent hos EMA, må det testes i tre faser:
         </p>
         <ul>
-          <li><b>Fase 1</b> – sikkerhet og dosering, på et lite antall personer.</li>
-          <li><b>Fase 2</b> – om legemidlet virker, på noen hundre pasienter.</li>
-          <li><b>Fase 3</b> – store studier, ofte med tusenvis av pasienter i mange land, som sammenligner med dagens behandling. Resultatene er grunnlaget for søknaden til EMA.</li>
+          <li><b>Fase 1:</b> sikkerhet og dosering, på et lite antall personer.</li>
+          <li><b>Fase 2:</b> om legemidlet virker, på noen hundre pasienter.</li>
+          <li><b>Fase 3:</b> store studier, ofte med tusenvis av pasienter i mange land, som sammenligner med dagens behandling. Resultatene er grunnlaget for søknaden til EMA.</li>
         </ul>
         <p>
           Vi viser pågående <b>fase 3-studier</b> fordi de forteller hva som kan komme på markedet de neste 1–3 årene. Studier med <b className="norge">NO</b> har norske sykehus som studiesentre:
@@ -243,14 +243,14 @@ function Pipeline({ marked }: { marked: MarkedData }) {
         </p>
         <p className="eyebrow">Slik leser du tabellen</p>
         <ul>
-          <li><b>Status</b> sier om studien fortsatt tar inn pasienter («Rekrutterer»), er fulltegnet og følger pasientene («Pågår – tar ikke inn flere»), eller ikke har startet.</li>
+          <li><b>Status</b> sier om studien fortsatt tar inn pasienter («Rekrutterer»), er fulltegnet og følger pasientene («Pågår, tar ikke inn flere»), eller ikke har startet.</li>
           <li><b>Hovedresultater ventes …</b> er datoen selskapet har oppgitt for når hovedresultatet foreligger. Søknad til EMA kommer typisk 6–12 måneder etter dette, og godkjenning ca. ett år senere.</li>
-          <li><b>Hovedresultat samlet inn …</b> betyr at datoen er passert: dataene for hovedresultatet er samlet inn, men studien følger fortsatt pasientene (for eksempel langtidsoverlevelse). Legemidlet kan da allerede være søkt godkjent – eller godkjent – for denne bruken. Det betyr ikke at ingenting har skjedd i flere år.</li>
+          <li><b>Hovedresultat samlet inn …</b> betyr at datoen er passert: dataene for hovedresultatet er samlet inn, men studien følger fortsatt pasientene (for eksempel langtidsoverlevelse). Legemidlet kan da allerede være søkt godkjent, eller godkjent, for denne bruken. Det betyr ikke at ingenting har skjedd i flere år.</li>
         </ul>
       </div>
       <div className="lokale-filtre">
         <label className="bryter"><input type="checkbox" checked={kunNorge} onChange={(e) => setKunNorge(e.target.checked)} /> Bare studier med norske sentre</label>
-        <input className="sokefelt" type="search" placeholder="Søk sykdom eller legemiddel – f.eks. «myelom», «Alzheimer»" value={sok} onChange={(e) => setSok(e.target.value)} />
+        <input className="sokefelt" type="search" placeholder="Søk sykdom eller legemiddel, for eksempel «myelom», «Alzheimer»" value={sok} onChange={(e) => setSok(e.target.value)} />
       </div>
       <Chips valg={pharma.map((s) => ({ id: s.nokkel, navn: s.navn.replace(/\s*\(.*\)/, '') }))} valgt={valgt} sett={setValgt} />
       <div className="rutenett-sidepanel">

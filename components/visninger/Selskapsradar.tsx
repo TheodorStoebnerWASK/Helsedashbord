@@ -58,7 +58,7 @@ export function Selskapsradar() {
   return (
     <>
       <p className="ingress">
-        Velg et selskap, så samles alt automatisk: metodene deres i Nye metoder, saker hos EMA, pipeline – og alle treff på selskapsnavnet og legemidlene deres
+        Velg et selskap, så samles alt automatisk: metodene deres i Nye metoder, saker hos EMA, pipeline og alle treff på selskapsnavnet og legemidlene deres
         i Stortinget, regjeringen, høringsinnspill, debatter og nyheter. Du trenger ikke sette opp søkeord selv.
       </p>
       <div className="lokale-filtre">
@@ -72,7 +72,7 @@ export function Selskapsradar() {
             ))}
           </select>
         </label>
-        <input className="sokefelt" placeholder="Egne søkeord, kommaseparert – f.eks. «Eurneffy, anafylaksi»" value={ekstra} onChange={(e) => lagreEkstra(e.target.value)} />
+        <input className="sokefelt" placeholder="Egne søkeord, kommaseparert, for eksempel «Eurneffy, anafylaksi»" value={ekstra} onChange={(e) => lagreEkstra(e.target.value)} />
       </div>
       {s && r && (
         <>
@@ -97,22 +97,22 @@ export function Selskapsradar() {
                 <ul className="kortliste">
                   {r.metoder.slice(0, 15).map(([id, m]) => {
                     const siste = m.h.at(-1)!;
-                    return <li key={id}><time>{datoKort(siste.d)}</time> <b>{id}</b> {m.tittel.slice(0, 110)}{m.tittel.length > 110 ? ' …' : ''} – <em>{siste.f === 'bsf' ? `Beslutningsforum: ${BSF[siste.s] || siste.s}` : `Bestillerforum: ${BF[siste.s] || siste.s}`}</em></li>;
+                    return <li key={id}><time>{datoKort(siste.d)}</time> <b>{id}</b> {m.tittel.slice(0, 110)}{m.tittel.length > 110 ? ' …' : ''} · <em>{siste.f === 'bsf' ? `Beslutningsforum: ${BSF[siste.s] || siste.s}` : `Bestillerforum: ${BF[siste.s] || siste.s}`}</em></li>;
                   })}
                 </ul>
               )}
             </Seksjon>
             <Seksjon tittel={`EMA siste to år (${r.ema.length})`}>
               {r.ema.length === 0 ? <p className="tomt">Ingen.</p> : (
-                <ul className="kortliste">{r.ema.slice(0, 15).map((e, i) => <li key={i}><time>{datoKort(e.dato)}</time> <a href={e.url} target="_blank" rel="noreferrer">{e.navn}</a> – {EMA_NAVN[e.type]} · {e.omrade.slice(0, 2).join(', ')}</li>)}</ul>
+                <ul className="kortliste">{r.ema.slice(0, 15).map((e, i) => <li key={i}><time>{datoKort(e.dato)}</time> <a href={e.url} target="_blank" rel="noreferrer">{e.navn}</a> · {EMA_NAVN[e.type]} · {e.omrade.slice(0, 2).join(', ')}</li>)}</ul>
               )}
             </Seksjon>
           </div>
           {!!s.studier?.length && (
-            <Seksjon tittel={`Pipeline – fase 3 (${s.studier.length})`}>
+            <Seksjon tittel={`Pipeline, fase 3 (${s.studier.length})`}>
               <ul className="kortliste">
                 {[...s.studier].sort((a, b) => Number(!!b.norge) - Number(!!a.norge)).slice(0, 12).map((x) => (
-                  <li key={x.id}>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a> – {x.tilstand.join(', ')} <span className="dempet liten-tekst">· {STATUS[x.status] || x.status} · {resultatTekst(x.ferdig)}</span></li>
+                  <li key={x.id}>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a> · {x.tilstand.join(', ')} <span className="dempet liten-tekst">· {STATUS[x.status] || x.status} · {resultatTekst(x.ferdig)}</span></li>
                 ))}
               </ul>
             </Seksjon>

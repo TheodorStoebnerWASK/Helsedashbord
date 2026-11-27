@@ -43,8 +43,8 @@ export function Graf({ spec, hoyde, kontroller }: { spec: GrafSpec; hoyde?: numb
           {spec.undertittel && <p className="dempet">{spec.undertittel}</p>}
         </div>
         <div className="graf-verktoy" role="toolbar" aria-label="Eksporter graf">
-          <button title="Kopier som bilde – lim rett inn i PowerPoint" onClick={async () => {
-            try { await kopierBilde(png()); vis('Kopiert – lim inn i PowerPoint'); } catch { lastNed(png(), `${filnavn(spec.tittel)}.png`); vis('Lastet ned som PNG'); }
+          <button title="Kopier som bilde og lim rett inn i PowerPoint" onClick={async () => {
+            try { await kopierBilde(png()); vis('Kopiert. Lim inn i PowerPoint'); } catch { lastNed(png(), `${filnavn(spec.tittel)}.png`); vis('Lastet ned som PNG'); }
           }}>Kopier</button>
           <button title="Last ned PNG i høy oppløsning" onClick={() => lastNed(png(), `${filnavn(spec.tittel)}.png`)}>PNG</button>
           <button title="Last ned som redigerbar PowerPoint-graf" onClick={async () => { vis('Lager PowerPoint …'); await lagPowerPoint([spec], spec.tittel); vis('PowerPoint lastet ned'); }}>PPT</button>

@@ -74,7 +74,7 @@ export function RolleMerke({ id, navn }: { id?: string; navn?: string }) {
   if (!id) return null;
   if (data.komite.medlemmer.includes(id)) return <span className="rolle-merke komite" title="Fast medlem av helse- og omsorgskomiteen">Helsekomiteen</span>;
   // Alle faste representanter i begge periodene er i persondataene – de som mangler, har møtt som vara
-  if (!p || p.vara) return <span className="rolle-merke vara" title="Vararepresentant – ikke fast representant">Vara</span>;
+  if (!p || p.vara) return <span className="rolle-merke vara" title="Vararepresentant, ikke fast representant">Vara</span>;
   return <span className="rolle-merke" title="Fast representant, men ikke medlem av helse- og omsorgskomiteen">Ikke i komiteen</span>;
 }
 
@@ -117,8 +117,8 @@ export function Seksjon({ tittel, children, hoyre, id }: { tittel: string; child
 
 /** Flervalg som «chips». */
 export function Chips<T extends string>({
-  valg, valgt, sett, maks, farge,
-}: { valg: { id: T; navn: string }[]; valgt: T[]; sett: (v: T[]) => void; maks?: number; farge?: (id: T) => string }) {
+  valg, valgt, sett, maks, farge, bilde,
+}: { valg: { id: T; navn: string }[]; valgt: T[]; sett: (v: T[]) => void; maks?: number; farge?: (id: T) => string; bilde?: (id: T) => string | undefined }) {
   return (
     <div className="chips" role="group">
       {valg.map((v) => {
@@ -130,7 +130,7 @@ export function Chips<T extends string>({
             aria-pressed={på}
             onClick={() => sett(på ? valgt.filter((x) => x !== v.id) : maks && valgt.length >= maks ? [...valgt.slice(1), v.id] : [...valgt, v.id])}
           >
-            {farge && <i className="prikk" style={{ background: farge(v.id) }} />}
+            {bilde?.(v.id) ? <img className="chip-logo" src={bilde(v.id)} alt="" /> : farge && <i className="prikk" style={{ background: farge(v.id) }} />}
             {v.navn}
           </button>
         );

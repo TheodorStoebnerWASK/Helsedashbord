@@ -52,23 +52,23 @@ const MED_FILTER = new Set<Hoved>(['oversikt', 'politikk', 'nyheter', 'kunder'])
 // Kort forklaring øverst i hver visning
 const INTRO: Record<string, string> = {
   kalender: 'Her kan du se hva som skjer de neste månedene: høringer, høringsfrister, frister for komiteens innstilling, debatter i salen og viktige datoer i budsjettåret.',
-  temaer: 'Her kan du utforske helsepolitikken tema for tema – fra kreft og legemiddeltilgang til psykisk helse og digitalisering. Klikk på et tema for undertemaer, utvikling over tid og alle saker.',
+  temaer: 'Her kan du utforske helsepolitikken tema for tema, fra kreft og legemiddeltilgang til psykisk helse og digitalisering. Klikk på et tema for undertemaer, utvikling over tid og alle saker.',
   endringer: 'Her kan du se saker som kan bety omfattende endringer: nye lover og forskrifter, reformer, endret finansiering og nedleggelser. Sakene flagges automatisk ut fra nøkkelord, og grunnen står under hver sak.',
-  sporsmal: 'Her kan du se alle helsespørsmål fra stortingsrepresentantene – skriftlige spørsmål, spørretimen og interpellasjoner – og sammenligne partier, representanter og temaer.',
+  sporsmal: 'Her kan du se alle helsespørsmål fra stortingsrepresentantene (skriftlige spørsmål, spørretimen og interpellasjoner) og sammenligne partier, representanter og temaer.',
   saker: 'Her kan du følge sakene Stortinget behandler og høringene i komiteene, med status, saksordfører og frister.',
   innspill: 'Her kan du se hvem som har levert høringsinnspill eller deltatt i komiteens høringer, og hva de har sagt.',
   debatter: 'Her kan du lese hva representantene og statsrådene har sagt i helsedebattene i Stortinget og i spørretimen.',
   voteringer: 'Her kan du se hvordan partiene har stemt i helsesaker, og hvor ofte de stemmer likt med hverandre.',
   komite: 'Her kan du bli kjent med Helse- og omsorgskomiteen: medlemmene, rollene og hvor aktive de er.',
   regjeringen: 'Her kan du følge Helse- og omsorgsdepartementet: nyheter, dokumenter og høringer, og se den politiske ledelsen.',
-  beslutning: 'Her kan du se alle beslutninger i Beslutningsforum – om nye legemidler og metoder skal tas i bruk i sykehusene – møte for møte, med beslutning og selskap.',
+  beslutning: 'Her kan du se alle beslutninger i Beslutningsforum om nye legemidler og metoder skal tas i bruk i sykehusene, møte for møte, med beslutning og selskap.',
   bestilling: 'Her kan du se hva Bestillerforum har bestilt: hvilke legemidler og metoder som skal vurderes, og hvilken type vurdering de får.',
   ema: 'Her kan du følge EMA: hvilke legemidler som har fått positiv anbefaling, godkjenning, avslag eller trukket søknaden i EU de siste to årene.',
-  metode: 'Her kan du søke opp et legemiddel, et selskap eller en metode og se hele løpet – fra EMA og bestilling til beslutning.',
+  metode: 'Her kan du søke opp et legemiddel, et selskap eller en metode og se hele løpet fra EMA og bestilling til beslutning.',
   blaresept: 'Her kan du følge det politiske løpet for legemidler på blå resept, og hva som skjer på Stortinget og hos etatene.',
   selskaper: 'Her kan du se de største helseselskapene i Norge per sektor, med ansatte, omsetning og resultat. Klikk på et selskap for regnskap, EMA-saker, studier og omtale.',
   nyheter: 'Her kan du lese siste nytt fra Dagens Medisin, Medwatch og helsemyndighetene, sortert etter tema. Søkefeltet og kategoriene øverst gjelder også her.',
-  lister: 'Her kan du sette opp egne søkelister – for eksempel for en kunde eller et produkt – og se alle treff i Stortinget, regjeringen, høringsinnspill, debatter og nyheter.',
+  lister: 'Her kan du sette opp egne søkelister, for eksempel for en kunde eller et produkt, og se alle treff i Stortinget, regjeringen, høringsinnspill, debatter og nyheter.',
 };
 
 export default function Dashboard() {
@@ -146,7 +146,7 @@ export default function Dashboard() {
       <SamlingProvider>
         <header className="topp">
           <div className="topp-indre">
-            <a className="topp-logo" href="/" aria-label="WA Helse – til forsiden">
+            <a className="topp-logo" href="/" aria-label="WA Helse, til forsiden">
               <img src="/wa-logo.svg" alt="Wergeland/Apenes" width={401} height={26} />
             </a>
             <span className="topp-produkt">WA Helse</span>
@@ -181,9 +181,12 @@ export default function Dashboard() {
             <div className="innhold">
               <p className="eyebrow">Helse- og omsorgskomiteen · Stortingsperioden {data.meta.periode.replace('-', '–')}</p>
               <h1>Bedre kommunikasjon gir <em>bedre helse</em></h1>
-              <p className="hero-meta">
-                Oppdatert {datoTid(data.meta.oppdatert)}
+              <p className="hero-tekst">
+                WA Helse samler helsepolitikken, tilgangsløpet for nye legemidler og helsemarkedet på ett sted.
+                Her følger du saker, spørsmål og debatter på Stortinget, beslutninger i Nye metoder, nye legemidler fra EMA og de største selskapene i Norge.
+                Bruk det til å se hva som skjer, finne riktig tidspunkt å påvirke og forberede møter med kunder og politikere.
               </p>
+              <p className="hero-meta">Oppdatert {datoTid(data.meta.oppdatert)}</p>
             </div>
           </div>
         )}
@@ -216,7 +219,7 @@ export default function Dashboard() {
             <input
               className="sokefelt"
               type="search"
-              placeholder="Søk i alt – f.eks. «kreft», «pollen», «Toppe»"
+              placeholder="Søk i alt, for eksempel «kreft», «pollen» eller «Toppe»"
               value={filtre.sok}
               onChange={(e) => ctx.setFiltre({ sok: e.target.value })}
               aria-label="Søk"

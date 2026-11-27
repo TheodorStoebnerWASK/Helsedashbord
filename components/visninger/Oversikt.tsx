@@ -90,9 +90,10 @@ export function Oversikt({ gaTil }: { gaTil: (f: Visning) => void }) {
         <Seksjon tittel="Mest aktive siste 90 dager" hoyre={<span className="dempet liten-tekst">Spørsmål om helse</span>}>
           <ol className="toppliste">
             {t.aktive.map(([id, n]) => (
-              <li key={id}><PersonLenke id={id} /><span className="tall">{n}</span></li>
+              <li key={id} className={data.komite.medlemmer.includes(id) ? '' : 'utenfor-komite'}><PersonLenke id={id} /><span className="tall">{n}</span></li>
             ))}
           </ol>
+          {t.aktive.some(([id]) => !data.komite.medlemmer.includes(id)) && <p className="dempet liten-tekst">Kursiv: ikke medlem av helse- og omsorgskomiteen. Listen tar med alle som har stilt helsespørsmål, også representanter fra andre komiteer.</p>}
         </Seksjon>
       </div>
 

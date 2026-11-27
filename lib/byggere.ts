@@ -1,7 +1,7 @@
 // Ferdige grafoppskrifter som brukes på tvers av visningene.
 import type { Data, Element } from './types';
 import type { GrafSpec } from './graf';
-import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort } from './parti';
+import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort, partiLogo } from './parti';
 import { telle, maneder, mndNokkel, mndNavn, sesjonKort, dagISesjon } from './analyse';
 
 type Ctx = { data: Data; temaNavn: (id: string) => string; katFarge: (id: string) => string; katNavn: (id: string) => string };
@@ -13,7 +13,7 @@ export function perParti(liste: Element[], c: Ctx, o: { tittel: string; undertit
   if (o.etterKategori) {
     return {
       id: o.id, tittel: o.tittel, undertittel: o.undertittel, form: 'liggende', stablet: true,
-      kategorier: partier.map((p) => PARTIER[p].navn),
+      kategorier: partier.map((p) => PARTIER[p].navn), kategoriBilder: partier.map(partiLogo),
       serier: c.data.taksonomi.kategorier.map((k) => ({
         navn: k.navn, farge: k.farge,
         data: partier.map((p) => liste.filter((e) => partiAv(c.data, e) === p && e.kategori === k.id).length),
@@ -24,7 +24,7 @@ export function perParti(liste: Element[], c: Ctx, o: { tittel: string; undertit
   const sortert = partier.sort((a, b) => (m.get(b) || 0) - (m.get(a) || 0));
   return {
     id: o.id, tittel: o.tittel, undertittel: o.undertittel, form: 'liggende', enhet: 'stk',
-    kategorier: sortert.map((p) => PARTIER[p].navn),
+    kategorier: sortert.map((p) => PARTIER[p].navn), kategoriBilder: sortert.map(partiLogo),
     serier: [{ navn: 'Antall', data: sortert.map((p) => m.get(p) || 0), fargerPerPunkt: sortert.map(partiFarge) }],
   };
 }
@@ -32,8 +32,11 @@ export function perParti(liste: Element[], c: Ctx, o: { tittel: string; undertit
 export function perRepresentant(liste: Element[], c: Ctx, o: { tittel: string; undertittel?: string; id: string; topp?: number }): GrafSpec {
   const m = telle(liste, (e) => e.fra);
   const topp = [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, o.topp ?? 15);
+  const utenfor = topp.filter(([id]) => !c.data.komite.medlemmer.includes(id)).length;
   return {
-    id: o.id, tittel: o.tittel, undertittel: o.undertittel, form: 'liggende', enhet: 'stk',
+    id: o.id, tittel: o.tittel, form: 'liggende', enhet: 'stk',
+    undertittel: [o.undertittel, utenfor ? 'Kursiv: ikke medlem av helse- og omsorgskomiteen' : null].filter(Boolean).join(' · '),
+    kategoriStil: topp.map(([id]) => (c.data.komite.medlemmer.includes(id) ? null : 'dempet')),
     kategorier: topp.map(([id]) => `${c.data.personer[id]?.navn || id} (${partiKort(c.data.personer[id]?.parti)})`),
     serier: [{ navn: 'Antall', data: topp.map(([, n]) => n), fargerPerPunkt: topp.map(([id]) => partiFarge(c.data.personer[id]?.parti)) }],
   };
