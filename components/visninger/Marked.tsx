@@ -4,6 +4,7 @@ import { useData, Seksjon, Stat, Segment, Chips } from '../felles';
 import { Graf } from '../Graf';
 import { useLat } from './Innspill';
 import { useNyheter, NyhetRad } from './Nyheter';
+import { SammenlignSelskaper } from './SammenlignSelskaper';
 import { datoKort } from '@/lib/analyse';
 import type { AccessData, EmaHendelse, MarkedData, Selskap } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
@@ -266,7 +267,7 @@ function Pipeline({ marked }: { marked: MarkedData }) {
   );
 }
 
-export function Marked({ visning }: { visning: 'selskaper' | 'kommer' | 'pipeline' }) {
+export function Marked({ visning }: { visning: 'selskaper' | 'sammenlign' | 'kommer' | 'pipeline' }) {
   const { data: marked, feil } = useLat<MarkedData>('/api/marked');
   const { data: acc } = useLat<AccessData>('/api/access');
   const k = useKoblinger(marked, acc);
@@ -275,5 +276,6 @@ export function Marked({ visning }: { visning: 'selskaper' | 'kommer' | 'pipelin
   if (!marked.selskaper?.length) return <p className="tomt">Selskapsdata hentes ved neste automatiske oppdatering.</p>;
   if (visning === 'kommer') return acc ? <KommerTilNorge marked={marked} acc={acc} k={k} /> : <p className="laster"><span className="spinner" /> Laster EMA-data …</p>;
   if (visning === 'pipeline') return <Pipeline marked={marked} />;
+  if (visning === 'sammenlign') return <SammenlignSelskaper marked={marked} acc={acc} />;
   return <Selskaper marked={marked} k={k} />;
 }

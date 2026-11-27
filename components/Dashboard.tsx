@@ -36,7 +36,7 @@ const FANER = [
     { id: 'ema', navn: 'EMA' }, { id: 'metode', navn: 'Finn metode' }, { id: 'blaresept', navn: 'Blå resept og politikk' },
   ] },
   { id: 'marked', navn: 'Marked', under: [
-    { id: 'selskaper', navn: 'Selskaper' }, { id: 'kommer', navn: 'Kommer til Norge' }, { id: 'pipeline', navn: 'Pipeline' },
+    { id: 'selskaper', navn: 'Selskaper' }, { id: 'sammenlign', navn: 'Sammenlign' }, { id: 'kommer', navn: 'Kommer til Norge' }, { id: 'pipeline', navn: 'Pipeline' },
   ] },
   { id: 'nyheter', navn: 'Nyheter', under: [] },
   { id: 'kunder', navn: 'Kunder', under: [{ id: 'radar', navn: 'Selskapsradar' }, { id: 'lister', navn: 'Egne søkelister' }] },
@@ -211,7 +211,7 @@ export default function Dashboard() {
           {vis('komite') && <Komite />}
           {vis('regjeringen') && <Regjeringen />}
           {hoved === 'access' && <Access visning={aktivUnder as AccessVisning} gaTil={byttFane} />}
-          {hoved === 'marked' && <Marked visning={aktivUnder as 'selskaper' | 'kommer' | 'pipeline'} />}
+          {hoved === 'marked' && <Marked visning={aktivUnder as 'selskaper' | 'sammenlign' | 'kommer' | 'pipeline'} />}
           {vis('nyheter') && <Nyheter />}
           {vis('radar') && <Selskapsradar />}
           {vis('lister') && <Overvaking />}
