@@ -10,7 +10,7 @@ export default function Login() {
       <div className="login-boks">
         <img className="login-logo" src="/wa-logo-hvit.svg" alt="Wergeland/Apenes" width={320} height={21} />
         <p className="eyebrow">Internt verktøy</p>
-        <h1>Helsepolitisk radar</h1>
+        <h1>WA Helse</h1>
         <form
           onSubmit={async (e) => {
             e.preventDefault();

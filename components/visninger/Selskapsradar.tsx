@@ -4,6 +4,7 @@ import { Seksjon, Stat } from '../felles';
 import { useLat } from './Innspill';
 import { Overvaking } from './Overvaking';
 import { datoKort } from '@/lib/analyse';
+import { STATUS, resultatTekst } from '@/lib/studier';
 import type { AccessData, MarkedData, Overvakingsliste, Selskap } from '@/lib/types';
 
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -111,7 +112,7 @@ export function Selskapsradar() {
             <Seksjon tittel={`Pipeline – fase 3 (${s.studier.length})`}>
               <ul className="kortliste">
                 {[...s.studier].sort((a, b) => Number(!!b.norge) - Number(!!a.norge)).slice(0, 12).map((x) => (
-                  <li key={x.id}>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a> – {x.tilstand.join(', ')}{x.ferdig ? ` · ferdig ${x.ferdig.slice(0, 7)}` : ''}</li>
+                  <li key={x.id}>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a> – {x.tilstand.join(', ')} <span className="dempet liten-tekst">· {STATUS[x.status] || x.status} · {resultatTekst(x.ferdig)}</span></li>
                 ))}
               </ul>
             </Seksjon>

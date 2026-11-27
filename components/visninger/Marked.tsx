@@ -8,6 +8,7 @@ import { SammenlignSelskaper } from './SammenlignSelskaper';
 import { datoKort } from '@/lib/analyse';
 import type { AccessData, EmaHendelse, MarkedData, Selskap } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
+import { STATUS, resultatTekst } from '@/lib/studier';
 
 const KILDE = 'Kilde: Brønnøysundregistrene (Enhetsregisteret og Regnskapsregisteret). Bearbeidet av Wergeland Apenes.';
 const mill = (n?: number | null) => (n == null ? '–' : `${(n / 1e6).toLocaleString('nb-NO', { maximumFractionDigits: n >= 1e10 ? 0 : 1 })} mill.`);
@@ -66,7 +67,7 @@ function SelskapDetalj({ s, k }: { s: Selskap; k: ReturnType<typeof useKoblinger
           {ema.length ? <ul className="kortliste">{ema.slice(0, 8).map((e, i) => <li key={i}><time>{datoKort(e.dato)}</time> <a href={e.url} target="_blank" rel="noreferrer">{e.navn}</a> – {EMA_NAVN[e.type]}{e.nm ? ` · Nye metoder ${e.nm.join(', ')}` : ''}</li>)}</ul> : <p className="dempet liten-tekst">Ingen.</p>}
           {s.sponsor && <>
             <h4 className="eyebrow">Fase 3-studier pågår ({studier.length}, {studier.filter((x) => x.norge).length} med norske studiesentre)</h4>
-            <ul className="kortliste">{studier.slice(0, 8).map((x) => <li key={x.id}>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a> – {x.tilstand.join(', ')}{x.ferdig ? ` · ferdig ${x.ferdig.slice(0, 7)}` : ''}</li>)}</ul>
+            <ul className="kortliste">{studier.slice(0, 8).map((x) => <li key={x.id}>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a> – {x.tilstand.join(', ')}<br /><span className="dempet liten-tekst">{STATUS[x.status] || x.status} · {resultatTekst(x.ferdig)}</span></li>)}</ul>
           </>}
         </div>
       </div>
@@ -240,6 +241,12 @@ function Pipeline({ marked }: { marked: MarkedData }) {
           Vi viser pågående <b>fase 3-studier</b> fordi de forteller hva som kan komme på markedet de neste 1–3 årene. Studier med <b className="norge">NO</b> har norske sykehus som studiesentre:
           da kjenner norske fagmiljøer allerede legemidlet, og selskapet har trolig planer for Norge. Det er her Access-modellens «1–2 år før» starter.
         </p>
+        <p className="eyebrow">Slik leser du tabellen</p>
+        <ul>
+          <li><b>Status</b> sier om studien fortsatt tar inn pasienter («Rekrutterer»), er fulltegnet og følger pasientene («Pågår – tar ikke inn flere»), eller ikke har startet.</li>
+          <li><b>Hovedresultater ventes …</b> er datoen selskapet har oppgitt for når hovedresultatet foreligger. Søknad til EMA kommer typisk 6–12 måneder etter dette, og godkjenning ca. ett år senere.</li>
+          <li><b>Hovedresultat samlet inn …</b> betyr at datoen er passert: dataene for hovedresultatet er samlet inn, men studien følger fortsatt pasientene (for eksempel langtidsoverlevelse). Legemidlet kan da allerede være søkt godkjent – eller godkjent – for denne bruken. Det betyr ikke at ingenting har skjedd i flere år.</li>
+        </ul>
       </div>
       <div className="lokale-filtre">
         <label className="bryter"><input type="checkbox" checked={kunNorge} onChange={(e) => setKunNorge(e.target.checked)} /> Bare studier med norske sentre</label>
@@ -249,13 +256,13 @@ function Pipeline({ marked }: { marked: MarkedData }) {
       <div className="rutenett-sidepanel">
         <Seksjon tittel={`Studier (${liste.length})`}>
           <table className="tabell bred">
-            <thead><tr><th>Legemiddel</th><th>Sykdom</th><th>Selskap</th><th>Ferdig</th></tr></thead>
+            <thead><tr><th>Legemiddel</th><th>Sykdom</th><th>Selskap</th><th>Status</th></tr></thead>
             <tbody>{liste.slice(0, antall).map((x) => (
               <tr key={`${x.selskap.nokkel}-${x.id}`}>
                 <td>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a><br /><span className="dempet liten-tekst">{x.t.slice(0, 140)}</span></td>
                 <td className="liten-tekst">{x.tilstand.join(', ')}</td>
                 <td className="liten-tekst">{x.selskap.navn}</td>
-                <td className="liten-tekst">{x.ferdig?.slice(0, 7) || '–'}</td>
+                <td className="liten-tekst">{STATUS[x.status] || x.status}<br /><span className="dempet">{resultatTekst(x.ferdig)}</span></td>
               </tr>
             ))}</tbody>
           </table>

@@ -63,6 +63,21 @@ export function Portrett({ id, str = 40, gra = false }: { id: string; str?: numb
   );
 }
 
+/** Viser om personen sitter fast i helsekomiteen, er vararepresentant, eller sitter i regjeringen. */
+export function RolleMerke({ id, navn }: { id?: string; navn?: string }) {
+  const { data } = useData();
+  const p = id ? data.personer[id] : undefined;
+  const n = p?.navn || navn || '';
+  const hod = data.hod?.personer?.find((h) => n && n.includes(h.navn));
+  if (hod) return <span className="rolle-merke hod">{hod.statsraad ? 'Statsråd' : 'HOD'}</span>;
+  if (/^statsråd|minister/i.test(navn || '')) return <span className="rolle-merke hod">Regjeringen</span>;
+  if (!id) return null;
+  if (data.komite.medlemmer.includes(id)) return <span className="rolle-merke komite" title="Fast medlem av helse- og omsorgskomiteen">Helsekomiteen</span>;
+  // Alle faste representanter i begge periodene er i persondataene – de som mangler, har møtt som vara
+  if (!p || p.vara) return <span className="rolle-merke vara" title="Vararepresentant – ikke fast representant">Vara</span>;
+  return <span className="rolle-merke" title="Fast representant, men ikke medlem av helse- og omsorgskomiteen">Ikke i komiteen</span>;
+}
+
 export function PersonLenke({ id, bilde = true }: { id: string; bilde?: boolean }) {
   const { data, visPerson } = useData();
   const p = data.personer[id];
@@ -72,6 +87,7 @@ export function PersonLenke({ id, bilde = true }: { id: string; bilde?: boolean 
       {bilde && <Portrett id={id} str={22} />}
       <span>{p.navn}</span>
       <PartiMerke parti={p.parti} />
+      {p.vara && <span className="rolle-merke vara" title="Vararepresentant">Vara</span>}
     </button>
   );
 }

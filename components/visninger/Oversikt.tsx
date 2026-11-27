@@ -55,52 +55,58 @@ export function Oversikt({ gaTil }: { gaTil: (f: Visning) => void }) {
         <Graf spec={temaSpec} />
       </div>
 
-      <div className="rutenett-sidepanel">
-        <Seksjon tittel="Siste nytt" hoyre={<span className="dempet liten-tekst">Nyeste først</span>}>
-          <ElementListe liste={siste} side={10} />
+      <div className="rutenett-2 oversikt-rad">
+        <Seksjon tittel="Siste nytt fra Stortinget og regjeringen" hoyre={<span className="dempet liten-tekst">Nyeste først</span>}>
+          <ElementListe liste={siste} side={6} />
         </Seksjon>
-        <aside>
-          {nyheter.length > 0 && (
-            <Seksjon tittel="I mediene" hoyre={<button className="lenkeknapp" onClick={() => gaTil('nyheter')}>Se alle</button>}>
-              <ul className="elementer">{nyheter.filter((n) => !['ema'].includes(n.k)).slice(0, 6).map((n) => <NyhetRad key={n.url} n={n} />)}</ul>
-            </Seksjon>
+        <Seksjon tittel="I mediene" hoyre={<button className="lenkeknapp" onClick={() => gaTil('nyheter')}>Se alle</button>}>
+          {nyheter.length === 0 ? <p className="tomt">Nyhetsstrømmen fylles ved neste oppdatering.</p> : (
+            <ul className="elementer">{nyheter.filter((n) => !['ema'].includes(n.k)).slice(0, 6).map((n) => <NyhetRad key={n.url} n={n} />)}</ul>
           )}
-          <Seksjon tittel="Kommende høringer">
-            {t.kommende.length === 0 && t.frister.length === 0 ? <p className="tomt">Ingen planlagte høringer nå.</p> : (
-              <ul className="kalender">
-                {t.kommende.slice(0, 6).map((h) => (
-                  <li key={h.id}>
-                    <time>{datoTid(h.tider![0].tid)}</time>
-                    <a href={h.url} target="_blank" rel="noreferrer">{h.tittel}</a>
-                    <span className="dempet liten-tekst">{data.komiteNavn[h.komite || ''] || ''}</span>
-                  </li>
-                ))}
-                {t.frister.filter((h) => !t.kommende.includes(h)).slice(0, 4).map((h) => (
-                  <li key={h.id}>
-                    <time>Frist {datoTid(h.frist)}</time>
-                    <a href={h.url} target="_blank" rel="noreferrer">{h.tittel}</a>
-                    <span className="dempet liten-tekst">Skriftlig innspill</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Seksjon>
-          <Seksjon tittel="Mest aktive siste 90 dager">
-            <ol className="toppliste">
-              {t.aktive.map(([id, n]) => (
-                <li key={id}><PersonLenke id={id} /><span className="tall">{n}</span></li>
+        </Seksjon>
+      </div>
+
+      <div className="rutenett-2 oversikt-rad">
+        <Seksjon tittel="Kommende høringer" hoyre={<button className="lenkeknapp" onClick={() => gaTil('kalender')}>Kalender</button>}>
+          {t.kommende.length === 0 && t.frister.length === 0 ? <p className="tomt">Ingen planlagte høringer nå.</p> : (
+            <ul className="kalender">
+              {t.kommende.slice(0, 6).map((h) => (
+                <li key={h.id}>
+                  <time>{datoTid(h.tider![0].tid)}</time>
+                  <a href={h.url} target="_blank" rel="noreferrer">{h.tittel}</a>
+                  <span className="dempet liten-tekst">{data.komiteNavn[h.komite || ''] || ''}</span>
+                </li>
               ))}
-            </ol>
-          </Seksjon>
-          <Seksjon tittel="Siste store endringer" hoyre={<button className="lenkeknapp" onClick={() => gaTil('endringer')}>Se alle</button>}>
-            <ul className="enkel-liste">
-              {filtrert.filter((e) => e.storEndring).slice(0, 5).map((e) => (
-                <li key={e.id}><a href={e.url} target="_blank" rel="noreferrer">{e.tittel.length > 140 ? e.tittel.slice(0, 140) + ' …' : e.tittel}</a></li>
+              {t.frister.filter((h) => !t.kommende.includes(h)).slice(0, 4).map((h) => (
+                <li key={h.id}>
+                  <time>Frist {datoTid(h.frist)}</time>
+                  <a href={h.url} target="_blank" rel="noreferrer">{h.tittel}</a>
+                  <span className="dempet liten-tekst">Skriftlig innspill</span>
+                </li>
               ))}
             </ul>
-          </Seksjon>
-        </aside>
+          )}
+        </Seksjon>
+        <Seksjon tittel="Mest aktive siste 90 dager" hoyre={<span className="dempet liten-tekst">Spørsmål om helse</span>}>
+          <ol className="toppliste">
+            {t.aktive.map(([id, n]) => (
+              <li key={id}><PersonLenke id={id} /><span className="tall">{n}</span></li>
+            ))}
+          </ol>
+        </Seksjon>
       </div>
+
+      <Seksjon tittel="Siste store endringer" hoyre={<button className="lenkeknapp" onClick={() => gaTil('endringer')}>Se alle</button>}>
+        <div className="endring-kort">
+          {filtrert.filter((e) => e.storEndring).slice(0, 6).map((e) => (
+            <a key={e.id} className="endring" href={e.url} target="_blank" rel="noreferrer">
+              <span className="eyebrow">{datoTid(e.dato).split(' kl.')[0]} · {e.type === 'regjering' ? 'Regjeringen' : e.type === 'sak' ? 'Sak' : e.type === 'horing' ? 'Høring' : 'Spørsmål'}</span>
+              <span className="endring-tittel">{e.tittel.length > 160 ? e.tittel.slice(0, 160) + ' …' : e.tittel}</span>
+              {e.begrunnelse && <span className="dempet liten-tekst">{e.begrunnelse}</span>}
+            </a>
+          ))}
+        </div>
+      </Seksjon>
     </>
   );
 }

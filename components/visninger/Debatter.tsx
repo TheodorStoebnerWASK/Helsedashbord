@@ -1,6 +1,6 @@
 'use client';
 import { useMemo, useState } from 'react';
-import { useData, Seksjon, Stat, KategoriMerke, Chips, Segment, PartiMerke, Portrett } from '../felles';
+import { useData, Seksjon, Stat, KategoriMerke, Chips, Segment, PartiMerke, Portrett, RolleMerke } from '../felles';
 import { Graf } from '../Graf';
 import { useLat } from './Innspill';
 import { datoKort } from '@/lib/analyse';
@@ -113,9 +113,12 @@ function DebattRad({ d, q, partier }: { d: Debatt; q: string; partier: string[] 
             {vis.map((i, n) => (
               <div key={n} className="innspill innlegg">
                 <div className="innlegg-hode">
-                  {i.p && data.personer[i.p] ? <Portrett id={i.p} str={22} /> : null}
-                  <strong>{i.navn}</strong> {partiAv(i) && <PartiMerke parti={partiAv(i)} />}
-                  <span className="dempet liten-tekst">{i.type === 'replikk' ? 'replikk' : 'innlegg'}{i.tid ? ` kl. ${i.tid}` : ''}</span>
+                  {i.p ? <Portrett id={i.p} str={40} /> : <span className="portrett tom" aria-hidden />}
+                  <div className="innlegg-person">
+                    <strong>{i.navn}</strong> {partiAv(i) && <PartiMerke parti={partiAv(i)} />}
+                    <RolleMerke id={i.p} navn={i.navn} />
+                    <span className="dempet liten-tekst">{i.type === 'replikk' ? 'replikk' : 'innlegg'}{i.tid ? ` kl. ${i.tid}` : ''}</span>
+                  </div>
                 </div>
                 <p>{i.tekst}{i.lengde > i.tekst.length ? ' …' : ''}</p>
               </div>

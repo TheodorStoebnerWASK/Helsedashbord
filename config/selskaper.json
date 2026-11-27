@@ -1,5 +1,5 @@
 {
- "_forklaring": "Selskaper i Marked-fanen. Tall (ansatte, omsetning, resultat) hentes automatisk fra Brønnøysundregistrene. 'match' er navnet slik det står hos EMA og i nyheter (regex, uten store/små bokstaver). 'sponsor' er navnet i ClinicalTrials.gov. Legg til et selskap ved å legge inn organisasjonsnummeret. Selskaper uten norsk enhet har 'id' i stedet for 'orgnr' og vises med EMA-saker, studier og omtale, men uten norske regnskapstall.",
+ "_forklaring": "Selskaper i Marked-fanen. Tall (ansatte, omsetning, resultat) hentes automatisk fra Brønnøysundregistrene. 'match' er navnet slik det står hos EMA og i nyheter (regex, uten store/små bokstaver). 'sponsor' er navnet i ClinicalTrials.gov. Legg til et selskap ved å legge inn organisasjonsnummeret. Selskaper uten norsk enhet har 'id' i stedet for 'orgnr' og vises med EMA-saker, studier og omtale, men uten norske regnskapstall. Listen skal bare inneholde private selskaper (ikke helseforetak, statsforetak eller offentlig eide selskaper).",
  "sektorer": [
   {
    "id": "legemidler",
@@ -704,24 +704,6 @@
      "match": "\\bdips\\b"
     },
     {
-     "orgnr": "994598759",
-     "navn": "Norsk Helsenett",
-     "domene": "nhn.no",
-     "match": "norsk helsenett|\\bnhn\\b"
-    },
-    {
-     "orgnr": "922307814",
-     "navn": "Helseplattformen",
-     "domene": "helseplattformen.no",
-     "match": "helseplattformen"
-    },
-    {
-     "orgnr": "914637651",
-     "navn": "Sykehuspartner",
-     "domene": "sykehuspartner.no",
-     "match": "sykehuspartner"
-    },
-    {
      "orgnr": "933012867",
      "navn": "Tietoevry (Tieto Norway)",
      "domene": "tietoevry.com",
@@ -792,6 +774,30 @@
      "navn": "Appex",
      "domene": "appex.no",
      "match": "\\bappex\\b"
+    },
+    {
+     "orgnr": "917519919",
+     "navn": "Tellu",
+     "domene": "tellu.no",
+     "match": "\\btellu\\b"
+    },
+    {
+     "orgnr": "996101894",
+     "navn": "Bliksund",
+     "domene": "bliksund.com",
+     "match": "bliksund"
+    },
+    {
+     "orgnr": "918343814",
+     "navn": "Mia Health",
+     "domene": "miahealth.no",
+     "match": "mia health"
+    },
+    {
+     "orgnr": "998354528",
+     "navn": "Legelisten.no",
+     "domene": "legelisten.no",
+     "match": "legelisten"
     }
    ]
   },

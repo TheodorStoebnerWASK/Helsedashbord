@@ -49,6 +49,28 @@ FORELDER.overvaking = 'kunder';
 // Faner der de globale filtrene (periode, kategori, søk) gir mening
 const MED_FILTER = new Set<Hoved>(['oversikt', 'politikk', 'nyheter', 'kunder']);
 
+// Kort forklaring øverst i hver visning
+const INTRO: Record<string, string> = {
+  kalender: 'Her kan du se hva som skjer de neste månedene: høringer, høringsfrister, frister for komiteens innstilling, debatter i salen og viktige datoer i budsjettåret.',
+  temaer: 'Her kan du utforske helsepolitikken tema for tema – fra kreft og legemiddeltilgang til psykisk helse og digitalisering. Klikk på et tema for undertemaer, utvikling over tid og alle saker.',
+  endringer: 'Her kan du se saker som kan bety omfattende endringer: nye lover og forskrifter, reformer, endret finansiering og nedleggelser. Sakene flagges automatisk ut fra nøkkelord, og grunnen står under hver sak.',
+  sporsmal: 'Her kan du se alle helsespørsmål fra stortingsrepresentantene – skriftlige spørsmål, spørretimen og interpellasjoner – og sammenligne partier, representanter og temaer.',
+  saker: 'Her kan du følge sakene Stortinget behandler og høringene i komiteene, med status, saksordfører og frister.',
+  innspill: 'Her kan du se hvem som har levert høringsinnspill eller deltatt i komiteens høringer, og hva de har sagt.',
+  debatter: 'Her kan du lese hva representantene og statsrådene har sagt i helsedebattene i Stortinget og i spørretimen.',
+  voteringer: 'Her kan du se hvordan partiene har stemt i helsesaker, og hvor ofte de stemmer likt med hverandre.',
+  komite: 'Her kan du bli kjent med Helse- og omsorgskomiteen: medlemmene, rollene og hvor aktive de er.',
+  regjeringen: 'Her kan du følge Helse- og omsorgsdepartementet: nyheter, dokumenter og høringer, og se den politiske ledelsen.',
+  beslutning: 'Her kan du se alle beslutninger i Beslutningsforum – om nye legemidler og metoder skal tas i bruk i sykehusene – møte for møte, med beslutning og selskap.',
+  bestilling: 'Her kan du se hva Bestillerforum har bestilt: hvilke legemidler og metoder som skal vurderes, og hvilken type vurdering de får.',
+  ema: 'Her kan du følge EMA: hvilke legemidler som har fått positiv anbefaling, godkjenning, avslag eller trukket søknaden i EU de siste to årene.',
+  metode: 'Her kan du søke opp et legemiddel, et selskap eller en metode og se hele løpet – fra EMA og bestilling til beslutning.',
+  blaresept: 'Her kan du følge det politiske løpet for legemidler på blå resept, og hva som skjer på Stortinget og hos etatene.',
+  selskaper: 'Her kan du se de største helseselskapene i Norge per sektor, med ansatte, omsetning og resultat. Klikk på et selskap for regnskap, EMA-saker, studier og omtale.',
+  nyheter: 'Her kan du lese siste nytt fra Dagens Medisin, Medwatch og helsemyndighetene, sortert etter tema. Søkefeltet og kategoriene øverst gjelder også her.',
+  lister: 'Her kan du sette opp egne søkelister – for eksempel for en kunde eller et produkt – og se alle treff i Stortinget, regjeringen, høringsinnspill, debatter og nyheter.',
+};
+
 export default function Dashboard() {
   const [data, setData] = useState<Data | null>(null);
   const [feil, setFeil] = useState('');
@@ -56,6 +78,7 @@ export default function Dashboard() {
   const [under, setUnder] = useState<Record<string, string>>({ oversikt: 'sammendrag', politikk: 'sporsmal', access: 'lopet', marked: 'selskaper', kunder: 'radar' });
   const [filtre, setF] = useState<Filtre>({ sesjon: 'p:2025-2029', kategorier: [], sok: '', kunStore: false });
   const [person, setPerson] = useState<string | null>(null);
+  const [visFiltre, setVisFiltre] = useState(false);
   const [tema, setTema] = useState<string | null>(null);
 
   useEffect(() => {
@@ -123,10 +146,10 @@ export default function Dashboard() {
       <SamlingProvider>
         <header className="topp">
           <div className="topp-indre">
-            <a className="topp-logo" href="/" aria-label="Helsepolitisk radar – til forsiden">
+            <a className="topp-logo" href="/" aria-label="WA Helse – til forsiden">
               <img src="/wa-logo.svg" alt="Wergeland/Apenes" width={401} height={26} />
             </a>
-            <span className="topp-produkt">Helsepolitisk radar</span>
+            <span className="topp-produkt">WA Helse</span>
             <div className="topp-hoyre">
               <SamlingKnapp />
               <button className="knapp knapp--naken" onClick={async () => { await fetch('/api/logout', { method: 'POST' }); location.href = '/login'; }}>Logg ut</button>
@@ -157,23 +180,25 @@ export default function Dashboard() {
           <div className="hero">
             <div className="innhold">
               <p className="eyebrow">Helse- og omsorgskomiteen · Stortingsperioden {data.meta.periode.replace('-', '–')}</p>
-              <h1>Hva rører seg i <em>helsepolitikken</em></h1>
+              <h1>Bedre kommunikasjon gir <em>bedre helse</em></h1>
               <p className="hero-meta">
-                Oppdatert {datoTid(data.meta.oppdatert)} · Kilder: Stortinget, regjeringen.no, Nye metoder, EMA, DMP og fagmedier ·{' '}
-                {data.meta.kiAndel > 0.5 ? 'Temaer klassifisert med KI' : 'Temaer klassifisert med nøkkelord (KI aktiveres ved første automatiske kjøring)'}
+                Oppdatert {datoTid(data.meta.oppdatert)}
               </p>
             </div>
           </div>
         )}
         {MED_FILTER.has(hoved) && <div className="filterlinje">
-          <div className="innhold filterlinje-indre">
+          <button className="filterknapp innhold" aria-expanded={visFiltre} onClick={() => setVisFiltre(!visFiltre)}>
+            Filtre og søk{((filtre.sesjon !== 'p:2025-2029' ? 1 : 0) + filtre.kategorier.length + (filtre.sok ? 1 : 0) + (filtre.kunStore ? 1 : 0)) > 0 ? ` (${(filtre.sesjon !== 'p:2025-2029' ? 1 : 0) + filtre.kategorier.length + (filtre.sok ? 1 : 0) + (filtre.kunStore ? 1 : 0)} aktive)` : ''} <span aria-hidden>{visFiltre ? '▴' : '▾'}</span>
+          </button>
+          <div className={`innhold filterlinje-indre${visFiltre ? ' åpen' : ''}`}>
             <Segment
               etikett="Sesjon"
               verdi={filtre.sesjon}
               sett={(s) => ctx.setFiltre({ sesjon: s })}
               valg={[
                 ...(data.meta.perioder || []).slice().reverse().map((p) => ({ id: `p:${p.id}`, navn: p.id.replace('-', '–') })),
-                { id: 'alle', navn: '2021–2029' },
+                { id: 'alle', navn: 'Begge perioder' },
               ]}
             />
             <select className="sesjonvelger" aria-label="Velg én sesjon" value={filtre.sesjon.startsWith('p:') || filtre.sesjon === 'alle' ? '' : filtre.sesjon}
@@ -199,6 +224,7 @@ export default function Dashboard() {
           </div>
         </div>}
         <main className="innhold hoved">
+          {INTRO[aktivUnder || hoved] && <p className="visning-intro">{INTRO[aktivUnder || hoved]}</p>}
           {vis('sammendrag') && <Oversikt gaTil={byttFane} />}
           {vis('kalender') && <Kalender />}
           {vis('temaer') && <Temaer valgt={tema} setValgt={setTema} />}
@@ -219,7 +245,7 @@ export default function Dashboard() {
         <footer className="bunn">
           <div className="innhold bunn-indre">
             <img src="/wa-logo-hvit.svg" alt="Wergeland/Apenes" width={240} height={16} />
-            <span>Helsepolitisk radar · Oppdatert {datoTid(data.meta.oppdatert)}</span>
+            <span>WA Helse · Oppdatert {datoTid(data.meta.oppdatert)}</span>
           </div>
         </footer>
         {person && <PersonPanel id={person} lukk={() => setPerson(null)} />}

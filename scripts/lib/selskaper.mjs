@@ -58,6 +58,47 @@ async function hentLogo(s, dir, logg) {
   return null;
 }
 
+
+/**
+ * Logoer fra LMIs medlemsside (ekte logoer, bedre enn nettstedenes små ikoner). Siden leses som HTML: hvert bilde
+ * matches mot selskapene på alt-tekst, tittel, filnavn og lenken rundt bildet. Returnerer nokkel → lokal sti.
+ */
+export async function hentLmiLogoer(selskaper, dir, logg) {
+  const ut = new Map();
+  let html;
+  try { html = await hentTekst('https://www.lmi.no/lmi/om-legemiddelindustrien/medlemmer/', { forsøk: 2 }); }
+  catch (e) { logg?.(`LMI-logoer: siden kunne ikke hentes (${e.message.slice(0, 60)})`); return ut; }
+  const base = 'https://www.lmi.no';
+  // Ta med lenken rundt bildet (ofte selskapets nettsted) som ekstra matchgrunnlag
+  const bilder = [...html.matchAll(/(?:<a[^>]+href=["']([^"']+)["'][^>]*>\s*)?<img[^>]+>/gi)].map((m) => {
+    const tag = m[0];
+    const src = /(?:data-src|src)=["']([^"']+)["']/i.exec(tag.slice(tag.lastIndexOf('<img')))?.[1];
+    const alt = /alt=["']([^"']*)["']/i.exec(tag)?.[1] || '';
+    const tittel = /title=["']([^"']*)["']/i.exec(tag)?.[1] || '';
+    return src ? { src: new URL(src, base).href, tekst: `${alt} ${tittel} ${decodeURIComponent(src.split('/').pop() || '').replace(/[-_]/g, ' ')} ${m[1] || ''}`.toLowerCase() } : null;
+  }).filter((b) => b && !/logo-lmi|lmi_logo|icon|sprite/i.test(b.src));
+  for (const s of selskaper) {
+    if (!s.match) continue;
+    let rx; try { rx = new RegExp(s.match, 'i'); } catch { continue; }
+    const domene = (s.domene || '').split('.')[0];
+    const b = bilder.find((x) => rx.test(x.tekst) || (domene.length > 3 && x.tekst.includes(domene)));
+    if (!b) continue;
+    try {
+      const res = await fetch(b.src, { signal: AbortSignal.timeout(20000) });
+      if (!res.ok) continue;
+      const type = res.headers.get('content-type') || '';
+      const ext = /svg/.test(type) ? 'svg' : /png/.test(type) ? 'png' : /webp/.test(type) ? 'webp' : /jpe?g/.test(type) ? 'jpg' : null;
+      if (!ext) continue;
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (buf.length < 200) continue;
+      writeFileSync(`${dir}/${s.nokkel}-lmi.${ext}`, buf);
+      ut.set(s.nokkel, `/logo/${s.nokkel}-lmi.${ext}`);
+    } catch { /* hopp over */ }
+  }
+  logg?.(`LMI-logoer: ${bilder.length} bilder på siden, ${ut.size} koblet til selskaper`);
+  return ut;
+}
+
 async function hentStudier(sponsor) {
   const q = new URLSearchParams({
     'query.spons': sponsor, 'filter.overallStatus': 'RECRUITING,ACTIVE_NOT_RECRUITING,NOT_YET_RECRUITING,ENROLLING_BY_INVITATION',
@@ -92,6 +133,7 @@ export async function hentSelskaper(cfg, cache, { rot, logg = console.log }) {
   const ut = [];
   const alle = cfg.sektorer.flatMap((sek) => sek.selskaper.map((s) => ({ ...s, nokkel: s.orgnr || s.id, sektor: sek.id })));
   let feil = 0;
+  const lmi = await hentLmiLogoer(alle, logoDir, logg);
   await parallell(alle, 5, async (s) => {
     const gammel = cache[s.nokkel] || {};
     const x = { ...s };
@@ -109,7 +151,9 @@ export async function hentSelskaper(cfg, cache, { rot, logg = console.log }) {
       const perAar = new Map([...(gammel.regnskap || []), ...regnskap].map((y) => [y.aar, y]));
       x.regnskap = [...perAar.values()].sort((a, b) => b.aar - a.aar).slice(0, 5);
     } catch (err) { feil++; Object.assign(x, { ...gammel, ...s }); logg(`Selskap ${s.navn}: ${err.message.slice(0, 80)}`); }
-    x.logo = gammel.logo && existsSync(`${rot}public${gammel.logo}`) ? gammel.logo : await hentLogo(s, logoDir, null);
+    // LMI-logo først, deretter tidligere lagret logo, til slutt ikon fra selskapets nettsted
+    const lmiFil = ['svg', 'png', 'webp', 'jpg'].map((e) => `/logo/${s.nokkel}-lmi.${e}`).find((f) => existsSync(`${rot}public${f}`));
+    x.logo = lmi.get(s.nokkel) || lmiFil || (gammel.logo && existsSync(`${rot}public${gammel.logo}`) ? gammel.logo : await hentLogo(s, logoDir, null));
     if (s.sponsor) {
       try { const st = await hentStudier(s.sponsor); x.fase3 = st.totalt; x.studier = st.studier; }
       catch { x.fase3 = gammel.fase3; x.studier = gammel.studier; }
