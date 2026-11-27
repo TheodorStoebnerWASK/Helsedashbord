@@ -117,7 +117,7 @@ export interface Nyhetskilde { id: string; navn: string; type: 'medie' | 'etat';
 
 // Access
 export interface MetodeSak { sak?: string; ider: string[]; tittel: string; beslutning: string; status: string }
-export interface ForumMote { dato: string; dokumenter: { saksliste?: string; sakspapirer?: string; protokoll?: string }; saker?: MetodeSak[] }
+export interface ForumMote { dato: string; skannet?: boolean; dokumenter: { saksliste?: string; sakspapirer?: string; protokoll?: string }; saker?: MetodeSak[] }
 export interface EmaHendelse {
   navn: string; virkestoff?: string; url?: string; omrade: string[]; innehaver?: string; atc?: string; indikasjon?: string;
   orphan?: boolean; prime?: boolean; betinget?: boolean; biotilsvarende?: boolean; generisk?: boolean; atmp?: boolean;

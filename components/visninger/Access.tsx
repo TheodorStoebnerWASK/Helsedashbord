@@ -60,7 +60,7 @@ function Lop({ steg }: { steg: { nr?: string; navn: string; aktor: string; tall?
 
 function MoteListe({ moter, kart, status }: { moter: ForumMote[]; kart: Record<string, { navn: string; farge: string }>; status: string[] }) {
   const [antall, setAntall] = useState(6);
-  const vis = moter.map((m) => ({ ...m, saker: (m.saker || []).filter((s) => !status.length || status.includes(s.status)) })).filter((m) => m.saker.length);
+  const vis = moter.map((m) => ({ ...m, saker: (m.saker || []).filter((s) => !status.length || status.includes(s.status)) })).filter((m) => m.saker.length || (m.skannet && !status.length));
   if (!vis.length) return <p className="tomt">Ingen saker i utvalget.</p>;
   return (
     <>
@@ -72,6 +72,7 @@ function MoteListe({ moter, kart, status }: { moter: ForumMote[]; kart: Record<s
             {m.dokumenter.saksliste && <a className="lenkeknapp liten" href={m.dokumenter.saksliste} target="_blank" rel="noreferrer">Saksliste</a>}
             {m.dokumenter.sakspapirer && <a className="lenkeknapp liten" href={m.dokumenter.sakspapirer} target="_blank" rel="noreferrer">Sakspapirer</a>}
           </h4>
+          {m.skannet && <p className="dempet liten-tekst">Protokollen er en skannet PDF og kan ikke leses automatisk – åpne den for å se beslutningene.</p>}
           <ul className="elementer">
             {m.saker.map((s, i) => (
               <li key={i} className="element">
@@ -97,7 +98,7 @@ function MetodeKort({ id, m, ema }: { id: string; m: Metode; ema?: EmaHendelse[]
     <li className="element">
       <div className="element-meta">
         <span className="type">{id}</span>
-        {bsf ? <Merke m={BSF[bsf.s]} /> : bf ? <span className="merke"><i className="prikk" style={{ background: '#2F86B8' }} />Under arbeid</span> : null}
+        {bsf ? <Merke m={BSF[bsf.s]} /> : bf ? <span className="merke"><i className="prikk" style={{ background: '#2F86B8' }} />Bestilt – ikke besluttet ennå</span> : null}
         {bf && bsf && <span className="dempet liten-tekst">{dagerMellom(bf.d, bsf.d)} dager fra bestilling til beslutning</span>}
       </div>
       <div className="element-innhold">
@@ -220,14 +221,14 @@ export function Access() {
         <Lop steg={[
           { navn: 'Godkjenning', aktor: 'EMA → DMP', tall: `${b.emaOpinion + b.emaGodkjent}`, merk: `${b.emaOpinion} positive opinions, ${b.emaGodkjent} nye MT` },
           { nr: '1', navn: 'Bestilling', aktor: 'Bestillerforum', tall: `${b.bestilt}`, merk: `metoder bestilt · ${b.ikkeOppdrag} fikk ikke oppdrag`, flaskehals: 'Flaskehals 1' },
-          { nr: '2', navn: 'Metodevurdering', aktor: 'DMP', tall: `${b.full}`, merk: `fulle/forenklede vurderinger bestilt · ${b.underArbeid} metoder venter på beslutning`, flaskehals: 'Flaskehals 2' },
+          { nr: '2', navn: 'Metodevurdering', aktor: 'DMP', tall: `${b.full}`, merk: `fulle/forenklede vurderinger bestilt · ${b.underArbeid} bestilte metoder uten registrert beslutning`, flaskehals: 'Flaskehals 2' },
           { nr: '3', navn: 'Prisforhandling', aktor: 'Sykehusinnkjøp', tall: `${b.prisnotat}`, merk: 'prisnotater bestilt', flaskehals: 'Flaskehals 3' },
           { nr: '4', navn: 'Anbefaling', aktor: 'Fagdirektørene', merk: 'Lukket – anbefalingen publiseres ikke før beslutningen' },
           { nr: '5', navn: 'Beslutning', aktor: 'Beslutningsforum', tall: `${b.innfort} / ${b.ikke}`, merk: `innført / ikke innført${b.innfort + b.ikke ? ` · ${Math.round((100 * b.ikke) / (b.innfort + b.ikke))} % nei` : ''}` },
         ]} />
         <p className="dempet liten-tekst">
           {b.median !== null && <>Median tid fra bestilling i Bestillerforum til beslutning i Beslutningsforum: <b>{b.median} dager</b> ({b.antallTider} metoder i dataene, inkludert forenklede løp). </>}
-          Protokollene fra 2023 og fram til i dag leses automatisk.
+          Protokollene leses automatisk (Bestillerforum fra 2023, Beslutningsforum fra 2024). Noen eldre protokoller er skannet og kan ikke leses maskinelt.
         </p>
       </Seksjon>
 

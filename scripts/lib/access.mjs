@@ -9,6 +9,8 @@ import { hentTekst, hentBuffer, avkod } from './nett.mjs';
 
 const NM = 'https://www.nyemetoder.no';
 const ID_RX = /ID\d{4}_\d{3}/g;
+// Økes når tolkningen av protokollene endres, så alle protokoller leses på nytt
+const TOLKER = 2;
 
 // ---------- EMA ----------
 const emaDato = (s) => { const m = /^(\d\d)\/(\d\d)\/(\d{4})$/.exec(s || ''); return m ? `${m[3]}-${m[2]}-${m[1]}` : null; };
@@ -94,17 +96,17 @@ export function beslutningStatus(t) {
 /** Beslutningsforum-protokoll: én post per metode-ID med beslutningen (punkt 1) og status. */
 export function parseBeslutningsforum(tekst) {
   const ut = [];
-  const blokker = tekst.split(/\n\s*(?=Sak \d{1,3}[-–]\d{2,4}\b)/);
+  const blokker = tekst.split(/\n\s*(?=Sak \d{1,3}\s*[-–]\s*\d{2,4}\b)/);
   for (const b of blokker) {
-    const hode = /^Sak (\d{1,3}[-–]\d{2,4})\s+([\s\S]*?)\n\s*Beslutning:?\s*\n([\s\S]*?)(?:\n\s*Begrunnelse\b|$)/.exec(b);
+    const hode = /^Sak (\d{1,3}\s*[-–]\s*\d{2,4})\s+([\s\S]*?)\n\s*Beslutning:?\s*\n([\s\S]*?)(?:\n\s*Begrunnelse\b|$)/.exec(b);
     if (!hode) continue;
     const ider = [...new Set(hode[2].match(ID_RX) || [])];
     if (!ider.length) continue;
-    const tittel = vask(hode[2]).replace(ID_RX, '').replace(/^[\s,og]+/, '').trim();
+    const tittel = vask(hode[2]).replace(ID_RX, '').replace(/^[\s,:og]+/, '').trim();
     let besl = hode[3];
     const punkt = /(?:^|\n)\s*1\.\s+([\s\S]*?)(?=\n\s*2\.\s|\n\s*\n\s*\n|$)/.exec(besl);
-    besl = vask(punkt ? punkt[1] : besl.replace(/Beslutningene som er fattet[\s\S]*?vurderes på nytt\.?/i, '')).slice(0, 600);
-    ut.push({ sak: hode[1].replace('–', '-'), ider, tittel: tittel.slice(0, 300), beslutning: besl, status: beslutningStatus(besl) });
+    besl = vask(punkt ? punkt[1] : besl.replace(/Beslutning(?:ene|en) som er fattet[\s\S]*?vurderes? på nytt\.?/i, '')).slice(0, 600);
+    ut.push({ sak: hode[1].replace(/\s*[–-]\s*/, '-'), ider, tittel: tittel.slice(0, 300), beslutning: besl, status: beslutningStatus(besl) });
   }
   return ut;
 }
@@ -130,6 +132,18 @@ export function parseBestillerforum(tekst) {
     const besl = vask(m[4]).slice(0, 500);
     ut.push({ ider: [m[1]], tittel: vask(m[2]).slice(0, 300), beslutning: besl, status: bestillingStatus(besl) });
   }
+  if (ut.length) return ut;
+  // Eldre protokoller (enspaltet): «Sak 168-24 Anmodning: IDxxxx Tittel. Til drøfting. … Beslutning …»
+  for (const b of tekst.split(/\n\s*(?=Sak \d{1,3}\s*[-–]\s*\d{2,4}\b)/)) {
+    const m = /^Sak (\d{1,3}\s*[-–]\s*\d{2,4})\s+([\s\S]*?)\n\s*Beslutning:?\s*\n([\s\S]*?)(?=\n\s*\n|$)/.exec(b);
+    if (!m) continue;
+    const ider = [...new Set(m[2].slice(0, 400).match(ID_RX) || [])];
+    if (!ider.length) continue;
+    const hode = vask(m[2]);
+    const tittel = (/(ID\d{4}_\d{3}[\s\S]*?)(?:\.\s*Til drøfting|\.\s*Til orientering|$)/.exec(hode)?.[1] || hode).replace(ID_RX, '').replace(/^[\s,:og]+/, '');
+    const besl = vask(m[3]).slice(0, 500);
+    ut.push({ sak: m[1].replace(/\s*[–-]\s*/, '-'), ider, tittel: tittel.slice(0, 300), beslutning: besl, status: bestillingStatus(besl) });
+  }
   return ut;
 }
 
@@ -150,15 +164,37 @@ export async function hentNyeMetoder(cache, { fra, logg = console.log }) {
     for (const m of liste) {
       const g = gamle.get(m.dato);
       const prot = m.dokumenter.protokoll;
-      if (g && g.kilde === prot && g.saker) { m.saker = g.saker; m.kilde = g.kilde; continue; }
+      if (g && g.kilde === prot && g.v === TOLKER && (g.saker?.length || g.skannet)) { m.saker = g.saker; m.kilde = g.kilde; m.v = g.v; m.skannet = g.skannet; continue; }
       if (!prot) continue;
       try {
         const tekst = pdfTilTekst(await hentBuffer(prot), forum === 'beslutningsforum');
-        m.saker = parse(tekst); m.kilde = prot; lest++;
+        m.saker = parse(tekst); m.kilde = prot; m.v = TOLKER; lest++;
+        if (tekst.replace(/\s/g, '').length < 300) m.skannet = true; // bilde-PDF uten tekstlag
+        else delete m.skannet;
       } catch (e) { logg(`Access: kunne ikke lese protokoll ${m.dato} (${e.message.slice(0, 80)})`); }
     }
     ut[forum] = liste;
     logg(`Access: ${forum} ${liste.length} møter, ${lest} protokoller lest, ${liste.reduce((a, m) => a + (m.saker?.length || 0), 0)} metodesaker`);
   }
   return ut;
+}
+
+/** Metodeoversikt: alle hendelser per Nye metoder-ID, og kobling fra EMA-legemiddel (merkenavn) til metodene. */
+export function byggMetoder(access) {
+  const metoder = {};
+  for (const forum of ['bestillerforum', 'beslutningsforum']) for (const m of access[forum] || []) for (const s of m.saker || []) for (const id of s.ider) {
+    const x = (metoder[id] ||= { tittel: s.tittel, h: [] });
+    if (forum === 'beslutningsforum' || !x.tittel) x.tittel = s.tittel;
+    x.h.push({ f: forum === 'bestillerforum' ? 'bf' : 'bsf', d: m.dato, s: s.status, b: s.beslutning, u: m.dokumenter.protokoll });
+  }
+  for (const x of Object.values(metoder)) x.h.sort((a, b) => a.d.localeCompare(b.d));
+  access.metoder = metoder;
+  const merke = (t) => [...t.matchAll(/\(([^()]{3,40})\)/g)].map((m) => m[1].toLowerCase());
+  const indeks = Object.entries(metoder).map(([id, x]) => [id, merke(x.tittel)]);
+  for (const e of access.ema || []) {
+    const n = String(e.navn || '').toLowerCase();
+    const treff = indeks.filter(([, m]) => m.includes(n)).map(([id]) => id);
+    if (treff.length) e.nm = treff; else delete e.nm;
+  }
+  return access;
 }

@@ -10,7 +10,7 @@ import { hentVoteringer } from './lib/voteringer.mjs';
 import { hentInnspill } from './lib/innspill.mjs';
 import { hentDebatter } from './lib/debatter.mjs';
 import { hentNyheter, KILDER as NYHETSKILDER } from './lib/nyheter.mjs';
-import { hentEma, hentNyeMetoder } from './lib/access.mjs';
+import { hentEma, hentNyeMetoder, byggMetoder } from './lib/access.mjs';
 
 const ROT = new URL('..', import.meta.url).pathname;
 const DATA = ROT + 'data/';
@@ -348,24 +348,7 @@ try {
   access.ema = await hentEma({ fra });
   logg(`Access: EMA ${access.ema.length} hendelser siden ${fra}`);
 } catch (e) { logg(`ADVARSEL: EMA feilet (${e.message})`); }
-// Metodeoversikt: alle hendelser per Nye metoder-ID, og kobling fra EMA-legemiddel til metodene
-{
-  const metoder = {};
-  for (const forum of ['bestillerforum', 'beslutningsforum']) for (const m of access[forum] || []) for (const s of m.saker || []) for (const id of s.ider) {
-    const x = (metoder[id] ||= { tittel: s.tittel, h: [] });
-    if (forum === 'beslutningsforum' || !x.tittel) x.tittel = s.tittel;
-    x.h.push({ f: forum === 'bestillerforum' ? 'bf' : 'bsf', d: m.dato, s: s.status, b: s.beslutning, u: m.dokumenter.protokoll });
-  }
-  for (const x of Object.values(metoder)) x.h.sort((a, b) => a.d.localeCompare(b.d));
-  access.metoder = metoder;
-  const merke = (t) => [...t.matchAll(/\(([^()]{3,40})\)/g)].map((m) => m[1].toLowerCase());
-  const indeks = Object.entries(metoder).map(([id, x]) => [id, merke(x.tittel)]);
-  for (const e of access.ema || []) {
-    const n = String(e.navn || '').toLowerCase();
-    const treff = indeks.filter(([, m]) => m.includes(n)).map(([id]) => id);
-    if (treff.length) e.nm = treff; else delete e.nm;
-  }
-}
+byggMetoder(access);
 access.oppdatert = new Date().toISOString();
 access.kilder = { nyheter: nyhetStatus };
 await writeFile(accessFil, JSON.stringify(access));
