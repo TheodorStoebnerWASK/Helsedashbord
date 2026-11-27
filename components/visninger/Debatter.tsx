@@ -18,7 +18,7 @@ const partiAv = (i: Innlegg) => (i.parti === 'Ap' ? 'A' : i.parti);
 
 export function Debatter() {
   const { data: rå, feil } = useLat<DebattData>('/api/debatter');
-  const { filtre } = useData();
+  const { filtre, sesjoner } = useData();
   const [type, setType] = useState<'alle' | 'sak' | 'spørretime'>('alle');
   const [partier, setPartier] = useState<string[]>([]);
   const [sok, setSok] = useState('');
@@ -32,12 +32,12 @@ export function Debatter() {
 
   const q = (sok || filtre.sok).toLowerCase().trim();
   const utvalg = useMemo(() => debatter.filter((d) =>
-    (filtre.sesjon === 'alle' || d.sesjon === filtre.sesjon) &&
+    sesjoner.includes(d.sesjon) &&
     (!filtre.kategorier.length || (d.kategori && filtre.kategorier.includes(d.kategori))) &&
     (type === 'alle' || d.type === type) &&
     (!partier.length || d.innlegg.some((i) => partier.includes(partiAv(i) || ''))) &&
     (!q || `${d.tittel} ${d.innlegg.map((i) => `${i.navn} ${i.tekst}`).join(' ')}`.toLowerCase().includes(q)),
-  ), [debatter, filtre, type, partier, q]);
+  ), [debatter, filtre, sesjoner, type, partier, q]);
 
   const innlegg = useMemo(() => utvalg.flatMap((d) => d.innlegg.filter((i) => !q || `${i.navn} ${i.tekst}`.toLowerCase().includes(q) || d.tittel.toLowerCase().includes(q))), [utvalg, q]);
 

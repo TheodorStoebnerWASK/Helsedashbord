@@ -5,7 +5,7 @@ import { Graf } from '../Graf';
 import { perParti, perRepresentant, perTema, sammenlignOverTid, sammenlignPerSesjon, type Enhet } from '@/lib/byggere';
 import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort } from '@/lib/parti';
 import { SPORSMAL_TYPER, TYPE_NAVN, type ElementType } from '@/lib/types';
-import { sesjonKort } from '@/lib/analyse';
+import { filterNavn } from '@/lib/analyse';
 
 // Fast rekkefølge for sammenligningsfarger (validert for fargeblindhet i parvise naboer)
 const SAMMENLIGN_FARGER = ['#2F86B8', '#E5402A', '#2E9E6E', '#DDA21A', '#8A5AB0', '#B5651D'];
@@ -30,7 +30,7 @@ export function Sporsmal() {
 
   const utvalg = [
     typer.length < 3 ? typer.map((t) => TYPE_NAVN[t]).join(', ') : 'Alle spørsmålstyper',
-    c.filtre.sesjon === 'alle' ? 'hele perioden' : `sesjon ${sesjonKort(c.filtre.sesjon)}`,
+    filterNavn(c.filtre.sesjon, data),
     kunKomite ? 'kun komiteens medlemmer' : null,
   ].filter(Boolean).join(' · ');
 
@@ -98,7 +98,7 @@ export function Sammenligning({ liste, standardDim = 'parti' }: { liste: ReturnT
   const spec = useMemo(() => {
     const base = { id: `sammenlign-${dim}-${visning}-${aktive.join('_')}`, tittel: `Sammenligning av ${dimNavn}` };
     if (visning === 'sesjon' || visning === 'samme')
-      return sammenlignPerSesjon(liste, enheter, data.meta.sesjoner, { ...base, sammePeriode: visning === 'samme', undertittel: visning === 'samme' ? `Antall spørsmål per sesjon – like mange dager inn i hver sesjon` : 'Antall spørsmål per sesjon' });
+      return sammenlignPerSesjon(liste, enheter, c.sesjoner, { ...base, sammePeriode: visning === 'samme', undertittel: visning === 'samme' ? `Antall spørsmål per sesjon – like mange dager inn i hver sesjon` : 'Antall spørsmål per sesjon' });
     return sammenlignOverTid(liste, enheter, { ...base, kumulativ: visning === 'kumulativ', undertittel: visning === 'kumulativ' ? 'Kumulativt antall spørsmål' : 'Antall spørsmål per måned' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liste, dim, visning, aktive.join(','), data]);

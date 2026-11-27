@@ -5,6 +5,7 @@ import { Graf } from '../Graf';
 import { datoKort } from '@/lib/analyse';
 import type { Element, InnspillData } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
+import { orgNokkel, velgVisningsnavn } from '@/lib/org';
 
 /** Laster en stor JSON-fil først når fanen åpnes. */
 export function useLat<T>(url: string) {
@@ -16,7 +17,7 @@ export function useLat<T>(url: string) {
   return { data, feil };
 }
 
-const nokkel = (org: string) => org.toLowerCase().replace(/[^\p{L}\d]+/gu, ' ').trim();
+const nokkel = orgNokkel;
 
 interface Bidrag { horing: Element; type: 'skriftlig' | 'muntlig'; org: string; tittel?: string; tekst?: string; lengde?: number; personer?: string[]; dato?: string }
 
@@ -27,24 +28,25 @@ export function Innspill() {
   const [sok, setSok] = useState('');
 
   // Alle bidrag (skriftlige innspill + muntlige deltakere) koblet til høringene som er synlige etter globale filtre
-  const { bidrag, horinger, utilgjengelige } = useMemo(() => {
+  const { bidrag, horinger, utilgjengelige, uten } = useMemo(() => {
     const horinger = filtrert.filter((e) => e.type === 'horing');
     const bidrag: Bidrag[] = [];
-    let utilgjengelige = 0;
+    const utilgjengelige: Element[] = [];
+    const uten: Element[] = [];
     for (const h of horinger) {
       const d = inn?.[h.id.replace('horing-', '')];
-      if (!d) continue;
-      if (d.utilgjengelig) utilgjengelige++;
+      if (!d) { uten.push(h); continue; }
+      if (d.utilgjengelig) utilgjengelige.push(h);
       for (const i of d.innspill) bidrag.push({ horing: h, type: 'skriftlig', org: i.org, tittel: i.tittel, tekst: i.tekst, lengde: i.lengde, dato: i.dato });
       for (const p of d.deltakere) bidrag.push({ horing: h, type: 'muntlig', org: p.org, personer: p.personer });
     }
-    return { bidrag, horinger, utilgjengelige };
+    return { bidrag, horinger, utilgjengelige, uten };
   }, [inn, filtrert]);
 
   const orgNavn = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const b of bidrag) if (!m.has(nokkel(b.org))) m.set(nokkel(b.org), b.org);
-    return m;
+    const varianter = new Map<string, string[]>();
+    for (const b of bidrag) { const k = nokkel(b.org); if (!varianter.has(k)) varianter.set(k, []); varianter.get(k)!.push(b.org); }
+    return new Map([...varianter.entries()].map(([k, v]) => [k, velgVisningsnavn(v)]));
   }, [bidrag]);
 
   const utvalg = useMemo(() => {
@@ -83,8 +85,18 @@ export function Innspill() {
         <Stat tall={utvalg.filter((b) => b.type === 'skriftlig').length} etikett="skriftlige innspill" />
         <Stat tall={utvalg.filter((b) => b.type === 'muntlig').length} etikett="muntlige innlegg" />
         <Stat tall={new Set(utvalg.map((b) => nokkel(b.org))).size} etikett="organisasjoner" />
-        <Stat tall={perHoring.size} etikett="høringer" hint={utilgjengelige ? `${utilgjengelige} skriftlige høringer mangler innspill (feil i Stortingets API)` : undefined} />
+        <Stat tall={`${horinger.length - utilgjengelige.length - uten.length} av ${horinger.length}`} etikett="høringer med innspill" hint={utilgjengelige.length + uten.length ? `${utilgjengelige.length + uten.length} mangler – se forklaring` : 'full dekning'} />
       </div>
+      {(utilgjengelige.length + uten.length) > 0 && (
+        <div className="infoboks bred">
+          <p>
+            <strong>Dekning:</strong> innspill er hentet for {horinger.length - utilgjengelige.length - uten.length} av {horinger.length} høringer i utvalget.
+            For {utilgjengelige.length + uten.length} høringer – nesten alle <em>skriftlige</em> høringer – gir Stortingets API serverfeil, så innspillene mangler her
+            selv om de finnes. Dashbordet prøver automatisk igjen hver uke. Til da kan innspillene leses på stortinget.no (lenkene under «Mangler innspill»).
+            Innspill til departementenes høringer på regjeringen.no er ikke med.
+          </p>
+        </div>
+      )}
 
       <div className="lokale-filtre">
         <input className="sokefelt" type="search" placeholder="Søk i innspillene – f.eks. «terskelverdi», «legemiddelindustrien», «LMI»" value={sok} onChange={(e) => setSok(e.target.value)} aria-label="Søk i innspill" />
@@ -100,8 +112,17 @@ export function Innspill() {
         </Seksjon>
         <aside>
           <Graf spec={toppSpec} />
+          {(utilgjengelige.length + uten.length) > 0 && (
+            <Seksjon tittel={`Mangler innspill (${utilgjengelige.length + uten.length})`}>
+              <ul className="enkel-liste">
+                {[...utilgjengelige, ...uten].sort((a, b) => String(b.dato).localeCompare(String(a.dato))).slice(0, 40).map((h) => (
+                  <li key={h.id}><a href={h.url} target="_blank" rel="noreferrer">{h.tittel}</a> <span className="dempet liten-tekst">{datoKort(h.dato)}</span></li>
+                ))}
+              </ul>
+            </Seksjon>
+          )}
           <p className="dempet liten-tekst">
-            Klikk på en organisasjon i listen for å se alle innspillene deres. Muntlige deltakere er hentet fra høringsprogrammene.
+            Navnevarianter slås sammen (f.eks. «Legemiddelindustrien (LMI)» og «LMI»). Klikk på en organisasjon i listen for å se alle innspillene deres. Muntlige deltakere er hentet fra høringsprogrammene.
             Innspill til <em>skriftlige</em> høringer mangler foreløpig, fordi Stortingets API gir feil for dem. De hentes automatisk når det er rettet.
           </p>
         </aside>

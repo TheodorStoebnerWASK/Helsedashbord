@@ -7,7 +7,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { useData, Seksjon, Segment, PartiMerke } from '../felles';
 import { PARTIER, PARTI_REKKEFOLGE } from '@/lib/parti';
 import { FONT, WA, kopierBilde, lastNed, filnavn } from '@/lib/graf';
-import { datoKort, sesjonKort } from '@/lib/analyse';
+import { datoKort, filterNavn } from '@/lib/analyse';
 import type { Votering } from '@/lib/types';
 
 echarts.use([HeatmapChart, GridComponent, TooltipComponent, CanvasRenderer]);
@@ -25,7 +25,7 @@ const VIS_TEKST: Record<Vis, string> = {
 };
 
 export function Voteringer() {
-  const { data, filtrert, filtre, temaNavn, katNavn } = useData();
+  const { data, filtrert, filtre, sesjoner, temaNavn, katNavn } = useData();
   const [vis, setVis] = useState<Vis>('likt');
   const [type, setType] = useState<Type>('alle');
   const [utvalg, setUtvalg] = useState('helse');
@@ -38,14 +38,14 @@ export function Voteringer() {
   const voteringer = useMemo(() => (data.voteringer || []).filter((v) => {
     const sak = saker[v.s];
     if (!sak) return false;
-    if (filtre.sesjon !== 'alle' && sak.sesjon !== filtre.sesjon) return false;
+    if (!sesjoner.includes(sak.sesjon)) return false;
     if (type !== 'alle' && v.ty !== type) return false;
     if (utvalg === 'alle') return true;
     if (!sak.helse || !synligeHelseSaker.has(String(v.s))) return false;
     if (utvalg === 'helse') return true;
     if (utvalg.startsWith('kat:')) return sak.kategori === utvalg.slice(4);
     return !!sak.temaer?.includes(utvalg.slice(5));
-  }), [data, saker, filtre.sesjon, type, utvalg, synligeHelseSaker]);
+  }), [data, saker, sesjoner, type, utvalg, synligeHelseSaker]);
 
   const partier = useMemo(() => {
     const n: Record<string, number> = {};
@@ -75,7 +75,7 @@ export function Voteringer() {
 
   const utvalgNavn = utvalg === 'alle' ? 'Alle saker i Stortinget' : utvalg === 'helse' ? 'Helsesaker' : utvalg.startsWith('kat:') ? katNavn(utvalg.slice(4)) : temaNavn(utvalg.slice(5));
   const tittel = `${vis === 'likt' ? 'Hvor ofte partiene stemmer likt' : vis === 'for' ? 'Hvor ofte partiene stemmer for det samme' : 'Hvor ofte partiene stemmer mot det samme'} – ${utvalgNavn.toLowerCase()}`;
-  const undertittel = `${voteringer.length} personlige voteringer · ${type === 'alle' ? 'alle voteringer' : type === 'innstilling' ? 'komiteens innstilling' : 'partienes forslag'} · ${filtre.sesjon === 'alle' ? 'stortingsperioden 2025–2029' : 'sesjon ' + sesjonKort(filtre.sesjon)}`;
+  const undertittel = `${voteringer.length} personlige voteringer · ${type === 'alle' ? 'alle voteringer' : type === 'innstilling' ? 'komiteens innstilling' : 'partienes forslag'} · ${filterNavn(filtre.sesjon, data)}`;
 
   // ---------- ECharts heatmap ----------
   const ref = useRef<HTMLDivElement>(null);

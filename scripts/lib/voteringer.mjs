@@ -7,7 +7,7 @@ const VOTERING = { 1: 'borte', 2: 'for', 3: 'mot' };
  * @param cache {sakId: {v: [...] }}  (muteres)
  * @returns antall nye saker hentet
  */
-export async function hentVoteringer(saker, cache, { sth, logg, maksNye = 2000, parallelt = 6 }) {
+export async function hentVoteringer(saker, cache, { sth, logg, maksNye = 5000, parallelt = 6 }) {
   const nye = saker.filter((s) => !cache[s.id]).slice(0, maksNye);
   if (!nye.length) return 0;
   logg(`Voteringer: henter ${nye.length} nye saker`);

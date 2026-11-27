@@ -16,6 +16,7 @@ interface Ctx {
   filtre: Filtre;
   setFiltre: (f: Partial<Filtre>) => void;
   filtrert: Element[]; // elementer etter globale filtre
+  sesjoner: string[]; // sesjonene i valgt periode/sesjon
   visPerson: (id: string | null) => void;
   visTema: (id: string) => void;
   temaNavn: (id: string) => string;

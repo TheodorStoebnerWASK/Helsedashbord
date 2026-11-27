@@ -26,6 +26,7 @@ export interface Element {
   saksordforere?: string[];
   emner?: string[];
   // høring
+  frister?: { sendt?: string; horingsfrist?: string; horing?: string; avgivelsesfrist?: string; avgitt?: string };
   horingStatus?: string;
   skriftlig?: boolean;
   frist?: string;
@@ -68,6 +69,7 @@ export interface Data {
     sesjoner: string[];
     innevaerende: string;
     periode: string;
+    perioder?: { id: string; navn: string; fra: string; til: string; start: string }[];
     ki: string;
     kiAndel: number;
     antall: Record<ElementType, number>;
@@ -77,6 +79,8 @@ export interface Data {
   komiteNavn: Record<string, string>;
   voteringSaker?: Record<string, { tittel: string; sesjon: string; komite?: string; helse?: boolean; kategori?: string; temaer?: string[] }>;
   voteringer?: Votering[];
+  kalender?: { salen: { dato: string; sakId?: number; tekst: string; henvisning?: string; komite?: string; nr?: string }[] };
+  overvaking?: Overvakingsliste[];
   hod?: { personer: HodPerson[]; kilde?: string; sistKontrollert?: string };
   personer: Record<string, Person>;
   elementer: Element[];
@@ -102,3 +106,5 @@ export type InnspillData = Record<string, { status?: string; innspill: Innspill[
 export interface Innlegg { p?: string; navn: string; parti?: string; tid?: string; type: 'innlegg' | 'replikk'; tekst: string; lengde: number }
 export interface Debattdel { type: 'sak' | 'spørretime'; sakId?: number; tittel: string; innlegg: Innlegg[]; kategori?: string; temaer?: string[]; undertemaer?: string[] }
 export type DebattData = Record<string, { sesjon: string; dato?: string; tittel: string; komplett: boolean; deler: Debattdel[] }>;
+
+export interface Overvakingsliste { id: string; navn: string; kunde?: string; beskrivelse?: string; ord: string[] }

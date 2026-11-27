@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Data } from '@/lib/types';
-import { sok, sesjonKort, datoTid } from '@/lib/analyse';
+import { sok, sesjonKort, datoTid, sesjonerI, settMndStart } from '@/lib/analyse';
 import { DataCtx, Chips, Segment, type Filtre } from './felles';
 import { SamlingProvider, SamlingKnapp } from './Samling';
 import { PersonPanel } from './PersonPanel';
@@ -15,9 +15,13 @@ import { StoreEndringer } from './visninger/StoreEndringer';
 import { Voteringer } from './visninger/Voteringer';
 import { Innspill } from './visninger/Innspill';
 import { Debatter } from './visninger/Debatter';
+import { Overvaking } from './visninger/Overvaking';
+import { Kalender } from './visninger/Kalender';
 
 const FANER = [
   { id: 'oversikt', navn: 'Oversikt' },
+  { id: 'kalender', navn: 'Kalender' },
+  { id: 'overvaking', navn: 'Overvåking' },
   { id: 'endringer', navn: 'Store endringer' },
   { id: 'temaer', navn: 'Temaer' },
   { id: 'sporsmal', navn: 'Spørsmål' },
@@ -34,7 +38,7 @@ export default function Dashboard() {
   const [data, setData] = useState<Data | null>(null);
   const [feil, setFeil] = useState('');
   const [fane, setFane] = useState<Fane>('oversikt');
-  const [filtre, setF] = useState<Filtre>({ sesjon: 'alle', kategorier: [], sok: '' });
+  const [filtre, setF] = useState<Filtre>({ sesjon: 'p:2025-2029', kategorier: [], sok: '' });
   const [person, setPerson] = useState<string | null>(null);
   const [tema, setTema] = useState<string | null>(null);
 
@@ -55,7 +59,8 @@ export default function Dashboard() {
   const filtrert = useMemo(() => {
     if (!data) return [];
     let l = data.elementer;
-    if (filtre.sesjon !== 'alle') l = l.filter((e) => e.sesjon === filtre.sesjon);
+    const ses = new Set(sesjonerI(filtre.sesjon, data));
+    l = l.filter((e) => ses.has(e.sesjon));
     if (filtre.kategorier.length) l = l.filter((e) => filtre.kategorier.includes(e.kategori));
     if (filtre.sok) l = sok(l, filtre.sok, data);
     return l;
@@ -67,8 +72,10 @@ export default function Dashboard() {
     const um = Object.fromEntries(data.taksonomi.temaer.flatMap((t) => (t.undertemaer || []).map((u) => [u.id, u.navn])));
     const kf = Object.fromEntries(data.taksonomi.kategorier.map((k) => [k.id, k.farge]));
     const kn = Object.fromEntries(data.taksonomi.kategorier.map((k) => [k.id, k.navn]));
+    const sesjoner = sesjonerI(filtre.sesjon, data);
+    settMndStart(sesjoner[0] ? `${sesjoner[0].slice(0, 4)}-10` : '2025-10');
     return {
-      data, filtre, filtrert,
+      data, filtre, filtrert, sesjoner,
       setFiltre: (f: Partial<Filtre>) => setF((g) => ({ ...g, ...f })),
       visPerson: setPerson,
       visTema: (id: string) => { setTema(id); setPerson(null); byttFane('temaer'); },
@@ -124,8 +131,16 @@ export default function Dashboard() {
               etikett="Sesjon"
               verdi={filtre.sesjon}
               sett={(s) => ctx.setFiltre({ sesjon: s })}
-              valg={[{ id: 'alle', navn: 'Hele perioden' }, ...data.meta.sesjoner.map((s) => ({ id: s, navn: sesjonKort(s) + (s === data.meta.innevaerende ? ' (nå)' : '') }))]}
+              valg={[
+                ...(data.meta.perioder || []).slice().reverse().map((p) => ({ id: `p:${p.id}`, navn: p.id === data.meta.periode ? 'Denne perioden' : 'Forrige periode' })),
+                { id: 'alle', navn: 'Begge' },
+              ]}
             />
+            <select className="sesjonvelger" aria-label="Velg én sesjon" value={filtre.sesjon.startsWith('p:') || filtre.sesjon === 'alle' ? '' : filtre.sesjon}
+              onChange={(e) => ctx.setFiltre({ sesjon: e.target.value || 'p:2025-2029' })}>
+              <option value="">Enkeltsesjon …</option>
+              {data.meta.sesjoner.slice().reverse().map((s) => <option key={s} value={s}>{sesjonKort(s)}{s === data.meta.innevaerende ? ' (nå)' : ''}</option>)}
+            </select>
             <Chips
               valg={data.taksonomi.kategorier.map((k) => ({ id: k.id, navn: k.navn }))}
               valgt={filtre.kategorier}
@@ -145,6 +160,8 @@ export default function Dashboard() {
         <main className="innhold hoved">
           {fane === 'oversikt' && <Oversikt gaTil={byttFane} />}
           {fane === 'endringer' && <StoreEndringer />}
+          {fane === 'kalender' && <Kalender />}
+          {fane === 'overvaking' && <Overvaking />}
           {fane === 'temaer' && <Temaer valgt={tema} setValgt={setTema} />}
           {fane === 'sporsmal' && <Sporsmal />}
           {fane === 'komite' && <Komite />}

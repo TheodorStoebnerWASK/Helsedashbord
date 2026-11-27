@@ -339,3 +339,18 @@ html:has(.login) { background: var(--surface-inverse); }
 .innlegg-hode { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .innlegg-hode .portrett { width: 22px; height: 22px; border-radius: 50%; }
 .innlegg-hode strong { font-size: 17px; }
+.sesjonvelger { border: 1px solid var(--border-hairline); background: var(--surface-card); padding: 6px 10px; font: var(--type-body-sm); font-size: 13px; color: var(--text-secondary); border-radius: 0; }
+
+/* --- Kalender og overvåking -------------------------------------------------------- */
+.kalenderliste { list-style: none; margin: 0; padding: 0; }
+.kal { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--border-hairline); border-left: 3px solid transparent; padding-left: var(--space-3); }
+.kal-innstilling { border-left-color: var(--wa-red); }
+.kal-horing, .kal-horingsfrist { border-left-color: var(--wa-blue); }
+.kal-salen { border-left-color: var(--wa-black); }
+.kal-budsjett { border-left-color: var(--wa-clay); background: var(--surface-sunken); }
+.kal-dato { font: var(--type-eyebrow); letter-spacing: var(--tracking-wide); text-transform: uppercase; color: var(--text-primary); }
+.kal-dato span { display: block; color: var(--text-muted); margin-top: 2px; }
+.kal-tittel { margin: 2px 0 0; font: var(--weight-light) 16px/1.4 var(--font-sans); color: var(--text-primary); }
+.kal-tittel a { border-bottom: 0; }
+.trefford { margin: 4px 0 var(--space-3); font: italic var(--weight-light) 14px/1.4 var(--font-serif); color: var(--wa-clay); }
+@media (max-width: 719px) { .kal { grid-template-columns: minmax(0, 1fr); gap: 2px; } }

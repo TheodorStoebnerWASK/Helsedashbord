@@ -1,0 +1,12 @@
+{
+  "_kommentar": "Overvåkingslister per kunde/sak. Hver liste søker i spørsmål, saker, høringer, regjeringen, høringsinnspill og debatter. Ordregler som i taksonomi.json: ordet treffer fra ordstart, «*ord» treffer også inni sammensatte ord, «ord\\b» krever helt ord.",
+  "lister": [
+    {
+      "id": "alk-eurneffy",
+      "navn": "ALK – Eurneffy",
+      "kunde": "ALK",
+      "beskrivelse": "Adrenalin nesespray mot anafylaksi, allergi og allergibehandling.",
+      "ord": ["eurneffy", "*adrenalin", "nesespray", "anafylaksi", "anafylaktisk", "adrenalinpenn", "epipen", "*allergi", "allergen", "allergivaksine", "immunterapi mot allergi", "matallergi", "peanøtt", "nøtteallergi", "insektstikk", "vepsestikk", "pollen", "astma", "alk-abelló", "alk\\b", "naaf"]
+    }
+  ]
+}

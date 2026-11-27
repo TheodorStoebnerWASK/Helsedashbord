@@ -22,8 +22,25 @@ export const MND = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep
 export const mndNokkel = (iso: string) => iso.slice(0, 7);
 export const mndNavn = (k: string) => `${MND[Number(k.slice(5, 7)) - 1]} ${k.slice(2, 4)}`;
 
+// Startmåned for tidsseriene følger periodefilteret (settes av Dashboard)
+let MND_START = '2025-10';
+export const settMndStart = (m: string) => { MND_START = m; };
+
+/** Sesjonene som er med i et periode-/sesjonsfilter: «p:2025-2029», «alle» eller én sesjon. */
+export function sesjonerI(filter: string, data: Data) {
+  const alle = data.meta.sesjoner;
+  if (filter === 'alle') return alle;
+  if (filter.startsWith('p:')) {
+    const per = data.meta.perioder?.find((p) => p.id === filter.slice(2));
+    return per ? alle.filter((x) => x >= per.fra && x <= per.til) : alle;
+  }
+  return [filter];
+}
+export const filterNavn = (filter: string, data: Data) =>
+  filter === 'alle' ? 'begge stortingsperioder' : filter.startsWith('p:') ? `stortingsperioden ${filter.slice(2).replace('-', '–')}` : `sesjon ${sesjonKort(filter)}`;
+
 /** Alle måneder fra periodestart til i dag. */
-export function maneder(fra = '2025-10', til = new Date().toISOString().slice(0, 7)) {
+export function maneder(fra = MND_START, til = new Date().toISOString().slice(0, 7)) {
   const ut: string[] = [];
   let [y, m] = fra.split('-').map(Number);
   const [ty, tm] = til.split('-').map(Number);

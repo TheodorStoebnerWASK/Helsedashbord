@@ -14,7 +14,12 @@ const ROT = new URL('..', import.meta.url).pathname;
 const DATA = ROT + 'data/';
 const API = 'https://data.stortinget.no/eksport';
 const PERIODE = '2025-2029';
-const FORSTE_SESJON = '2025-2026';
+// To stortingsperioder gir sammenligningsgrunnlag: forrige (2021–2025) og inneværende (2025–2029)
+const PERIODER = [
+  { id: '2021-2025', navn: 'Forrige periode (2021–2025)', fra: '2021-2022', til: '2024-2025', start: '2021-10-01' },
+  { id: '2025-2029', navn: 'Denne perioden (2025–2029)', fra: '2025-2026', til: '2028-2029', start: '2025-10-01' },
+];
+const FORSTE_SESJON = PERIODER[0].fra;
 const KOMITE = 'HELSEOMS';
 const HOD_MINISTER = 'HHD';
 const HOD_EIER = 421; // Helse- og omsorgsdepartementet på regjeringen.no
@@ -39,6 +44,7 @@ async function hent(url, { json = true, forsøk = 4 } = {}) {
   }
 }
 const sth = (sti) => hent(`${API}/${sti}${sti.includes('?') ? '&' : '?'}format=json`);
+const sthRask = (sti) => hent(`${API}/${sti}${sti.includes('?') ? '&' : '?'}format=json`, { forsøk: 1 });
 const dato = (s) => {
   const m = /\/Date\((-?\d+)/.exec(s || '');
   if (!m || Number(m[1]) < 0) return null;
@@ -69,7 +75,7 @@ const leggTilPerson = (p, ekstra = {}) => {
     ...ekstra,
   });
 };
-for (const p of (await sth(`representanter?stortingsperiodeid=${PERIODE}`)).representanter_liste) leggTilPerson(p);
+for (const per of PERIODER) for (const p of (await sth(`representanter?stortingsperiodeid=${per.id}`)).representanter_liste || []) leggTilPerson(p);
 const dagens = (await sth('dagensrepresentanter')).dagensrepresentanter_liste;
 for (const p of dagens) leggTilPerson(p, { komiteer: (p.komiteer_liste || []).map((k) => k.id), aktiv: true, epost: p.epost });
 const komiteMedlemmer = dagens.filter((p) => (p.komiteer_liste || []).some((k) => k.id === KOMITE)).map((p) => p.id);
@@ -187,7 +193,7 @@ for (const [feed, standardType] of [['aktuelt/nyheter', 'Nyhet'], ['dokumenter',
 }
 await mkdir(DATA, { recursive: true });
 await writeFile(arkivFil, JSON.stringify(arkiv, null, 1));
-const periodeStart = '2025-10-01';
+const periodeStart = PERIODER[0].start;
 for (const [guid, r] of Object.entries(arkiv)) {
   if (r.dato < periodeStart) continue;
   kandidater.push({
@@ -280,7 +286,7 @@ logg(`Voteringer: ${voteringer.length} personlige voteringer i ${Object.keys(vot
 const innspillFil = DATA + 'innspill.json';
 const innspill = await lesJson(innspillFil, {});
 try {
-  const n = await hentInnspill(elementer.filter((e) => e.type === 'horing'), innspill, { sth, logg });
+  const n = await hentInnspill(elementer.filter((e) => e.type === 'horing'), innspill, { sth: sthRask, logg });
   logg(`Innspill: ${n} høringer oppdatert, ${Object.values(innspill).reduce((a, h) => a + h.innspill.length, 0)} skriftlige innspill totalt`);
 } catch (e) {
   logg(`ADVARSEL: innspill feilet (${e.message})`);
@@ -311,13 +317,44 @@ try {
 }
 await writeFile(debattFil, JSON.stringify(debatter));
 
+// ---------- Kalender: frister for åpne helsesaker og dagsorden i salen ----------
+const HENDELSE = { SENDT: 'sendt', HOERFRIST: 'horingsfrist', HOER: 'horing', AVGFRIST: 'avgivelsesfrist', AVGITT: 'avgitt' };
+const norskDato = (s) => { const m = /^(\d\d)\.(\d\d)\.(\d{4})/.exec(s || ''); return m && m[3] !== '0001' ? `${m[3]}-${m[2]}-${m[1]}` : null; };
+for (const e of elementer.filter((x) => x.type === 'sak' && ['Til behandling', 'Varslet'].includes(x.status))) {
+  try {
+    const sak = await sth(`sak?sakid=${e.id.replace('sak-', '')}`);
+    const frister = {};
+    for (const steg of sak.saksgang?.saksgang_steg_liste || []) for (const h of steg.saksgang_hendelse_liste || []) {
+      const d = norskDato(h.dato);
+      if (d && HENDELSE[h.id]) frister[HENDELSE[h.id]] = d;
+    }
+    if (Object.keys(frister).length) e.frister = frister;
+  } catch (err) { logg(`Kalender: hopper over ${e.id} (${err.message})`); }
+}
+const salen = [];
+try {
+  const moter = (await sth(`moter?sesjonid=${innevaerende}`)).moter_liste || [];
+  const igaar = Date.now() - 2 * 86400000;
+  for (const m of moter.filter((x) => x.id > 0 && Number(/\((\d+)/.exec(x.mote_dato_tid)?.[1]) > igaar)) {
+    const dag = await sth(`dagsorden?moteid=${m.id}`);
+    for (const d of dag.dagsordensak_liste || []) {
+      const tekst = String(d.dagsordensak_tekst || '').replace(/\s+/g, ' ').trim();
+      const helse = (d.sak_id > 0 && helseSakId.has(String(d.sak_id))) || d.komite_id === KOMITE || regler.helse.test(tekst);
+      if (!helse) continue;
+      salen.push(rens({ dato: dato(m.mote_dato_tid), sakId: d.sak_id > 0 ? d.sak_id : undefined, tekst: tekst.slice(0, 300), henvisning: d.dagsordensak_henvisning !== 'None' ? d.dagsordensak_henvisning : undefined, komite: d.komite_id !== 'None' ? d.komite_id : undefined, nr: d.dagsordensak_nummer }));
+    }
+  }
+  logg(`Kalender: ${elementer.filter((e) => e.frister).length} saker med frister, ${salen.length} helsesaker på dagsorden i salen`);
+} catch (err) { logg(`ADVARSEL: dagsorden feilet (${err.message})`); }
+const overvaking = await lesJson(ROT + 'config/overvaking.json', { lister: [] });
+
 const roller = await lesJson(ROT + 'config/komite-roller.json', {});
 const hod = await lesJson(ROT + 'config/hod-ledelse.json', { personer: [] });
 // Ta bare med bilder som faktisk finnes i public/hod/
 for (const p of hod.personer) if (p.bilde && !existsSync(ROT + 'public/hod/' + p.bilde)) delete p.bilde;
 const ut = {
   meta: {
-    oppdatert: new Date().toISOString(), sesjoner, innevaerende, periode: PERIODE,
+    oppdatert: new Date().toISOString(), sesjoner, innevaerende, periode: PERIODE, perioder: PERIODER,
     ki: kiStatus, kiAndel: elementer.length ? elementer.filter((e) => e.kilde === 'ki').length / elementer.length : 0,
     antall: Object.fromEntries(['skriftlig', 'muntlig', 'interpellasjon', 'sak', 'horing', 'regjering'].map((t) => [t, elementer.filter((e) => e.type === t).length])),
   },
@@ -326,6 +363,8 @@ const ut = {
   komiteNavn,
   voteringSaker,
   voteringer,
+  kalender: { salen },
+  overvaking: overvaking.lister,
   hod: { personer: hod.personer, kilde: hod.kilde, sistKontrollert: hod.sistKontrollert },
   personer: personerUt,
   elementer,
