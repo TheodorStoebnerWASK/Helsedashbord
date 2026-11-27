@@ -10,6 +10,7 @@ export interface Filtre {
   sesjon: 'alle' | string;
   kategorier: string[];
   sok: string;
+  kunStore: boolean;
 }
 interface Ctx {
   data: Data;

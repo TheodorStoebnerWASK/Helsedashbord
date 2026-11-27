@@ -127,3 +127,13 @@ export interface Metode { tittel: string; h: { f: 'bf' | 'bsf'; d: string; s: st
 export interface AccessData {
   oppdatert?: string; ema?: EmaHendelse[]; beslutningsforum?: ForumMote[]; bestillerforum?: ForumMote[]; metoder?: Record<string, Metode>;
 }
+
+// Marked: selskaper fra Brønnøysund, studier fra ClinicalTrials.gov
+export interface Regnskap { aar: number; valuta: string; omsetning: number | null; driftsresultat: number | null; resultat: number | null }
+export interface Studie { id: string; t: string; tilstand: string[]; legemiddel: string[]; status: string; ferdig?: string; norge?: boolean; norden?: boolean }
+export interface Selskap {
+  orgnr: string; navn: string; sektor: string; domene?: string; match?: string; sponsor?: string;
+  offisieltNavn?: string; ansatte?: number | null; form?: string; bransje?: string; kommune?: string; stiftet?: string; hjemmeside?: string;
+  regnskap?: Regnskap[]; omsetningNok?: number | null; logo?: string | null; studier?: Studie[];
+}
+export interface MarkedData { oppdatert?: string; sektorer: { id: string; navn: string; kategori: string }[]; selskaper: Selskap[] }

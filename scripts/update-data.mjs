@@ -11,6 +11,7 @@ import { hentInnspill } from './lib/innspill.mjs';
 import { hentDebatter } from './lib/debatter.mjs';
 import { hentNyheter, KILDER as NYHETSKILDER } from './lib/nyheter.mjs';
 import { hentEma, hentNyeMetoder, byggMetoder } from './lib/access.mjs';
+import { hentSelskaper } from './lib/selskaper.mjs';
 
 const ROT = new URL('..', import.meta.url).pathname;
 const DATA = ROT + 'data/';
@@ -352,6 +353,20 @@ byggMetoder(access);
 access.oppdatert = new Date().toISOString();
 access.kilder = { nyheter: nyhetStatus };
 await writeFile(accessFil, JSON.stringify(access));
+
+// ---------- Marked: selskaper (Brønnøysund), logoer og fase 3-studier (ClinicalTrials.gov) ----------
+const markedFil = DATA + 'marked.json';
+const markedGammel = await lesJson(markedFil, { selskaper: [] });
+try {
+  const cfgSelskaper = await lesJson(ROT + 'config/selskaper.json', { sektorer: [] });
+  const cache = Object.fromEntries((markedGammel.selskaper || []).map((s) => [s.orgnr, s]));
+  const selskaper = await hentSelskaper(cfgSelskaper, cache, { rot: ROT, logg });
+  await writeFile(markedFil, JSON.stringify({
+    oppdatert: new Date().toISOString(),
+    sektorer: cfgSelskaper.sektorer.map(({ id, navn, kategori }) => ({ id, navn, kategori })),
+    selskaper,
+  }));
+} catch (e) { logg(`ADVARSEL: selskaper feilet (${e.message})`); }
 
 // ---------- Kalender: frister for åpne helsesaker og dagsorden i salen ----------
 const HENDELSE = { SENDT: 'sendt', HOERFRIST: 'horingsfrist', HOER: 'horing', AVGFRIST: 'avgivelsesfrist', AVGITT: 'avgitt' };

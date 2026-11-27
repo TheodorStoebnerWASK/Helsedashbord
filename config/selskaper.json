@@ -1,0 +1,733 @@
+{
+ "_forklaring": "Selskaper i Marked-fanen. Tall (ansatte, omsetning, resultat) hentes automatisk fra Brønnøysundregistrene. 'match' er navnet slik det står hos EMA og i nyheter (regex, uten store/små bokstaver). 'sponsor' er navnet i ClinicalTrials.gov. Legg til et selskap ved å legge inn organisasjonsnummeret.",
+ "sektorer": [
+  {
+   "id": "legemidler",
+   "navn": "Legemidler & Biotek",
+   "kategori": "legemidler",
+   "selskaper": [
+    {
+     "orgnr": "935925525",
+     "navn": "Roche Norge",
+     "domene": "roche.no",
+     "match": "\\broche\\b",
+     "sponsor": "Hoffmann-La Roche"
+    },
+    {
+     "orgnr": "965599614",
+     "navn": "Novartis Norge",
+     "domene": "novartis.com",
+     "match": "novartis",
+     "sponsor": "Novartis Pharmaceuticals"
+    },
+    {
+     "orgnr": "915213596",
+     "navn": "Pfizer",
+     "domene": "pfizer.no",
+     "match": "pfizer",
+     "sponsor": "Pfizer"
+    },
+    {
+     "orgnr": "921386540",
+     "navn": "MSD (Norge)",
+     "domene": "msd.no",
+     "match": "merck sharp|\\bmsd\\b",
+     "sponsor": "Merck Sharp & Dohme LLC"
+    },
+    {
+     "orgnr": "918209999",
+     "navn": "AstraZeneca",
+     "domene": "astrazeneca.no",
+     "match": "astrazeneca",
+     "sponsor": "AstraZeneca"
+    },
+    {
+     "orgnr": "918229353",
+     "navn": "Novo Nordisk Norway",
+     "domene": "novonordisk.no",
+     "match": "novo nordisk",
+     "sponsor": "Novo Nordisk A/S"
+    },
+    {
+     "orgnr": "976335147",
+     "navn": "Sanofi-aventis Norge",
+     "domene": "sanofi.no",
+     "match": "sanofi",
+     "sponsor": "Sanofi"
+    },
+    {
+     "orgnr": "930606308",
+     "navn": "GlaxoSmithKline",
+     "domene": "gsk.com",
+     "match": "glaxosmithkline|\\bgsk\\b|viiv",
+     "sponsor": "GlaxoSmithKline"
+    },
+    {
+     "orgnr": "911268647",
+     "navn": "Bayer",
+     "domene": "bayer.no",
+     "match": "\\bbayer\\b",
+     "sponsor": "Bayer"
+    },
+    {
+     "orgnr": "865684452",
+     "navn": "Eli Lilly Norge",
+     "domene": "lilly.com",
+     "match": "eli lilly|\\blilly\\b",
+     "sponsor": "Eli Lilly and Company"
+    },
+    {
+     "orgnr": "998085497",
+     "navn": "AbbVie",
+     "domene": "abbvie.no",
+     "match": "abbvie",
+     "sponsor": "AbbVie"
+    },
+    {
+     "orgnr": "891297262",
+     "navn": "Bristol-Myers Squibb Norway",
+     "domene": "bms.com",
+     "match": "bristol.myers|\\bbms\\b|celgene",
+     "sponsor": "Bristol-Myers Squibb"
+    },
+    {
+     "orgnr": "975332802",
+     "navn": "Janssen-Cilag (J&J Innovative Medicine)",
+     "domene": "janssen.com",
+     "match": "janssen|johnson ?& ?johnson",
+     "sponsor": "Janssen Research & Development, LLC"
+    },
+    {
+     "orgnr": "980347257",
+     "navn": "Takeda",
+     "domene": "takeda.com",
+     "match": "takeda",
+     "sponsor": "Takeda"
+    },
+    {
+     "orgnr": "932264064",
+     "navn": "Boehringer Ingelheim",
+     "domene": "boehringer-ingelheim.com",
+     "match": "boehringer",
+     "sponsor": "Boehringer Ingelheim"
+    },
+    {
+     "orgnr": "982725038",
+     "navn": "Amgen",
+     "domene": "amgen.com",
+     "match": "amgen",
+     "sponsor": "Amgen"
+    },
+    {
+     "orgnr": "991461841",
+     "navn": "Gilead Sciences Norway",
+     "domene": "gilead.com",
+     "match": "gilead|kite pharma",
+     "sponsor": "Gilead Sciences"
+    },
+    {
+     "orgnr": "982222311",
+     "navn": "Teva Norway",
+     "domene": "teva.no",
+     "match": "\\bteva\\b",
+     "sponsor": "Teva Branded Pharmaceutical Products R&D, Inc."
+    },
+    {
+     "orgnr": "967727970",
+     "navn": "Orion Pharma",
+     "domene": "orionpharma.no",
+     "match": "orion (pharma|corporation)",
+     "sponsor": "Orion Corporation, Orion Pharma"
+    },
+    {
+     "orgnr": "946397369",
+     "navn": "LEO Pharma",
+     "domene": "leo-pharma.no",
+     "match": "leo pharma",
+     "sponsor": "LEO Pharma"
+    },
+    {
+     "orgnr": "914158877",
+     "navn": "Viatris",
+     "domene": "viatris.no",
+     "match": "viatris|mylan",
+     "sponsor": "Viatris Inc."
+    },
+    {
+     "orgnr": "933727289",
+     "navn": "Merck (Merck KGaA)",
+     "domene": "merckgroup.com",
+     "match": "merck (europe|kgaa|healthcare)",
+     "sponsor": "Merck KGaA, Darmstadt, Germany"
+    },
+    {
+     "orgnr": "980785122",
+     "navn": "Biogen Norway",
+     "domene": "biogen.com",
+     "match": "biogen",
+     "sponsor": "Biogen"
+    },
+    {
+     "orgnr": "914022940",
+     "navn": "H. Lundbeck",
+     "domene": "lundbeck.com",
+     "match": "lundbeck",
+     "sponsor": "H. Lundbeck A/S"
+    },
+    {
+     "orgnr": "975859932",
+     "navn": "Ferring Legemidler",
+     "domene": "ferring.com",
+     "match": "ferring",
+     "sponsor": "Ferring Pharmaceuticals"
+    },
+    {
+     "orgnr": "976281918",
+     "navn": "UCB Pharma",
+     "domene": "ucb.com",
+     "match": "\\bucb\\b",
+     "sponsor": "UCB Biopharma SRL"
+    },
+    {
+     "orgnr": "924421819",
+     "navn": "Organon Norway",
+     "domene": "organon.com",
+     "match": "organon",
+     "sponsor": "Organon and Co"
+    },
+    {
+     "orgnr": "976313682",
+     "navn": "Sobi (Swedish Orphan Biovitrum)",
+     "domene": "sobi.com",
+     "match": "swedish orphan|\\bsobi\\b",
+     "sponsor": "Swedish Orphan Biovitrum"
+    },
+    {
+     "orgnr": "937866348",
+     "navn": "STADA Norway",
+     "domene": "stada.com",
+     "match": "\\bstada\\b"
+    },
+    {
+     "orgnr": "996838196",
+     "navn": "ALK-Abelló Nordic",
+     "domene": "alk.net",
+     "match": "\\balk\\b|alk-abell",
+     "sponsor": "ALK-Abelló A/S"
+    },
+    {
+     "orgnr": "980250008",
+     "navn": "Fresenius Kabi Norge",
+     "domene": "fresenius-kabi.com",
+     "match": "fresenius kabi",
+     "sponsor": "Fresenius Kabi"
+    },
+    {
+     "orgnr": "914829674",
+     "navn": "GE HealthCare (Oslo/Lindesnes)",
+     "domene": "gehealthcare.com",
+     "match": "ge healthcare",
+     "sponsor": "GE Healthcare"
+    },
+    {
+     "orgnr": "920777457",
+     "navn": "Daiichi Sankyo",
+     "domene": "daiichi-sankyo.eu",
+     "match": "daiichi",
+     "sponsor": "Daiichi Sankyo"
+    },
+    {
+     "orgnr": "996890465",
+     "navn": "Alexion (AstraZeneca Rare Disease)",
+     "domene": "alexion.com",
+     "match": "alexion",
+     "sponsor": "Alexion Pharmaceuticals, Inc."
+    },
+    {
+     "orgnr": "922884889",
+     "navn": "Chiesi",
+     "domene": "chiesi.com",
+     "match": "chiesi",
+     "sponsor": "Chiesi Farmaceutici S.p.A."
+    },
+    {
+     "orgnr": "968090364",
+     "navn": "Astellas",
+     "domene": "astellas.com",
+     "match": "astellas",
+     "sponsor": "Astellas Pharma Global Development, Inc."
+    },
+    {
+     "orgnr": "915140009",
+     "navn": "Vertex Pharmaceuticals",
+     "domene": "vrtx.com",
+     "match": "vertex",
+     "sponsor": "Vertex Pharmaceuticals Incorporated"
+    },
+    {
+     "orgnr": "986200584",
+     "navn": "Otsuka",
+     "domene": "otsuka.com",
+     "match": "otsuka",
+     "sponsor": "Otsuka Pharmaceutical Co., Ltd."
+    },
+    {
+     "orgnr": "991972072",
+     "navn": "Ipsen",
+     "domene": "ipsen.com",
+     "match": "ipsen",
+     "sponsor": "Ipsen"
+    },
+    {
+     "orgnr": "990048037",
+     "navn": "Norgine Norge",
+     "domene": "norgine.com",
+     "match": "norgine"
+    },
+    {
+     "orgnr": "931241818",
+     "navn": "HP Halden Pharma",
+     "domene": "hphaldenpharma.com",
+     "match": "halden pharma"
+    },
+    {
+     "orgnr": "928041069",
+     "navn": "Agilera Pharma",
+     "domene": "agilera.no",
+     "match": "agilera"
+    },
+    {
+     "orgnr": "815146352",
+     "navn": "Curida",
+     "domene": "curida.no",
+     "match": "curida"
+    },
+    {
+     "orgnr": "967598593",
+     "navn": "Photocure",
+     "domene": "photocure.com",
+     "match": "photocure",
+     "sponsor": "Photocure"
+    },
+    {
+     "orgnr": "990646066",
+     "navn": "Nykode Therapeutics",
+     "domene": "nykode.com",
+     "match": "nykode",
+     "sponsor": "Nykode Therapeutics ASA"
+    },
+    {
+     "orgnr": "985012059",
+     "navn": "Navamedic",
+     "domene": "navamedic.com",
+     "match": "navamedic"
+    }
+   ]
+  },
+  {
+   "id": "medtek",
+   "navn": "Medtek & diagnostikk",
+   "kategori": "medtek",
+   "selskaper": [
+    {
+     "orgnr": "979484488",
+     "navn": "Laerdal Medical",
+     "domene": "laerdal.com",
+     "match": "laerdal"
+    },
+    {
+     "orgnr": "938937583",
+     "navn": "GE Vingmed Ultrasound",
+     "domene": "gehealthcare.com",
+     "match": "vingmed"
+    },
+    {
+     "orgnr": "932310449",
+     "navn": "Siemens Healthineers",
+     "domene": "siemens-healthineers.com",
+     "match": "siemens health"
+    },
+    {
+     "orgnr": "915213952",
+     "navn": "Philips Norge",
+     "domene": "philips.no",
+     "match": "philips"
+    },
+    {
+     "orgnr": "975806529",
+     "navn": "Medtronic Norge",
+     "domene": "medtronic.com",
+     "match": "medtronic"
+    },
+    {
+     "orgnr": "957212158",
+     "navn": "Abbott Norge",
+     "domene": "abbott.no",
+     "match": "\\babbott\\b"
+    },
+    {
+     "orgnr": "981363019",
+     "navn": "Abbott Diagnostics Technologies",
+     "domene": "abbott.com",
+     "match": "abbott diagnostics"
+    },
+    {
+     "orgnr": "987852208",
+     "navn": "Roche Diagnostics Norge",
+     "domene": "roche.no",
+     "match": "roche diagnostics"
+    },
+    {
+     "orgnr": "914113172",
+     "navn": "B. Braun Medical",
+     "domene": "bbraun.no",
+     "match": "b\\.? braun"
+    },
+    {
+     "orgnr": "981080262",
+     "navn": "Mediq Norge",
+     "domene": "mediq.no",
+     "match": "mediq"
+    },
+    {
+     "orgnr": "931925822",
+     "navn": "Coloplast Norge",
+     "domene": "coloplast.no",
+     "match": "coloplast"
+    },
+    {
+     "orgnr": "914120349",
+     "navn": "Ottobock Care Norge",
+     "domene": "ottobock.com",
+     "match": "ottobock"
+    },
+    {
+     "orgnr": "987985240",
+     "navn": "Becton Dickinson Norway",
+     "domene": "bd.com",
+     "match": "becton|\\bbd\\b"
+    },
+    {
+     "orgnr": "933183947",
+     "navn": "Smith & Nephew",
+     "domene": "smith-nephew.com",
+     "match": "smith ?& ?nephew"
+    },
+    {
+     "orgnr": "995610930",
+     "navn": "Zimmer Biomet Norway",
+     "domene": "zimmerbiomet.com",
+     "match": "zimmer biomet"
+    },
+    {
+     "orgnr": "950637323",
+     "navn": "Olympus Norge",
+     "domene": "olympus.no",
+     "match": "olympus"
+    },
+    {
+     "orgnr": "958625820",
+     "navn": "Getinge Norge",
+     "domene": "getinge.com",
+     "match": "getinge"
+    },
+    {
+     "orgnr": "936079679",
+     "navn": "Dräger Norge",
+     "domene": "draeger.com",
+     "match": "dr[äa]ger"
+    },
+    {
+     "orgnr": "936656013",
+     "navn": "Medistim",
+     "domene": "medistim.com",
+     "match": "medistim"
+    },
+    {
+     "orgnr": "891043082",
+     "navn": "NordicNeuroLab",
+     "domene": "nordicneurolab.com",
+     "match": "nordicneurolab"
+    },
+    {
+     "orgnr": "979512341",
+     "navn": "Mölnlycke Health Care",
+     "domene": "molnlycke.no",
+     "match": "m[öo]lnlycke"
+    },
+    {
+     "orgnr": "981062310",
+     "navn": "bioMérieux Norge",
+     "domene": "biomerieux.no",
+     "match": "biom[ée]rieux"
+    },
+    {
+     "orgnr": "953424894",
+     "navn": "OneMed",
+     "domene": "onemed.no",
+     "match": "onemed"
+    },
+    {
+     "orgnr": "966042028",
+     "navn": "Sunrise Medical",
+     "domene": "sunrisemedical.no",
+     "match": "sunrise medical"
+    },
+    {
+     "orgnr": "876597152",
+     "navn": "Etac",
+     "domene": "etac.com",
+     "match": "\\betac\\b"
+    },
+    {
+     "orgnr": "992780118",
+     "navn": "ConvaTec Norway",
+     "domene": "convatec.com",
+     "match": "convatec"
+    },
+    {
+     "orgnr": "980344320",
+     "navn": "Stryker",
+     "domene": "stryker.com",
+     "match": "stryker"
+    },
+    {
+     "orgnr": "814380572",
+     "navn": "Boston Scientific",
+     "domene": "bostonscientific.com",
+     "match": "boston scientific"
+    },
+    {
+     "orgnr": "848236632",
+     "navn": "Vingmed (distributør)",
+     "domene": "vingmed.no",
+     "match": "vingmed as"
+    },
+    {
+     "orgnr": "937162103",
+     "navn": "Hepro",
+     "domene": "hepro.no",
+     "match": "hepro"
+    },
+    {
+     "orgnr": "986400990",
+     "navn": "Thermo Fisher Diagnostics",
+     "domene": "thermofisher.com",
+     "match": "thermo fisher"
+    },
+    {
+     "orgnr": "993346292",
+     "navn": "Karl Storz Endoskopi Norge",
+     "domene": "karlstorz.com",
+     "match": "karl storz"
+    }
+   ]
+  },
+  {
+   "id": "digital",
+   "navn": "Digital helse",
+   "kategori": "digital",
+   "selskaper": [
+    {
+     "orgnr": "979543883",
+     "navn": "DIPS",
+     "domene": "dips.no",
+     "match": "\\bdips\\b"
+    },
+    {
+     "orgnr": "994598759",
+     "navn": "Norsk Helsenett",
+     "domene": "nhn.no",
+     "match": "norsk helsenett|\\bnhn\\b"
+    },
+    {
+     "orgnr": "922307814",
+     "navn": "Helseplattformen",
+     "domene": "helseplattformen.no",
+     "match": "helseplattformen"
+    },
+    {
+     "orgnr": "914637651",
+     "navn": "Sykehuspartner",
+     "domene": "sykehuspartner.no",
+     "match": "sykehuspartner"
+    },
+    {
+     "orgnr": "933012867",
+     "navn": "Tietoevry (Tieto Norway)",
+     "domene": "tietoevry.com",
+     "match": "tietoevry|\\btieto\\b"
+    },
+    {
+     "orgnr": "933287335",
+     "navn": "Visma Flyt",
+     "domene": "visma.no",
+     "match": "visma"
+    },
+    {
+     "orgnr": "966585404",
+     "navn": "CompuGroup Medical Norway",
+     "domene": "cgm.com",
+     "match": "compugroup|\\bcgm\\b"
+    },
+    {
+     "orgnr": "921572166",
+     "navn": "WebMed EPJ",
+     "domene": "webmed.no",
+     "match": "webmed"
+    },
+    {
+     "orgnr": "963310439",
+     "navn": "DNV Imatis",
+     "domene": "imatis.com",
+     "match": "imatis"
+    },
+    {
+     "orgnr": "996362337",
+     "navn": "Dignio",
+     "domene": "dignio.com",
+     "match": "dignio"
+    },
+    {
+     "orgnr": "919415223",
+     "navn": "Sensio",
+     "domene": "sensio.no",
+     "match": "sensio"
+    },
+    {
+     "orgnr": "927384302",
+     "navn": "Aidn",
+     "domene": "aidn.no",
+     "match": "\\baidn\\b"
+    },
+    {
+     "orgnr": "990808414",
+     "navn": "EG Checkware",
+     "domene": "checkware.com",
+     "match": "checkware"
+    },
+    {
+     "orgnr": "912719103",
+     "navn": "Pridok",
+     "domene": "pridok.no",
+     "match": "pridok"
+    },
+    {
+     "orgnr": "975353265",
+     "navn": "Sectra Norge",
+     "domene": "sectra.com",
+     "match": "sectra"
+    },
+    {
+     "orgnr": "995412020",
+     "navn": "Appex",
+     "domene": "appex.no",
+     "match": "\\bappex\\b"
+    }
+   ]
+  },
+  {
+   "id": "tjenester",
+   "navn": "Helsetjenester og apotek",
+   "kategori": "regulering",
+   "selskaper": [
+    {
+     "orgnr": "943545634",
+     "navn": "Aleris Helse",
+     "domene": "aleris.no",
+     "match": "aleris"
+    },
+    {
+     "orgnr": "953164701",
+     "navn": "Volvat Medisinske Senter",
+     "domene": "volvat.no",
+     "match": "volvat"
+    },
+    {
+     "orgnr": "965985166",
+     "navn": "Lovisenberg Diakonale Sykehus",
+     "domene": "lovisenberg.no",
+     "match": "lovisenberg"
+    },
+    {
+     "orgnr": "982791952",
+     "navn": "Diakonhjemmet Sykehus",
+     "domene": "diakonhjemmetsykehus.no",
+     "match": "diakonhjemmet"
+    },
+    {
+     "orgnr": "977102278",
+     "navn": "Colosseumklinikken",
+     "domene": "colosseumklinikken.no",
+     "match": "colosseum"
+    },
+    {
+     "orgnr": "981230787",
+     "navn": "Unilabs Norge",
+     "domene": "unilabs.no",
+     "match": "unilabs"
+    },
+    {
+     "orgnr": "931469851",
+     "navn": "Dr. Fürst Medisinsk Laboratorium",
+     "domene": "furst.no",
+     "match": "f[üu]rst"
+    },
+    {
+     "orgnr": "884039312",
+     "navn": "Avonova Helse",
+     "domene": "avonova.no",
+     "match": "avonova"
+    },
+    {
+     "orgnr": "919149795",
+     "navn": "Dr.Dropin",
+     "domene": "drdropin.no",
+     "match": "dr\\.? ?dropin"
+    },
+    {
+     "orgnr": "922716552",
+     "navn": "Betanien Sykehus",
+     "domene": "betanien.no",
+     "match": "betanien"
+    },
+    {
+     "orgnr": "985773238",
+     "navn": "Revmatismesykehuset",
+     "domene": "revmatismesykehuset.no",
+     "match": "revmatismesykehuset"
+    },
+    {
+     "orgnr": "985194653",
+     "navn": "Stendi",
+     "domene": "stendi.no",
+     "match": "stendi"
+    },
+    {
+     "orgnr": "980478076",
+     "navn": "Norlandia Care Norge",
+     "domene": "norlandia.no",
+     "match": "norlandia"
+    },
+    {
+     "orgnr": "983044778",
+     "navn": "Apotek 1 Gruppen",
+     "domene": "apotek1.no",
+     "match": "apotek ?1"
+    },
+    {
+     "orgnr": "965336796",
+     "navn": "Norsk Medisinaldepot (Vitusapotek)",
+     "domene": "vitusapotek.no",
+     "match": "vitusapotek|medisinaldepot"
+    },
+    {
+     "orgnr": "982547822",
+     "navn": "Alliance Healthcare (Boots apotek)",
+     "domene": "boots.no",
+     "match": "boots|alliance healthcare"
+    }
+   ]
+  }
+ ]
+}

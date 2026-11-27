@@ -372,3 +372,43 @@ html:has(.login) { background: var(--surface-inverse); }
 @media (max-width: 720px) {
   .lop li + li { padding-left: 0; border-left: 0; }
 }
+
+/* --- Undervalg under hovedfanene ------------------------------------------- */
+.underfaner { border-top: 1px solid var(--border-hairline); background: var(--surface-raised, transparent); }
+.underfaner-indre { max-width: calc(var(--maks) + 2 * var(--marg)); margin: 0 auto; padding: 0 var(--marg); display: flex; flex-wrap: wrap; gap: 0 var(--space-5); }
+.underfaner button { border: 0; border-bottom: 2px solid transparent; background: none; padding: var(--space-3) 0; font: var(--type-body-sm); color: var(--text-secondary); white-space: nowrap; transition: var(--transition-ui); }
+.underfaner button:hover { color: var(--text-primary); }
+.underfaner button.på { color: var(--text-primary); border-bottom-color: var(--wa-blue, #3D99C7); }
+@media (max-width: 720px) { .underfaner-indre { gap: 0 var(--space-4); } }
+
+/* --- Marked ----------------------------------------------------------------- */
+.logo { width: 40px; height: 40px; object-fit: contain; background: #fff; border: 1px solid var(--border-hairline); padding: 3px; flex: none; }
+.logo-init { display: inline-flex; align-items: center; justify-content: center; font: var(--type-eyebrow); letter-spacing: 0.04em; color: var(--text-secondary); background: var(--surface-card, #fff); }
+.selskaper { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border-strong); }
+.selskaper > li { border-bottom: 1px solid var(--border-hairline); }
+.selskaper > li.apen { background: var(--surface-card, #fff); }
+.selskap-rad { width: 100%; display: grid; grid-template-columns: 28px 44px minmax(160px, 1.6fr) repeat(4, minmax(80px, 1fr)); gap: var(--space-3); align-items: center; padding: var(--space-3) var(--space-2); border: 0; background: none; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.selskap-rad:hover { background: var(--surface-card, #fff); }
+.selskap-rad .nr { color: var(--text-muted); font: var(--type-body-sm); }
+.selskap-navn { display: flex; flex-direction: column; min-width: 0; }
+.selskap-navn strong { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.selskap-rad .tall { display: flex; flex-direction: column; font: var(--type-body-sm); }
+.selskap-rad .tall b { font-weight: 600; font-size: 15px; }
+.selskap-rad .tall span { color: var(--text-muted); font-size: 12px; }
+.selskap-rad em { font-style: normal; } .selskap-rad em.opp { color: #2E9E6E; } .selskap-rad em.ned { color: #E5402A; }
+.selskap-detalj { padding: var(--space-3) var(--space-4) var(--space-5) 76px; }
+.selskap-detalj h4 { margin: var(--space-4) 0 var(--space-2); }
+.kortliste { list-style: none; margin: 0; padding: 0; font: var(--type-body-sm); }
+.kortliste li { padding: 4px 0; border-bottom: 1px solid var(--border-subtle, var(--border-hairline)); }
+.kortliste time { color: var(--text-muted); margin-right: 6px; }
+.norge { color: #B4321F; font-size: 11px; letter-spacing: 0.06em; }
+.selskap-mini { display: inline-flex; align-items: center; gap: 8px; }
+.selskap-mini .logo { padding: 1px; }
+.tabell.bred td { vertical-align: top; }
+@media (max-width: 860px) {
+  .selskap-rad { grid-template-columns: 24px 40px 1fr 1fr; }
+  .selskap-rad .tall:nth-of-type(n+3) { display: none; }
+  .selskap-detalj { padding-left: var(--space-3); }
+}
+.selskap-detalj .rutenett-2 { gap: var(--space-6); }
+.selskap-detalj .tabell th, .selskap-detalj .tabell td { white-space: nowrap; }

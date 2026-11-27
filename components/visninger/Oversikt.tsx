@@ -6,8 +6,9 @@ import { kategoriOverTid, perTema } from '@/lib/byggere';
 import { dagerSiden, datoTid, telle } from '@/lib/analyse';
 import { SPORSMAL_TYPER } from '@/lib/types';
 import { useNyheter, NyhetRad } from './Nyheter';
+import type { Visning } from '../Dashboard';
 
-export function Oversikt({ gaTil }: { gaTil: (f: 'endringer' | 'saker' | 'sporsmal' | 'regjeringen' | 'nyheter') => void }) {
+export function Oversikt({ gaTil }: { gaTil: (f: Visning) => void }) {
   const c = useData();
   const { data, filtrert } = c;
   const { liste: nyheter } = useNyheter();

@@ -19,30 +19,38 @@ import { Overvaking } from './visninger/Overvaking';
 import { Kalender } from './visninger/Kalender';
 import { Nyheter } from './visninger/Nyheter';
 import { Access } from './visninger/Access';
+import { Marked } from './visninger/Marked';
 
+// Seks hovedfaner; de med flere visninger har undervalg. Adressen er #hovedfane/undervalg.
 const FANER = [
-  { id: 'oversikt', navn: 'Oversikt' },
-  { id: 'nyheter', navn: 'Nyheter' },
-  { id: 'access', navn: 'Access' },
-  { id: 'kalender', navn: 'Kalender' },
-  { id: 'overvaking', navn: 'Overvåking' },
-  { id: 'endringer', navn: 'Store endringer' },
-  { id: 'temaer', navn: 'Temaer' },
-  { id: 'sporsmal', navn: 'Spørsmål' },
-  { id: 'komite', navn: 'Komiteen' },
-  { id: 'voteringer', navn: 'Voteringer' },
-  { id: 'saker', navn: 'Saker & høringer' },
-  { id: 'innspill', navn: 'Høringsinnspill' },
-  { id: 'debatter', navn: 'Debatter' },
-  { id: 'regjeringen', navn: 'Regjeringen' },
+  { id: 'oversikt', navn: 'Oversikt', under: [
+    { id: 'sammendrag', navn: 'Sammendrag' }, { id: 'kalender', navn: 'Kalender' }, { id: 'temaer', navn: 'Temaer' }, { id: 'endringer', navn: 'Store endringer' },
+  ] },
+  { id: 'politikk', navn: 'Politikk', under: [
+    { id: 'sporsmal', navn: 'Spørsmål' }, { id: 'saker', navn: 'Saker og høringer' }, { id: 'innspill', navn: 'Høringsinnspill' }, { id: 'debatter', navn: 'Debatter' },
+    { id: 'voteringer', navn: 'Voteringer' }, { id: 'komite', navn: 'Komiteen' }, { id: 'regjeringen', navn: 'Regjeringen' },
+  ] },
+  { id: 'access', navn: 'Access', under: [] },
+  { id: 'marked', navn: 'Marked', under: [
+    { id: 'selskaper', navn: 'Selskaper' }, { id: 'kommer', navn: 'Kommer til Norge' }, { id: 'pipeline', navn: 'Pipeline' },
+  ] },
+  { id: 'nyheter', navn: 'Nyheter', under: [] },
+  { id: 'kunder', navn: 'Kunder', under: [] },
 ] as const;
-type Fane = (typeof FANER)[number]['id'];
+type Hoved = (typeof FANER)[number]['id'];
+export type Visning = Hoved | (typeof FANER)[number]['under'][number]['id'];
+// Hovedfane for hver visning (også gamle adresser som #sporsmal)
+const FORELDER: Record<string, Hoved> = Object.fromEntries(FANER.flatMap((f) => [[f.id, f.id], ...f.under.map((u) => [u.id, f.id])])) as Record<string, Hoved>;
+FORELDER.overvaking = 'kunder';
+// Faner der de globale filtrene (periode, kategori, søk) gir mening
+const MED_FILTER = new Set<Hoved>(['oversikt', 'politikk', 'nyheter', 'kunder']);
 
 export default function Dashboard() {
   const [data, setData] = useState<Data | null>(null);
   const [feil, setFeil] = useState('');
-  const [fane, setFane] = useState<Fane>('oversikt');
-  const [filtre, setF] = useState<Filtre>({ sesjon: 'p:2025-2029', kategorier: [], sok: '' });
+  const [hoved, setHoved] = useState<Hoved>('oversikt');
+  const [under, setUnder] = useState<Record<string, string>>({ oversikt: 'sammendrag', politikk: 'sporsmal', marked: 'selskaper' });
+  const [filtre, setF] = useState<Filtre>({ sesjon: 'p:2025-2029', kategorier: [], sok: '', kunStore: false });
   const [person, setPerson] = useState<string | null>(null);
   const [tema, setTema] = useState<string | null>(null);
 
@@ -51,14 +59,23 @@ export default function Dashboard() {
       .then((r) => { if (r.status === 401) { location.href = '/login'; throw new Error('401'); } return r.json(); })
       .then(setData)
       .catch((e) => e.message !== '401' && setFeil('Kunne ikke laste data.'));
-    const h = location.hash.slice(1) as Fane;
-    if (FANER.some((f) => f.id === h)) setFane(h);
+    const [a, b] = location.hash.slice(1).split('/');
+    const h = FORELDER[b || a] || FORELDER[a];
+    if (h) { setHoved(h); const u = b || (a !== h ? a : ''); if (u && FORELDER[u] === h && u !== h) setUnder((x) => ({ ...x, [h]: u })); }
   }, []);
-  const byttFane = useCallback((f: Fane) => {
-    setFane(f);
-    history.replaceState(null, '', `#${f}`);
+  // Gå til en hovedfane eller en undervisning (f.eks. 'sporsmal' åpner Politikk › Spørsmål)
+  const byttFane = useCallback((v: Visning | 'overvaking') => {
+    const h = FORELDER[v];
+    if (!h) return;
+    setHoved(h);
+    if (v !== h) setUnder((x) => ({ ...x, [h]: v }));
     window.scrollTo({ top: 0 });
   }, []);
+  useEffect(() => {
+    const u = under[hoved];
+    const har = FANER.find((f) => f.id === hoved)!.under.length > 0;
+    history.replaceState(null, '', `#${hoved}${har && u ? '/' + u : ''}`);
+  }, [hoved, under]);
 
   const filtrert = useMemo(() => {
     if (!data) return [];
@@ -66,6 +83,7 @@ export default function Dashboard() {
     const ses = new Set(sesjonerI(filtre.sesjon, data));
     l = l.filter((e) => ses.has(e.sesjon));
     if (filtre.kategorier.length) l = l.filter((e) => filtre.kategorier.includes(e.kategori));
+    if (filtre.kunStore) l = l.filter((e) => e.storEndring);
     if (filtre.sok) l = sok(l, filtre.sok, data);
     return l;
   }, [data, filtre]);
@@ -90,6 +108,9 @@ export default function Dashboard() {
     };
   }, [data, filtre, filtrert, byttFane]);
 
+  const aktivFane = FANER.find((f) => f.id === hoved)!;
+  const aktivUnder = under[hoved] || aktivFane.under[0]?.id;
+  const vis = (id: string) => (aktivFane.under.length ? aktivUnder === id : hoved === id);
   if (feil) return <div className="laster">{feil}</div>;
   if (!data || !ctx) return <div className="laster"><span className="spinner" /> Laster helsepolitiske data …</div>;
 
@@ -107,17 +128,28 @@ export default function Dashboard() {
               <button className="knapp knapp--naken" onClick={async () => { await fetch('/api/logout', { method: 'POST' }); location.href = '/login'; }}>Logg ut</button>
             </div>
           </div>
-          <nav className="faner" aria-label="Visninger">
+          <nav className="faner" aria-label="Hovedfaner">
             <div className="faner-indre">
               {FANER.map((f) => (
-                <button key={f.id} className={fane === f.id ? 'på' : ''} aria-current={fane === f.id ? 'page' : undefined} onClick={() => byttFane(f.id)}>
+                <button key={f.id} className={hoved === f.id ? 'på' : ''} aria-current={hoved === f.id ? 'page' : undefined} onClick={() => byttFane(f.id)}>
                   {f.navn}
                 </button>
               ))}
             </div>
           </nav>
+          {aktivFane.under.length > 0 && (
+            <nav className="underfaner" aria-label={`Visninger i ${aktivFane.navn}`}>
+              <div className="underfaner-indre">
+                {aktivFane.under.map((u) => (
+                  <button key={u.id} className={aktivUnder === u.id ? 'på' : ''} aria-current={aktivUnder === u.id ? 'page' : undefined} onClick={() => byttFane(u.id)}>
+                    {u.navn}
+                  </button>
+                ))}
+              </div>
+            </nav>
+          )}
         </header>
-        {fane === 'oversikt' && (
+        {hoved === 'oversikt' && aktivUnder === 'sammendrag' && (
           <div className="hero">
             <div className="innhold">
               <p className="eyebrow">Helse- og omsorgskomiteen · Stortingsperioden {data.meta.periode.replace('-', '–')}</p>
@@ -129,7 +161,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-        <div className="filterlinje">
+        {MED_FILTER.has(hoved) && <div className="filterlinje">
           <div className="innhold filterlinje-indre">
             <Segment
               etikett="Sesjon"
@@ -151,6 +183,7 @@ export default function Dashboard() {
               sett={(v) => ctx.setFiltre({ kategorier: v })}
               farge={ctx.katFarge}
             />
+            <label className="bryter"><input type="checkbox" checked={filtre.kunStore} onChange={(e) => ctx.setFiltre({ kunStore: e.target.checked })} /> Kun store endringer</label>
             <input
               className="sokefelt"
               type="search"
@@ -160,22 +193,23 @@ export default function Dashboard() {
               aria-label="Søk"
             />
           </div>
-        </div>
+        </div>}
         <main className="innhold hoved">
-          {fane === 'oversikt' && <Oversikt gaTil={byttFane} />}
-          {fane === 'endringer' && <StoreEndringer />}
-          {fane === 'kalender' && <Kalender />}
-          {fane === 'nyheter' && <Nyheter />}
-          {fane === 'access' && <Access />}
-          {fane === 'overvaking' && <Overvaking />}
-          {fane === 'temaer' && <Temaer valgt={tema} setValgt={setTema} />}
-          {fane === 'sporsmal' && <Sporsmal />}
-          {fane === 'komite' && <Komite />}
-          {fane === 'voteringer' && <Voteringer />}
-          {fane === 'saker' && <Saker />}
-          {fane === 'innspill' && <Innspill />}
-          {fane === 'debatter' && <Debatter />}
-          {fane === 'regjeringen' && <Regjeringen />}
+          {vis('sammendrag') && <Oversikt gaTil={byttFane} />}
+          {vis('kalender') && <Kalender />}
+          {vis('temaer') && <Temaer valgt={tema} setValgt={setTema} />}
+          {vis('endringer') && <StoreEndringer />}
+          {vis('sporsmal') && <Sporsmal />}
+          {vis('saker') && <Saker />}
+          {vis('innspill') && <Innspill />}
+          {vis('debatter') && <Debatter />}
+          {vis('voteringer') && <Voteringer />}
+          {vis('komite') && <Komite />}
+          {vis('regjeringen') && <Regjeringen />}
+          {vis('access') && <Access />}
+          {hoved === 'marked' && <Marked visning={aktivUnder as 'selskaper' | 'kommer' | 'pipeline'} />}
+          {vis('nyheter') && <Nyheter />}
+          {vis('kunder') && <Overvaking />}
         </main>
         <footer className="bunn">
           <div className="innhold bunn-indre">
