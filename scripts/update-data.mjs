@@ -16,8 +16,8 @@ const API = 'https://data.stortinget.no/eksport';
 const PERIODE = '2025-2029';
 // To stortingsperioder gir sammenligningsgrunnlag: forrige (2021–2025) og inneværende (2025–2029)
 const PERIODER = [
-  { id: '2021-2025', navn: 'Forrige periode (2021–2025)', fra: '2021-2022', til: '2024-2025', start: '2021-10-01' },
-  { id: '2025-2029', navn: 'Denne perioden (2025–2029)', fra: '2025-2026', til: '2028-2029', start: '2025-10-01' },
+  { id: '2021-2025', navn: '2021–2025', fra: '2021-2022', til: '2024-2025', start: '2021-10-01' },
+  { id: '2025-2029', navn: '2025–2029', fra: '2025-2026', til: '2028-2029', start: '2025-10-01' },
 ];
 const FORSTE_SESJON = PERIODER[0].fra;
 const KOMITE = 'HELSEOMS';

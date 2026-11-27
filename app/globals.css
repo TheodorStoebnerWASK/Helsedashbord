@@ -88,7 +88,7 @@ code { font-size: 0.9em; background: var(--surface-sunken); border: 1px solid va
 .topp-produkt { font: var(--type-subhead); font-size: 19px; color: var(--text-primary); padding-left: var(--space-5); border-left: 1px solid var(--border-hairline); white-space: nowrap; }
 .topp-hoyre { margin-left: auto; display: flex; align-items: center; gap: var(--space-5); }
 .faner { max-width: calc(var(--maks) + 2 * var(--marg)); margin: 0 auto; padding: 0 var(--marg); }
-.faner-indre { display: flex; gap: var(--space-6); overflow-x: auto; scrollbar-width: none; }
+.faner-indre { display: flex; flex-wrap: wrap; gap: 0 var(--space-5); }
 .faner button { border: 0; border-bottom: 1px solid transparent; background: none; padding: var(--space-2) 0 var(--space-3); color: var(--text-secondary); white-space: nowrap; transition: var(--transition-ui); }
 .faner button:hover { color: var(--text-primary); }
 .faner button.på { color: var(--text-primary); border-bottom-color: var(--border-strong); }
@@ -286,7 +286,7 @@ aside .seksjon-hode h2 { font-size: 24px; }
   .topp-produkt { display: none; }
   .topp-logo img { height: 16px; }
   .topp-hoyre { gap: var(--space-3); }
-  .faner-indre { gap: var(--space-5); }
+  .faner-indre { gap: 0 var(--space-4); }
   .element { grid-template-columns: minmax(0, 1fr); gap: 6px; }
   .element-meta { flex-direction: row; flex-wrap: wrap; gap: 10px; }
   .stat + .stat { border-left: 0; padding-left: 0; }

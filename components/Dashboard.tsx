@@ -132,8 +132,8 @@ export default function Dashboard() {
               verdi={filtre.sesjon}
               sett={(s) => ctx.setFiltre({ sesjon: s })}
               valg={[
-                ...(data.meta.perioder || []).slice().reverse().map((p) => ({ id: `p:${p.id}`, navn: p.id === data.meta.periode ? 'Denne perioden' : 'Forrige periode' })),
-                { id: 'alle', navn: 'Begge' },
+                ...(data.meta.perioder || []).slice().reverse().map((p) => ({ id: `p:${p.id}`, navn: p.id.replace('-', '–') })),
+                { id: 'alle', navn: '2021–2029' },
               ]}
             />
             <select className="sesjonvelger" aria-label="Velg én sesjon" value={filtre.sesjon.startsWith('p:') || filtre.sesjon === 'alle' ? '' : filtre.sesjon}
