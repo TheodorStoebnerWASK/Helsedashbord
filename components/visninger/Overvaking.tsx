@@ -3,12 +3,13 @@ import { useMemo, useState } from 'react';
 import { useData, Seksjon, Stat, Segment, ElementRad } from '../felles';
 import { Graf } from '../Graf';
 import { useLat } from './Innspill';
+import { useNyheter } from './Nyheter';
 import { lagOrdRegex, treffI } from '@/lib/ord';
 import { datoKort, maneder, mndNokkel, mndNavn } from '@/lib/analyse';
 import type { DebattData, InnspillData, Element } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
 
-type Kilde = 'stortinget' | 'regjeringen' | 'innspill' | 'debatter';
+type Kilde = 'stortinget' | 'regjeringen' | 'innspill' | 'debatter' | 'nyheter';
 interface Treff { kilde: Kilde; dato?: string; tittel: string; url?: string; ord: string[]; element?: Element; undertekst?: string }
 
 /** Overvåkingslister per kunde: søkeord fra config/overvaking.json mot alle kildene i dashbordet. */
@@ -19,6 +20,7 @@ export function Overvaking() {
   const [kilde, setKilde] = useState<'alle' | Kilde>('alle');
   const { data: inn } = useLat<InnspillData>('/api/innspill');
   const { data: deb } = useLat<DebattData>('/api/debatter');
+  const { liste: nyheter } = useNyheter();
   const liste = lister.find((l) => l.id === valgt);
   const rx = useMemo(() => lagOrdRegex(liste?.ord || []), [liste]);
 
@@ -48,8 +50,13 @@ export function Overvaking() {
         });
       }
     }
+    const kildeNavn = Object.fromEntries((data.nyhetskilder || []).map((k) => [k.id, k.navn]));
+    for (const n of nyheter) {
+      const ord = treffI(`${n.t} ${n.i || ''}`, rx);
+      if (ord.length) ut.push({ kilde: 'nyheter', dato: n.d, tittel: `${kildeNavn[n.k] || n.k}: ${n.t}`, url: n.url, ord, undertekst: n.i });
+    }
     return ut.sort((a, b) => String(b.dato).localeCompare(String(a.dato)));
-  }, [rx, filtrert, inn, deb, sesjoner]);
+  }, [rx, filtrert, inn, deb, sesjoner, nyheter, data]);
 
   const vis = kilde === 'alle' ? treff : treff.filter((t) => t.kilde === kilde);
   const ordTelling = useMemo(() => {
@@ -60,10 +67,10 @@ export function Overvaking() {
 
   const tidSpec: GrafSpec = useMemo(() => {
     const mnd = maneder();
-    const farger: Record<Kilde, string> = { stortinget: '#2F86B8', regjeringen: '#E5402A', innspill: '#2E9E6E', debatter: '#DDA21A' };
-    const navn: Record<Kilde, string> = { stortinget: 'Stortinget', regjeringen: 'Regjeringen', innspill: 'Høringsinnspill', debatter: 'Debatter' };
+    const farger: Record<Kilde, string> = { stortinget: '#2F86B8', regjeringen: '#E5402A', innspill: '#2E9E6E', debatter: '#DDA21A', nyheter: '#8A5AB0' };
+    const navn: Record<Kilde, string> = { stortinget: 'Stortinget', regjeringen: 'Regjeringen', innspill: 'Høringsinnspill', debatter: 'Debatter', nyheter: 'Nyheter' };
     return {
-      id: `overvaking-tid-${valgt}`, tittel: `${liste?.navn}: treff per måned`, undertittel: 'Spørsmål, saker, høringer, regjeringen, innspill og debattinnlegg', form: 'stolpe', stablet: true,
+      id: `overvaking-tid-${valgt}`, tittel: `${liste?.navn}: treff per måned`, undertittel: 'Spørsmål, saker, høringer, regjeringen, innspill, debattinnlegg og nyheter', form: 'stolpe', stablet: true,
       kategorier: mnd.map(mndNavn),
       serier: (Object.keys(farger) as Kilde[]).map((k) => ({ navn: navn[k], farge: farger[k], data: mnd.map((m) => treff.filter((t) => t.kilde === k && t.dato && mndNokkel(t.dato) === m).length) })),
     };
@@ -80,7 +87,7 @@ export function Overvaking() {
             {lister.map((l) => <option key={l.id} value={l.id}>{l.navn}</option>)}
           </select>
         </label>
-        <Segment etikett="Kilde" verdi={kilde} sett={setKilde} valg={[{ id: 'alle', navn: 'Alle kilder' }, { id: 'stortinget', navn: 'Stortinget' }, { id: 'regjeringen', navn: 'Regjeringen' }, { id: 'innspill', navn: 'Innspill' }, { id: 'debatter', navn: 'Debatter' }]} />
+        <Segment etikett="Kilde" verdi={kilde} sett={setKilde} valg={[{ id: 'alle', navn: 'Alle kilder' }, { id: 'stortinget', navn: 'Stortinget' }, { id: 'regjeringen', navn: 'Regjeringen' }, { id: 'innspill', navn: 'Innspill' }, { id: 'debatter', navn: 'Debatter' }, { id: 'nyheter', navn: 'Nyheter' }]} />
       </div>
       {liste?.beskrivelse && <p className="dempet">{liste.beskrivelse}</p>}
       <div className="stats">
@@ -88,6 +95,7 @@ export function Overvaking() {
         <Stat tall={treff.filter((t) => t.kilde === 'stortinget').length} etikett="i Stortinget" />
         <Stat tall={treff.filter((t) => t.kilde === 'innspill').length} etikett="i høringsinnspill" />
         <Stat tall={treff.filter((t) => t.kilde === 'debatter').length} etikett="i debatter" />
+        <Stat tall={treff.filter((t) => t.kilde === 'nyheter').length} etikett="i nyheter" />
         <Stat tall={treff.filter((t) => t.element?.storEndring).length} etikett="store endringer" />
       </div>
       <div className="rutenett-sidepanel">
@@ -98,7 +106,7 @@ export function Overvaking() {
               <div key={i}><ElementRad e={t.element} /><p className="trefford">Treff: {t.ord.join(', ')}</p></div>
             ) : (
               <li key={i} className="element">
-                <div className="element-meta"><span className="type">{t.kilde === 'innspill' ? 'Høringsinnspill' : 'Debatt'}</span><time>{datoKort(t.dato)}</time></div>
+                <div className="element-meta"><span className="type">{t.kilde === 'innspill' ? 'Høringsinnspill' : t.kilde === 'nyheter' ? 'Nyhet' : 'Debatt'}</span><time>{datoKort(t.dato)}</time></div>
                 <div className="element-innhold">
                   <p className="element-tittel"><a href={t.url} target="_blank" rel="noreferrer">{t.tittel}</a></p>
                   {t.undertekst && <p className="dempet liten-tekst">{t.undertekst} …</p>}

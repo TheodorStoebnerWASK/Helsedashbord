@@ -5,10 +5,12 @@ import { Graf } from '../Graf';
 import { kategoriOverTid, perTema } from '@/lib/byggere';
 import { dagerSiden, datoTid, telle } from '@/lib/analyse';
 import { SPORSMAL_TYPER } from '@/lib/types';
+import { useNyheter, NyhetRad } from './Nyheter';
 
-export function Oversikt({ gaTil }: { gaTil: (f: 'endringer' | 'saker' | 'sporsmal' | 'regjeringen') => void }) {
+export function Oversikt({ gaTil }: { gaTil: (f: 'endringer' | 'saker' | 'sporsmal' | 'regjeringen' | 'nyheter') => void }) {
   const c = useData();
   const { data, filtrert } = c;
+  const { liste: nyheter } = useNyheter();
   const nå = Date.now();
 
   const t = useMemo(() => {
@@ -57,6 +59,11 @@ export function Oversikt({ gaTil }: { gaTil: (f: 'endringer' | 'saker' | 'sporsm
           <ElementListe liste={siste} side={10} />
         </Seksjon>
         <aside>
+          {nyheter.length > 0 && (
+            <Seksjon tittel="I mediene" hoyre={<button className="lenkeknapp" onClick={() => gaTil('nyheter')}>Se alle</button>}>
+              <ul className="elementer">{nyheter.filter((n) => !['ema'].includes(n.k)).slice(0, 6).map((n) => <NyhetRad key={n.url} n={n} />)}</ul>
+            </Seksjon>
+          )}
           <Seksjon tittel="Kommende høringer">
             {t.kommende.length === 0 && t.frister.length === 0 ? <p className="tomt">Ingen planlagte høringer nå.</p> : (
               <ul className="kalender">

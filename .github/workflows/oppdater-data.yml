@@ -30,6 +30,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Installer pdftotext (for protokollene fra Nye metoder)
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends poppler-utils
       - name: Hent og klassifiser
         run: node scripts/update-data.mjs --ki
         env:

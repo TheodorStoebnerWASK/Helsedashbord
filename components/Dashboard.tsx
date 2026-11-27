@@ -17,9 +17,13 @@ import { Innspill } from './visninger/Innspill';
 import { Debatter } from './visninger/Debatter';
 import { Overvaking } from './visninger/Overvaking';
 import { Kalender } from './visninger/Kalender';
+import { Nyheter } from './visninger/Nyheter';
+import { Access } from './visninger/Access';
 
 const FANER = [
   { id: 'oversikt', navn: 'Oversikt' },
+  { id: 'nyheter', navn: 'Nyheter' },
+  { id: 'access', navn: 'Access' },
   { id: 'kalender', navn: 'Kalender' },
   { id: 'overvaking', navn: 'Overvåking' },
   { id: 'endringer', navn: 'Store endringer' },
@@ -119,7 +123,7 @@ export default function Dashboard() {
               <p className="eyebrow">Helse- og omsorgskomiteen · Stortingsperioden {data.meta.periode.replace('-', '–')}</p>
               <h1>Hva rører seg i <em>helsepolitikken</em></h1>
               <p className="hero-meta">
-                Oppdatert {datoTid(data.meta.oppdatert)} · Kilder: Stortinget og regjeringen.no ·{' '}
+                Oppdatert {datoTid(data.meta.oppdatert)} · Kilder: Stortinget, regjeringen.no, Nye metoder, EMA, DMP og fagmedier ·{' '}
                 {data.meta.kiAndel > 0.5 ? 'Temaer klassifisert med KI' : 'Temaer klassifisert med nøkkelord (KI aktiveres ved første automatiske kjøring)'}
               </p>
             </div>
@@ -161,6 +165,8 @@ export default function Dashboard() {
           {fane === 'oversikt' && <Oversikt gaTil={byttFane} />}
           {fane === 'endringer' && <StoreEndringer />}
           {fane === 'kalender' && <Kalender />}
+          {fane === 'nyheter' && <Nyheter />}
+          {fane === 'access' && <Access />}
           {fane === 'overvaking' && <Overvaking />}
           {fane === 'temaer' && <Temaer valgt={tema} setValgt={setTema} />}
           {fane === 'sporsmal' && <Sporsmal />}

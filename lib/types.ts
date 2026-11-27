@@ -81,6 +81,7 @@ export interface Data {
   voteringer?: Votering[];
   kalender?: { salen: { dato: string; sakId?: number; tekst: string; henvisning?: string; komite?: string; nr?: string }[] };
   overvaking?: Overvakingsliste[];
+  nyhetskilder?: Nyhetskilde[];
   hod?: { personer: HodPerson[]; kilde?: string; sistKontrollert?: string };
   personer: Record<string, Person>;
   elementer: Element[];
@@ -108,3 +109,21 @@ export interface Debattdel { type: 'sak' | 'spørretime'; sakId?: number; tittel
 export type DebattData = Record<string, { sesjon: string; dato?: string; tittel: string; komplett: boolean; deler: Debattdel[] }>;
 
 export interface Overvakingsliste { id: string; navn: string; kunde?: string; beskrivelse?: string; ord: string[] }
+
+// Nyhetsstrøm: url → artikkel (korte nøkler for å holde filen liten)
+export interface Nyhet { k: string; t: string; i?: string; d: string; s?: string; p?: boolean; kat?: string; tem?: string[]; und?: string[]; se?: boolean }
+export type NyhetData = Record<string, Nyhet>;
+export interface Nyhetskilde { id: string; navn: string; type: 'medie' | 'etat'; status?: { ok: boolean; funnet?: number; nye?: number; feil?: string } }
+
+// Access
+export interface MetodeSak { sak?: string; ider: string[]; tittel: string; beslutning: string; status: string }
+export interface ForumMote { dato: string; dokumenter: { saksliste?: string; sakspapirer?: string; protokoll?: string }; saker?: MetodeSak[] }
+export interface EmaHendelse {
+  navn: string; virkestoff?: string; url?: string; omrade: string[]; innehaver?: string; atc?: string; indikasjon?: string;
+  orphan?: boolean; prime?: boolean; betinget?: boolean; biotilsvarende?: boolean; generisk?: boolean; atmp?: boolean;
+  type: 'opinion' | 'godkjent' | 'avslag' | 'trukket'; dato: string; status: string; nm?: string[];
+}
+export interface Metode { tittel: string; h: { f: 'bf' | 'bsf'; d: string; s: string; b: string; u?: string }[] }
+export interface AccessData {
+  oppdatert?: string; ema?: EmaHendelse[]; beslutningsforum?: ForumMote[]; bestillerforum?: ForumMote[]; metoder?: Record<string, Metode>;
+}
