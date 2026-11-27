@@ -18,8 +18,9 @@ import { Debatter } from './visninger/Debatter';
 import { Overvaking } from './visninger/Overvaking';
 import { Kalender } from './visninger/Kalender';
 import { Nyheter } from './visninger/Nyheter';
-import { Access } from './visninger/Access';
+import { Access, type AccessVisning } from './visninger/Access';
 import { Marked } from './visninger/Marked';
+import { Selskapsradar } from './visninger/Selskapsradar';
 
 // Seks hovedfaner; de med flere visninger har undervalg. Adressen er #hovedfane/undervalg.
 const FANER = [
@@ -30,12 +31,15 @@ const FANER = [
     { id: 'sporsmal', navn: 'Spørsmål' }, { id: 'saker', navn: 'Saker og høringer' }, { id: 'innspill', navn: 'Høringsinnspill' }, { id: 'debatter', navn: 'Debatter' },
     { id: 'voteringer', navn: 'Voteringer' }, { id: 'komite', navn: 'Komiteen' }, { id: 'regjeringen', navn: 'Regjeringen' },
   ] },
-  { id: 'access', navn: 'Access', under: [] },
+  { id: 'access', navn: 'Access', under: [
+    { id: 'lopet', navn: 'Tilgangsløpet' }, { id: 'beslutning', navn: 'Beslutningsforum' }, { id: 'bestilling', navn: 'Bestillerforum' },
+    { id: 'ema', navn: 'EMA' }, { id: 'metode', navn: 'Finn metode' }, { id: 'blaresept', navn: 'Blå resept og politikk' },
+  ] },
   { id: 'marked', navn: 'Marked', under: [
     { id: 'selskaper', navn: 'Selskaper' }, { id: 'kommer', navn: 'Kommer til Norge' }, { id: 'pipeline', navn: 'Pipeline' },
   ] },
   { id: 'nyheter', navn: 'Nyheter', under: [] },
-  { id: 'kunder', navn: 'Kunder', under: [] },
+  { id: 'kunder', navn: 'Kunder', under: [{ id: 'radar', navn: 'Selskapsradar' }, { id: 'lister', navn: 'Egne søkelister' }] },
 ] as const;
 type Hoved = (typeof FANER)[number]['id'];
 export type Visning = Hoved | (typeof FANER)[number]['under'][number]['id'];
@@ -49,7 +53,7 @@ export default function Dashboard() {
   const [data, setData] = useState<Data | null>(null);
   const [feil, setFeil] = useState('');
   const [hoved, setHoved] = useState<Hoved>('oversikt');
-  const [under, setUnder] = useState<Record<string, string>>({ oversikt: 'sammendrag', politikk: 'sporsmal', marked: 'selskaper' });
+  const [under, setUnder] = useState<Record<string, string>>({ oversikt: 'sammendrag', politikk: 'sporsmal', access: 'lopet', marked: 'selskaper', kunder: 'radar' });
   const [filtre, setF] = useState<Filtre>({ sesjon: 'p:2025-2029', kategorier: [], sok: '', kunStore: false });
   const [person, setPerson] = useState<string | null>(null);
   const [tema, setTema] = useState<string | null>(null);
@@ -206,10 +210,11 @@ export default function Dashboard() {
           {vis('voteringer') && <Voteringer />}
           {vis('komite') && <Komite />}
           {vis('regjeringen') && <Regjeringen />}
-          {vis('access') && <Access />}
+          {hoved === 'access' && <Access visning={aktivUnder as AccessVisning} gaTil={byttFane} />}
           {hoved === 'marked' && <Marked visning={aktivUnder as 'selskaper' | 'kommer' | 'pipeline'} />}
           {vis('nyheter') && <Nyheter />}
-          {vis('kunder') && <Overvaking />}
+          {vis('radar') && <Selskapsradar />}
+          {vis('lister') && <Overvaking />}
         </main>
         <footer className="bunn">
           <div className="innhold bunn-indre">

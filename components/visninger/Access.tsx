@@ -5,7 +5,7 @@ import { Graf } from '../Graf';
 import { useLat } from './Innspill';
 import { useNyheter, NyhetRad } from './Nyheter';
 import { datoKort } from '@/lib/analyse';
-import type { AccessData, EmaHendelse, ForumMote, Metode } from '@/lib/types';
+import type { AccessData, EmaHendelse, ForumMote, MarkedData, Metode } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
 
 const BSF: Record<string, { navn: string; farge: string }> = {
@@ -58,7 +58,82 @@ function Lop({ steg }: { steg: { nr?: string; navn: string; aktor: string; tall?
   );
 }
 
-function MoteListe({ moter, kart, status }: { moter: ForumMote[]; kart: Record<string, { navn: string; farge: string }>; status: string[] }) {
+type Tall = { emaOpinion: number; emaGodkjent: number; bestilt: number; ikkeOppdrag: number; full: number; underArbeid: number; prisnotat: number; innfort: number; ikke: number; median: number | null; antallTider: number };
+
+/** Forklaring av tilgangsløpet: fra EMA til beslutning, og forskjellen på sykehus og blå resept. */
+function Lopet({ b }: { b: Tall }) {
+  return (
+    <>
+      <p className="ingress">
+        Et nytt legemiddel må gjennom to løp før norske pasienter får det: først <b>godkjenning</b> (markedsføringstillatelse) og deretter <b>finansiering</b>.
+        Hvilket finansieringsløp det havner i, avhenger av hvem som skal betale – sykehusene eller folketrygden – og det avgjør hvem som bestemmer og om saken kan bli politisk.
+      </p>
+
+      <Seksjon tittel="1. Godkjenning: EMA → EU-kommisjonen → DMP">
+        <ol className="forklaring">
+          <li><b>Søknad til EMA.</b> Selskapet søker om markedsføringstillatelse for hele EU/EØS. Vurderingen tar normalt rundt ett år (kortere ved hurtigvurdering / PRIME).</li>
+          <li><b>CHMP-opinion.</b> EMAs legemiddelkomité (CHMP) gir en positiv eller negativ anbefaling. <em>Dette er det første offentlige signalet om at et legemiddel kommer.</em></li>
+          <li><b>Vedtak i EU-kommisjonen</b> om markedsføringstillatelse, normalt innen 67 dager etter opinion.</li>
+          <li><b>DMP</b> (Direktoratet for medisinske produkter) gjør vedtaket gjeldende i Norge, normalt innen 30 dager. Legemidlet kan da selges – men ingen betaler for det ennå.</li>
+        </ol>
+        <p className="dempet liten-tekst">Siste 12 måneder: {b.emaOpinion} positive opinions og {b.emaGodkjent} nye markedsføringstillatelser. Se undervalget «EMA» og Marked › «Kommer til Norge».</p>
+      </Seksjon>
+
+      <Seksjon tittel="2. Finansiering: to ulike løp">
+        <div className="kanaler">
+          <div className="kanal">
+            <p className="eyebrow">Spesialisthelsetjenesten</p>
+            <h3>Sykehuslegemidler – Nye metoder</h3>
+            <dl>
+              <dt>Hvem betaler</dt><dd>De regionale helseforetakene (sykehusbudsjettene)</dd>
+              <dt>Hvem vurderer</dt><dd>DMP, på oppdrag fra Bestillerforum. Sykehusinnkjøp forhandler pris</dd>
+              <dt>Hvem beslutter</dt><dd>Beslutningsforum – de fire administrerende direktørene i RHF-ene, etter anbefaling fra fagdirektørene</dd>
+              <dt>Fullmaktsgrense</dt><dd><b>Ingen.</b> Beslutningsforum kan innføre et legemiddel uansett budsjettvirkning</dd>
+              <dt>Politisk nivå</dt><dd>Ikke involvert i enkeltsaker. Stortinget har vedtatt prioriteringskriteriene (nytte, ressursbruk, alvorlighet) som beslutningene skal følge</dd>
+              <dt>Typiske legemidler</dt><dd>Kreft, sjeldne sykdommer, biologiske legemidler, infusjoner og andre som gis eller startes på sykehus</dd>
+            </dl>
+          </div>
+          <div className="kanal">
+            <p className="eyebrow">Primærhelsetjenesten (fastlege, kommunen, apotek)</p>
+            <h3>Blå resept – folketrygden</h3>
+            <dl>
+              <dt>Hvem betaler</dt><dd>Folketrygden (staten, via Helfo) – ikke kommunen</dd>
+              <dt>Hvem vurderer</dt><dd>DMP, etter søknad fra selskapet</dd>
+              <dt>Hvem beslutter</dt><dd><b>Under 100 mill. kr</b> i årlig merutgift (5. budsjettår): DMP vedtar selv.<br /><b>Over 100 mill. kr:</b> saken går til HOD, må inn i statsbudsjettet og vedtas av Stortinget</dd>
+              <dt>Fullmaktsgrense</dt><dd>100 mill. kr per år (legemiddelforskriften § 14-7, presisert per bruksområde fra 1. juli 2026)</dd>
+              <dt>Politisk nivå</dt><dd>Avgjørende over fullmaktsgrensen. Ingen frist for når HOD må fremme saken – kommer den ikke med i oktober, er neste sjanse ett år senere</dd>
+              <dt>Typiske legemidler</dt><dd>Legemidler for kroniske sykdommer som brukes hjemme: diabetes, astma/KOLS, hjerte–kar, overvekt</dd>
+            </dl>
+          </div>
+        </div>
+        <p className="dempet liten-tekst">Legemidler som kommunene selv gir i sykehjem og hjemmetjeneste betales over kommunebudsjettet. Medisinsk utstyr har ingen fullmaktsgrense, men kjøpes inn gjennom anbud (Sykehusinnkjøp) og vurderes i Nye metoder når det er en ny metode.</p>
+      </Seksjon>
+
+      <Seksjon tittel="3. Tilgangsløpet i Nye metoder – med tall fra protokollene">
+        <Lop steg={[
+          { navn: 'Godkjenning', aktor: 'EMA → DMP', tall: `${b.emaOpinion + b.emaGodkjent}`, merk: `${b.emaOpinion} positive opinions, ${b.emaGodkjent} nye MT` },
+          { nr: '1', navn: 'Bestilling', aktor: 'Bestillerforum', tall: `${b.bestilt}`, merk: `metoder bestilt · ${b.ikkeOppdrag} fikk ikke oppdrag`, flaskehals: 'Flaskehals 1' },
+          { nr: '2', navn: 'Metodevurdering', aktor: 'DMP', tall: `${b.full}`, merk: 'fulle eller forenklede vurderinger bestilt', flaskehals: 'Flaskehals 2' },
+          { nr: '3', navn: 'Prisforhandling', aktor: 'Sykehusinnkjøp', tall: `${b.prisnotat}`, merk: 'prisnotater bestilt', flaskehals: 'Flaskehals 3' },
+          { nr: '4', navn: 'Anbefaling', aktor: 'Fagdirektørene', merk: 'Lukket – anbefalingen publiseres ikke' },
+          { nr: '5', navn: 'Beslutning', aktor: 'Beslutningsforum', tall: `${b.innfort} / ${b.ikke}`, merk: `innført / ikke innført${b.innfort + b.ikke ? ` · ${Math.round((100 * b.ikke) / (b.innfort + b.ikke))} % nei` : ''}` },
+        ]} />
+        <div className="rutenett-3 forklaring-kort">
+          <div><p className="eyebrow">Flaskehals 1 · Bestillingen</p><p>Bestillerforum avgjør hvilken type vurdering som skal gjøres: full metodevurdering, forenklet vurdering eller bare et prisnotat. En uklar bestilling – for eksempel før indikasjonen er avklart – gir forsinkelser.</p></div>
+          <div><p className="eyebrow">Flaskehals 2 · Dokumentasjonen</p><p>DMP kan ikke starte før selskapet har levert komplett dokumentasjon. Det tar i snitt 208 dager. Selve vurderingen tar rundt 133 dager.</p></div>
+          <div><p className="eyebrow">Flaskehals 3 · Prisen</p><p>Avslag i Beslutningsforum er nesten alltid begrunnet med pris. Et nei kan snus med et nytt pristilbud – det tok i snitt 83 dager.</p></div>
+        </div>
+        <p className="dempet liten-tekst">
+          {b.median !== null && <>Median tid fra bestilling i Bestillerforum til beslutning i Beslutningsforum: <b>{b.median} dager</b> ({b.antallTider} metoder i dataene, inkludert forenklede løp). </>}
+          {b.underArbeid} metoder er bestilt siden 2023 uten at vi har funnet en beslutning (noen avsluttes uten å gå til Beslutningsforum, så tallet er et anslag).
+          Tall for flaskehalsene er fra WA Helses Access-modell.
+        </p>
+      </Seksjon>
+    </>
+  );
+}
+
+function MoteListe({ moter, kart, status, metoder, norsk }: { moter: ForumMote[]; kart: Record<string, { navn: string; farge: string }>; status: string[]; metoder: Record<string, Metode>; norsk: (n?: string) => string | null }) {
   const [antall, setAntall] = useState(6);
   const vis = moter.map((m) => ({ ...m, saker: (m.saker || []).filter((s) => !status.length || status.includes(s.status)) })).filter((m) => m.saker.length || (m.skannet && !status.length));
   if (!vis.length) return <p className="tomt">Ingen saker i utvalget.</p>;
@@ -79,6 +154,7 @@ function MoteListe({ moter, kart, status }: { moter: ForumMote[]; kart: Record<s
                 <div className="element-meta"><span className="type">{s.ider.join(', ')}</span><Merke m={kart[s.status]} /></div>
                 <div className="element-innhold">
                   <p className="element-tittel">{s.tittel}</p>
+                  <Produsent m={metoder[s.ider[0]]} norsk={norsk} />
                   <p className="dempet liten-tekst">{s.beslutning}</p>
                 </div>
               </li>
@@ -91,7 +167,13 @@ function MoteListe({ moter, kart, status }: { moter: ForumMote[]; kart: Record<s
   );
 }
 
-function MetodeKort({ id, m, ema }: { id: string; m: Metode; ema?: EmaHendelse[] }) {
+function Produsent({ m, norsk }: { m?: Metode; norsk: (n?: string) => string | null }) {
+  if (!m?.selskap) return null;
+  const no = norsk(m.selskap);
+  return <p className="produsent">Selskap: <b>{m.selskap}</b>{no && <span className="dempet"> · i Norge: {no}</span>}</p>;
+}
+
+function MetodeKort({ id, m, ema, norsk }: { id: string; m: Metode; ema?: EmaHendelse[]; norsk: (n?: string) => string | null }) {
   const bf = m.h.find((h) => h.f === 'bf' && BESTILT.includes(h.s));
   const bsf = [...m.h].reverse().find((h) => h.f === 'bsf');
   return (
@@ -103,6 +185,7 @@ function MetodeKort({ id, m, ema }: { id: string; m: Metode; ema?: EmaHendelse[]
       </div>
       <div className="element-innhold">
         <p className="element-tittel">{m.tittel}</p>
+        <Produsent m={m} norsk={norsk} />
         <ol className="tidslinje">
           {ema?.map((e, i) => <li key={`e${i}`}><time>{datoKort(e.dato)}</time> EMA: {EMA[e.type].navn} ({e.navn})</li>)}
           {m.h.map((h, i) => (
@@ -118,11 +201,17 @@ function MetodeKort({ id, m, ema }: { id: string; m: Metode; ema?: EmaHendelse[]
   );
 }
 
-export function Access() {
+export type AccessVisning = 'lopet' | 'beslutning' | 'bestilling' | 'ema' | 'metode' | 'blaresept';
+
+export function Access({ visning, gaTil }: { visning: AccessVisning; gaTil: (v: AccessVisning) => void }) {
   const { data: acc, feil } = useLat<AccessData>('/api/access');
   const { data, filtrert } = useData();
   const { liste: nyheter } = useNyheter();
-  const [visning, setVisning] = useState<'beslutning' | 'bestilling' | 'ema' | 'metode' | 'politisk'>('beslutning');
+  const { data: marked } = useLat<MarkedData>('/api/marked');
+  const norsk = useMemo(() => {
+    const l = (marked?.selskaper || []).filter((x) => x.orgnr && x.match).map((x) => ({ rx: (() => { try { return new RegExp(x.match!, 'i'); } catch { return null; } })(), navn: x.navn }));
+    return (n?: string) => (n ? l.find((x) => x.rx?.test(n))?.navn || null : null);
+  }, [marked]);
   const [bsfStatus, setBsfStatus] = useState<string[]>([]);
   const [bfStatus, setBfStatus] = useState<string[]>([]);
   const [emaType, setEmaType] = useState<EmaHendelse['type'][]>([]);
@@ -194,7 +283,7 @@ export function Access() {
   const metodeTreff = useMemo(() => {
     if (!acc?.metoder) return [];
     const q = sok.trim().toLowerCase();
-    const l = Object.entries(acc.metoder).filter(([id, m]) => !q || `${id} ${m.tittel}`.toLowerCase().includes(q));
+    const l = Object.entries(acc.metoder).filter(([id, m]) => !q || `${id} ${m.tittel} ${m.selskap || ''} ${m.legemiddel || ''}`.toLowerCase().includes(q));
     return l.sort((a, b) => (b[1].h.at(-1)?.d || '').localeCompare(a[1].h.at(-1)?.d || '')).slice(0, 60);
   }, [acc, sok]);
 
@@ -213,38 +302,18 @@ export function Access() {
   const b = beregnet;
   return (
     <>
-      <p className="ingress">
-        Tilgangsløpet for nye legemidler og metoder, fra godkjenning i EMA til beslutning i Beslutningsforum – og det politiske løpet for blå resept.
-        Strukturen følger WA Helses Access-modell. Tallene gjelder siste 12 måneder.
-      </p>
-      <Seksjon tittel="Tilgangsløpet – sykehuslegemidler (Nye metoder)">
-        <Lop steg={[
-          { navn: 'Godkjenning', aktor: 'EMA → DMP', tall: `${b.emaOpinion + b.emaGodkjent}`, merk: `${b.emaOpinion} positive opinions, ${b.emaGodkjent} nye MT` },
-          { nr: '1', navn: 'Bestilling', aktor: 'Bestillerforum', tall: `${b.bestilt}`, merk: `metoder bestilt · ${b.ikkeOppdrag} fikk ikke oppdrag`, flaskehals: 'Flaskehals 1' },
-          { nr: '2', navn: 'Metodevurdering', aktor: 'DMP', tall: `${b.full}`, merk: `fulle/forenklede vurderinger bestilt · ${b.underArbeid} bestilte metoder uten registrert beslutning`, flaskehals: 'Flaskehals 2' },
-          { nr: '3', navn: 'Prisforhandling', aktor: 'Sykehusinnkjøp', tall: `${b.prisnotat}`, merk: 'prisnotater bestilt', flaskehals: 'Flaskehals 3' },
-          { nr: '4', navn: 'Anbefaling', aktor: 'Fagdirektørene', merk: 'Lukket – anbefalingen publiseres ikke før beslutningen' },
-          { nr: '5', navn: 'Beslutning', aktor: 'Beslutningsforum', tall: `${b.innfort} / ${b.ikke}`, merk: `innført / ikke innført${b.innfort + b.ikke ? ` · ${Math.round((100 * b.ikke) / (b.innfort + b.ikke))} % nei` : ''}` },
-        ]} />
-        <p className="dempet liten-tekst">
-          {b.median !== null && <>Median tid fra bestilling i Bestillerforum til beslutning i Beslutningsforum: <b>{b.median} dager</b> ({b.antallTider} metoder i dataene, inkludert forenklede løp). </>}
-          Protokollene leses automatisk (Bestillerforum fra 2023, Beslutningsforum fra 2024). Noen eldre protokoller er skannet og kan ikke leses maskinelt.
-        </p>
-      </Seksjon>
-
-      <div className="lokale-filtre">
-        <Segment etikett="Visning" verdi={visning} sett={setVisning} valg={[
-          { id: 'beslutning', navn: 'Beslutningsforum' }, { id: 'bestilling', navn: 'Bestillerforum' }, { id: 'ema', navn: 'EMA' },
-          { id: 'metode', navn: 'Finn metode' }, { id: 'politisk', navn: 'Blå resept og politikk' },
-        ]} />
-        {(visning === 'ema' || visning === 'metode') && <input className="sokefelt" type="search" placeholder={visning === 'ema' ? 'Søk legemiddel, virkestoff, område …' : 'Søk ID, legemiddel eller indikasjon …'} value={sok} onChange={(e) => setSok(e.target.value)} />}
-      </div>
+      {visning === 'lopet' && <Lopet b={b} />}
+      {(visning === 'ema' || visning === 'metode') && (
+        <div className="lokale-filtre">
+          <input className="sokefelt" type="search" placeholder={visning === 'ema' ? 'Søk legemiddel, virkestoff, område, selskap …' : 'Søk ID, legemiddel, selskap eller indikasjon …'} value={sok} onChange={(e) => setSok(e.target.value)} />
+        </div>
+      )}
 
       {visning === 'beslutning' && (
         <div className="rutenett-sidepanel">
           <Seksjon tittel="Møter i Beslutningsforum">
             <Chips valg={Object.entries(BSF).map(([id, x]) => ({ id, navn: x.navn }))} valgt={bsfStatus} sett={setBsfStatus} farge={(id) => BSF[id].farge} />
-            <MoteListe moter={acc.beslutningsforum || []} kart={BSF} status={bsfStatus} />
+            <MoteListe moter={acc.beslutningsforum || []} kart={BSF} status={bsfStatus} metoder={acc.metoder || {}} norsk={norsk} />
           </Seksjon>
           <aside>{kvartalSpec && <Graf spec={kvartalSpec} />}</aside>
         </div>
@@ -253,7 +322,7 @@ export function Access() {
         <div className="rutenett-sidepanel">
           <Seksjon tittel="Møter i Bestillerforum">
             <Chips valg={Object.entries(BF).filter(([id]) => id !== 'annet').map(([id, x]) => ({ id, navn: x.navn }))} valgt={bfStatus} sett={setBfStatus} farge={(id) => BF[id].farge} />
-            <MoteListe moter={acc.bestillerforum || []} kart={BF} status={bfStatus} />
+            <MoteListe moter={acc.bestillerforum || []} kart={BF} status={bfStatus} metoder={acc.metoder || {}} norsk={norsk} />
           </Seksjon>
           <aside>{bfSpec && <Graf spec={bfSpec} />}</aside>
         </div>
@@ -275,8 +344,8 @@ export function Access() {
                     {e.omrade.map((o) => <span key={o} className="stikkord">{o}</span>)}
                     {e.orphan && <span className="stikkord">Orphan</span>}{e.prime && <span className="stikkord">PRIME</span>}{e.atmp && <span className="stikkord">ATMP</span>}
                     {e.betinget && <span className="stikkord">Betinget</span>}{e.biotilsvarende && <span className="stikkord">Biotilsvarende</span>}{e.generisk && <span className="stikkord">Generisk</span>}
-                    {e.innehaver && <span className="dempet liten-tekst">{e.innehaver}</span>}
-                    {e.nm?.map((id) => <button key={id} className="tema-merke" onClick={() => { setSok(id); setVisning('metode'); }}>Nye metoder {id}</button>)}
+                    {e.innehaver && <span className="dempet liten-tekst">{e.innehaver}{norsk(e.innehaver) ? ` · i Norge: ${norsk(e.innehaver)}` : ''}</span>}
+                    {e.nm?.map((id) => <button key={id} className="tema-merke" onClick={() => { setSok(id); gaTil('metode'); }}>Nye metoder {id}</button>)}
                   </div>
                 </div>
               </li>
@@ -289,10 +358,10 @@ export function Access() {
       {visning === 'metode' && (
         <Seksjon tittel={sok ? `Metoder som matcher «${sok}»` : 'Sist behandlede metoder'}>
           {metodeTreff.length === 0 && <p className="tomt">Ingen metoder funnet. Søk på ID (f.eks. ID2025_052), virkestoff eller merkenavn.</p>}
-          <ul className="elementer">{metodeTreff.map(([id, m]) => <MetodeKort key={id} id={id} m={m} ema={emaPerMetode.get(id)} />)}</ul>
+          <ul className="elementer">{metodeTreff.map(([id, m]) => <MetodeKort key={id} id={id} m={m} ema={emaPerMetode.get(id)} norsk={norsk} />)}</ul>
         </Seksjon>
       )}
-      {visning === 'politisk' && (
+      {visning === 'blaresept' && (
         <>
           <Seksjon tittel="Det politiske løpet – blå resept (primærhelsetjenesten)">
             <Lop steg={[

@@ -412,3 +412,23 @@ html:has(.login) { background: var(--surface-inverse); }
 }
 .selskap-detalj .rutenett-2 { gap: var(--space-6); }
 .selskap-detalj .tabell th, .selskap-detalj .tabell td { white-space: nowrap; }
+
+/* --- Access: forklaring ----------------------------------------------------- */
+.forklaring { margin: 0 0 var(--space-3); padding-left: 1.2em; max-width: 80ch; }
+.forklaring li { margin-bottom: var(--space-2); }
+.kanaler { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-3); }
+.kanal { background: var(--surface-card, #fff); border: 1px solid var(--border-hairline); padding: var(--space-5); }
+.kanal h3 { font: var(--type-display-4, 500 24px/1.2 "Source Serif 4", serif); margin: var(--space-2) 0 var(--space-4); }
+.kanal dl { margin: 0; display: grid; grid-template-columns: 9.5em 1fr; gap: var(--space-2) var(--space-3); font: var(--type-body-sm); }
+.kanal dt { color: var(--text-muted); }
+.kanal dd { margin: 0; }
+.rutenett-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-5); margin: var(--space-4) 0; }
+.forklaring-kort > div { border-top: 2px solid #E5402A; padding-top: var(--space-3); font: var(--type-body-sm); }
+.produsent { font: var(--type-body-sm); margin: 2px 0 6px; }
+@media (max-width: 560px) { .kanal dl { grid-template-columns: 1fr; } .kanal dt { margin-top: var(--space-2); } }
+.forklaringsboks { background: var(--surface-card, #fff); border-left: 3px solid var(--wa-blue, #3D99C7); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-5); max-width: 90ch; font: var(--type-body-sm); }
+.forklaringsboks p { margin: 0 0 var(--space-2); }
+.forklaringsboks ul { margin: 0 0 var(--space-2); padding-left: 1.2em; }
+.radar-hode { display: flex; align-items: center; gap: var(--space-4); margin: var(--space-4) 0; }
+.radar-hode h2 { font: var(--type-display-4, 500 28px/1.2 "Source Serif 4", serif); margin: 0; }
+.radar-hode .logo { width: 56px; height: 56px; }

@@ -29,8 +29,8 @@ function lesRegnskap(r) {
 async function hentLogo(s, dir, logg) {
   const domene = s.domene;
   if (!domene) return null;
-  const fil = (ext) => `${dir}/${s.orgnr}.${ext}`;
-  for (const ext of ['svg', 'png', 'ico']) if (existsSync(fil(ext))) return `/logo/${s.orgnr}.${ext}`;
+  const fil = (ext) => `${dir}/${s.nokkel}.${ext}`;
+  for (const ext of ['svg', 'png', 'ico']) if (existsSync(fil(ext))) return `/logo/${s.nokkel}.${ext}`;
   try {
     const base = `https://${domene.startsWith('www.') ? domene : 'www.' + domene}`;
     const html = await hentTekst(base, { forsøk: 1, tidsavbrudd: 15000 });
@@ -51,7 +51,7 @@ async function hentLogo(s, dir, logg) {
         const buf = Buffer.from(await res.arrayBuffer());
         if (buf.length < 100 || buf.length > 500000) continue;
         writeFileSync(fil(ext), buf);
-        return `/logo/${s.orgnr}.${ext}`;
+        return `/logo/${s.nokkel}.${ext}`;
       } catch { /* prøv neste */ }
     }
   } catch (e) { logg?.(`Logo ${s.navn}: ${e.message.slice(0, 60)}`); }
@@ -90,12 +90,12 @@ export async function hentSelskaper(cfg, cache, { rot, logg = console.log }) {
   const logoDir = `${rot}public/logo`;
   mkdirSync(logoDir, { recursive: true });
   const ut = [];
-  const alle = cfg.sektorer.flatMap((sek) => sek.selskaper.map((s) => ({ ...s, sektor: sek.id })));
+  const alle = cfg.sektorer.flatMap((sek) => sek.selskaper.map((s) => ({ ...s, nokkel: s.orgnr || s.id, sektor: sek.id })));
   let feil = 0;
   await parallell(alle, 5, async (s) => {
-    const gammel = cache[s.orgnr] || {};
+    const gammel = cache[s.nokkel] || {};
     const x = { ...s };
-    try {
+    if (s.orgnr) try {
       const e = await json(`${BRREG}/enhetsregisteret/api/enheter/${s.orgnr}`);
       if (e) Object.assign(x, {
         offisieltNavn: e.navn, ansatte: e.antallAnsatte ?? null, form: e.organisasjonsform?.kode,
@@ -118,7 +118,7 @@ export async function hentSelskaper(cfg, cache, { rot, logg = console.log }) {
     x.omsetningNok = siste?.omsetning != null ? Math.round(siste.omsetning * (KURS[siste.valuta] || 1)) : null;
     ut.push(x);
   });
-  for (const x of ut) cache[x.orgnr] = x;
+  for (const x of ut) cache[x.nokkel] = x;
   logg(`Selskaper: ${ut.length} hentet (${feil} feil), ${ut.filter((x) => x.logo).length} med logo, ${ut.filter((x) => x.regnskap?.length).length} med regnskap, ${ut.reduce((a, x) => a + (x.studier?.length || 0), 0)} fase 3-studier`);
   return ut;
 }

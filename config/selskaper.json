@@ -1,5 +1,5 @@
 {
- "_forklaring": "Selskaper i Marked-fanen. Tall (ansatte, omsetning, resultat) hentes automatisk fra Brønnøysundregistrene. 'match' er navnet slik det står hos EMA og i nyheter (regex, uten store/små bokstaver). 'sponsor' er navnet i ClinicalTrials.gov. Legg til et selskap ved å legge inn organisasjonsnummeret.",
+ "_forklaring": "Selskaper i Marked-fanen. Tall (ansatte, omsetning, resultat) hentes automatisk fra Brønnøysundregistrene. 'match' er navnet slik det står hos EMA og i nyheter (regex, uten store/små bokstaver). 'sponsor' er navnet i ClinicalTrials.gov. Legg til et selskap ved å legge inn organisasjonsnummeret. Selskaper uten norsk enhet har 'id' i stedet for 'orgnr' og vises med EMA-saker, studier og omtale, men uten norske regnskapstall.",
  "sektorer": [
   {
    "id": "legemidler",
@@ -321,6 +321,168 @@
      "navn": "Navamedic",
      "domene": "navamedic.com",
      "match": "navamedic"
+    },
+    {
+     "orgnr": "927997894",
+     "navn": "Almirall",
+     "domene": "almirall.com",
+     "match": "almirall",
+     "sponsor": "Almirall, S.A."
+    },
+    {
+     "orgnr": "931642464",
+     "navn": "Angelini Pharma Nordics",
+     "domene": "angelinipharma.com",
+     "match": "angelini",
+     "sponsor": "Angelini Pharma S.p.A"
+    },
+    {
+     "orgnr": "933141918",
+     "navn": "Grifols Nordic",
+     "domene": "grifols.com",
+     "match": "grifols",
+     "sponsor": "Grifols Therapeutics LLC"
+    },
+    {
+     "orgnr": "916941528",
+     "navn": "Allergan (AbbVie)",
+     "domene": "allergan.com",
+     "match": "allergan"
+    },
+    {
+     "orgnr": "828882082",
+     "navn": "Moderna Norway",
+     "domene": "modernatx.com",
+     "match": "moderna",
+     "sponsor": "ModernaTX, Inc."
+    },
+    {
+     "orgnr": "995603454",
+     "navn": "CSL Behring",
+     "domene": "cslbehring.com",
+     "match": "csl behring|\\bcsl\\b|seqirus",
+     "sponsor": "CSL Behring"
+    },
+    {
+     "orgnr": "994033964",
+     "navn": "Vifor Pharma (CSL Vifor)",
+     "domene": "viforpharma.com",
+     "match": "vifor",
+     "sponsor": "Vifor (International) Inc."
+    },
+    {
+     "orgnr": "991465944",
+     "navn": "Grünenthal Norway",
+     "domene": "grunenthal.com",
+     "match": "gr[üu]nenthal",
+     "sponsor": "Grünenthal GmbH"
+    },
+    {
+     "id": "menarini",
+     "navn": "Menarini",
+     "domene": "menarini.com",
+     "match": "menarini",
+     "sponsor": "Menarini Group"
+    },
+    {
+     "id": "servier",
+     "navn": "Servier",
+     "domene": "servier.com",
+     "match": "servier",
+     "sponsor": "Institut de Recherches Internationales Servier"
+    },
+    {
+     "id": "sandoz",
+     "navn": "Sandoz",
+     "domene": "sandoz.com",
+     "match": "sandoz"
+    },
+    {
+     "id": "baxter",
+     "navn": "Baxter",
+     "domene": "baxter.com",
+     "match": "baxter",
+     "sponsor": "Baxter Healthcare Corporation"
+    },
+    {
+     "id": "biontech",
+     "navn": "BioNTech",
+     "domene": "biontech.com",
+     "match": "biontech",
+     "sponsor": "BioNTech SE"
+    },
+    {
+     "id": "regeneron",
+     "navn": "Regeneron",
+     "domene": "regeneron.com",
+     "match": "regeneron",
+     "sponsor": "Regeneron Pharmaceuticals"
+    },
+    {
+     "id": "rovi",
+     "navn": "Rovi",
+     "domene": "rovi.es",
+     "match": "\\brovi\\b",
+     "sponsor": "Laboratorios Farmacéuticos Rovi, S.A."
+    },
+    {
+     "id": "esteve",
+     "navn": "Esteve",
+     "domene": "esteve.com",
+     "match": "esteve",
+     "sponsor": "Esteve Pharmaceuticals, S.A."
+    },
+    {
+     "id": "ferrer",
+     "navn": "Ferrer",
+     "domene": "ferrer.com",
+     "match": "ferrer internacional|\\bferrer\\b",
+     "sponsor": "Ferrer Internacional S.A."
+    },
+    {
+     "id": "italfarmaco",
+     "navn": "Italfarmaco",
+     "domene": "italfarmacogroup.com",
+     "match": "italfarmaco",
+     "sponsor": "Italfarmaco"
+    },
+    {
+     "id": "nestle-health-science",
+     "navn": "Nestlé Health Science",
+     "domene": "nestlehealthscience.com",
+     "match": "nestl[ée] health|aimmune",
+     "sponsor": "Nestlé"
+    },
+    {
+     "id": "kern-pharma",
+     "navn": "Kern Pharma",
+     "domene": "kernpharma.com",
+     "match": "kern pharma"
+    },
+    {
+     "id": "faes-farma",
+     "navn": "Faes Farma",
+     "domene": "faesfarma.com",
+     "match": "faes farma"
+    },
+    {
+     "id": "normon",
+     "navn": "Normon",
+     "domene": "normon.es",
+     "match": "normon"
+    },
+    {
+     "id": "sinopharm",
+     "navn": "Sinopharm",
+     "domene": "sinopharm.com",
+     "match": "sinopharm|china national biotec",
+     "sponsor": "China National Biotec Group Company Limited"
+    },
+    {
+     "id": "shanghai-pharma",
+     "navn": "Shanghai Pharma",
+     "domene": "sphchina.com",
+     "match": "shanghai pharma"
     }
    ]
   },
@@ -520,6 +682,13 @@
      "navn": "Karl Storz Endoskopi Norge",
      "domene": "karlstorz.com",
      "match": "karl storz"
+    },
+    {
+     "orgnr": "812878042",
+     "navn": "Alcon Nordic",
+     "domene": "alcon.com",
+     "match": "alcon",
+     "sponsor": "Alcon Research"
     }
    ]
   },

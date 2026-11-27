@@ -346,7 +346,9 @@ try {
 } catch (e) { logg(`ADVARSEL: Nye metoder feilet (${e.message})`); }
 try {
   const fra = new Date(Date.now() - 730 * 86400000).toISOString().slice(0, 10);
-  access.ema = await hentEma({ fra });
+  const ema = await hentEma({ fra });
+  access.ema = ema.hendelser;
+  access.emaRegister = ema.register;
   logg(`Access: EMA ${access.ema.length} hendelser siden ${fra}`);
 } catch (e) { logg(`ADVARSEL: EMA feilet (${e.message})`); }
 byggMetoder(access);
@@ -359,7 +361,7 @@ const markedFil = DATA + 'marked.json';
 const markedGammel = await lesJson(markedFil, { selskaper: [] });
 try {
   const cfgSelskaper = await lesJson(ROT + 'config/selskaper.json', { sektorer: [] });
-  const cache = Object.fromEntries((markedGammel.selskaper || []).map((s) => [s.orgnr, s]));
+  const cache = Object.fromEntries((markedGammel.selskaper || []).map((s) => [s.nokkel || s.orgnr, s]));
   const selskaper = await hentSelskaper(cfgSelskaper, cache, { rot: ROT, logg });
   await writeFile(markedFil, JSON.stringify({
     oppdatert: new Date().toISOString(),

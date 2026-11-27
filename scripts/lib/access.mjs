@@ -19,8 +19,11 @@ export async function hentEma({ fra }) {
   if (!res.ok) throw new Error(`EMA ${res.status}`);
   const { data } = await res.json();
   const ut = [];
+  // Register over alle legemidler i EU (merkenavn, virkestoff, innehaver) – brukes til å finne selskapet bak metodene i Nye metoder
+  const register = [];
   for (const x of data) {
     if (x.category !== 'Human') continue;
+    register.push({ n: x.name_of_medicine, v: x.active_substance || x.international_non_proprietary_name_common_name, i: x.marketing_authorisation_developer_applicant_holder, s: x.medicine_status, u: x.medicine_url });
     const felles = {
       navn: x.name_of_medicine, virkestoff: x.active_substance || x.international_non_proprietary_name_common_name, url: x.medicine_url,
       omrade: (x.therapeutic_area_mesh || '').split(';').map((s) => s.trim()).filter(Boolean).slice(0, 3),
@@ -44,7 +47,7 @@ export async function hentEma({ fra }) {
       ut.push({ ...felles, type, dato, status: x.medicine_status });
     }
   }
-  return ut.sort((a, b) => b.dato.localeCompare(a.dato));
+  return { hendelser: ut.sort((a, b) => b.dato.localeCompare(a.dato)), register };
 }
 
 // ---------- Nye metoder: møtearkiv ----------
@@ -188,6 +191,27 @@ export function byggMetoder(access) {
     x.h.push({ f: forum === 'bestillerforum' ? 'bf' : 'bsf', d: m.dato, s: s.status, b: s.beslutning, u: m.dokumenter.protokoll });
   }
   for (const x of Object.values(metoder)) x.h.sort((a, b) => a.d.localeCompare(b.d));
+  // Selskapet bak metoden: merkenavnet i parentes slås opp i EMAs register, ellers virkestoffet (første ord i tittelen)
+  const reg = access.emaRegister || [];
+  const perNavn = new Map(), perStoff = new Map();
+  const aktiv = (r) => /authorised|opinion/i.test(r.s || '');
+  for (const r of reg) {
+    const n = String(r.n || '').toLowerCase();
+    if (!perNavn.has(n) || aktiv(r)) perNavn.set(n, r);
+    for (const v of String(r.v || '').toLowerCase().split(/\s*[,/;]\s*|\s+and\s+/)) if (v && !(perStoff.get(v) || []).some((x) => x.i === r.i)) perStoff.set(v, [...(perStoff.get(v) || []), r]);
+  }
+  const normStoff = (t) => t.toLowerCase().replace(/k(?=[aeiouy])/g, 'c').replace(/ks/g, 'x').replace(/f(?=[aeiou])/g, 'ph');
+  for (const x of Object.values(metoder)) {
+    const merker = [...x.tittel.matchAll(/\(([^()]{3,40})\)/g)].map((m) => m[1].toLowerCase().trim());
+    let treff = merker.map((m) => perNavn.get(m)).find(Boolean);
+    if (!treff) {
+      const ord = (x.tittel.split(/[\s(]/)[0] || '').toLowerCase();
+      const kand = perStoff.get(ord) || perStoff.get(normStoff(ord)) || [...perStoff.entries()].find(([k]) => k.startsWith(normStoff(ord)) && ord.length > 6)?.[1];
+      // Bare entydige treff på virkestoff (ett selskap), ellers blir det gjetting
+      if (kand && new Set(kand.filter((r) => !/generic|withdrawn/i.test(r.s || '')).map((r) => r.i)).size === 1) treff = kand.find((r) => aktiv(r)) || kand[0];
+    }
+    if (treff?.i) { x.selskap = treff.i; x.legemiddel = treff.n; }
+  }
   access.metoder = metoder;
   const merke = (t) => [...t.matchAll(/\(([^()]{3,40})\)/g)].map((m) => m[1].toLowerCase());
   const indeks = Object.entries(metoder).map(([id, x]) => [id, merke(x.tittel)]);

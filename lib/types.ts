@@ -123,16 +123,16 @@ export interface EmaHendelse {
   orphan?: boolean; prime?: boolean; betinget?: boolean; biotilsvarende?: boolean; generisk?: boolean; atmp?: boolean;
   type: 'opinion' | 'godkjent' | 'avslag' | 'trukket'; dato: string; status: string; nm?: string[];
 }
-export interface Metode { tittel: string; h: { f: 'bf' | 'bsf'; d: string; s: string; b: string; u?: string }[] }
+export interface Metode { tittel: string; selskap?: string; legemiddel?: string; h: { f: 'bf' | 'bsf'; d: string; s: string; b: string; u?: string }[] }
 export interface AccessData {
-  oppdatert?: string; ema?: EmaHendelse[]; beslutningsforum?: ForumMote[]; bestillerforum?: ForumMote[]; metoder?: Record<string, Metode>;
+  oppdatert?: string; ema?: EmaHendelse[]; emaRegister?: { n: string; v?: string; i?: string; s?: string; u?: string }[]; beslutningsforum?: ForumMote[]; bestillerforum?: ForumMote[]; metoder?: Record<string, Metode>;
 }
 
 // Marked: selskaper fra Brønnøysund, studier fra ClinicalTrials.gov
 export interface Regnskap { aar: number; valuta: string; omsetning: number | null; driftsresultat: number | null; resultat: number | null }
 export interface Studie { id: string; t: string; tilstand: string[]; legemiddel: string[]; status: string; ferdig?: string; norge?: boolean; norden?: boolean }
 export interface Selskap {
-  orgnr: string; navn: string; sektor: string; domene?: string; match?: string; sponsor?: string;
+  orgnr?: string; nokkel: string; navn: string; sektor: string; domene?: string; match?: string; sponsor?: string;
   offisieltNavn?: string; ansatte?: number | null; form?: string; bransje?: string; kommune?: string; stiftet?: string; hjemmeside?: string;
   regnskap?: Regnskap[]; omsetningNok?: number | null; logo?: string | null; studier?: Studie[];
 }

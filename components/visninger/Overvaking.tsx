@@ -6,14 +6,15 @@ import { useLat } from './Innspill';
 import { useNyheter } from './Nyheter';
 import { lagOrdRegex, treffI } from '@/lib/ord';
 import { datoKort, maneder, mndNokkel, mndNavn } from '@/lib/analyse';
-import type { DebattData, InnspillData, Element } from '@/lib/types';
+import type { DebattData, InnspillData, Element, Overvakingsliste } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
 
 type Kilde = 'stortinget' | 'regjeringen' | 'innspill' | 'debatter' | 'nyheter';
 interface Treff { kilde: Kilde; dato?: string; tittel: string; url?: string; ord: string[]; element?: Element; undertekst?: string }
 
 /** Overvåkingslister per kunde: søkeord fra config/overvaking.json mot alle kildene i dashbordet. */
-export function Overvaking() {
+/** Søk etter en liste med ord i alle kildene. Med «fast» brukes en gitt liste (f.eks. fra Selskapsradaren) og listevelgeren skjules. */
+export function Overvaking({ fast, skjulStats }: { fast?: Overvakingsliste; skjulStats?: boolean } = {}) {
   const { data, filtrert, sesjoner } = useData();
   const lister = data.overvaking || [];
   const [valgt, setValgt] = useState(lister[0]?.id || '');
@@ -21,7 +22,7 @@ export function Overvaking() {
   const { data: inn } = useLat<InnspillData>('/api/innspill');
   const { data: deb } = useLat<DebattData>('/api/debatter');
   const { liste: nyheter } = useNyheter();
-  const liste = lister.find((l) => l.id === valgt);
+  const liste = fast || lister.find((l) => l.id === valgt);
   const rx = useMemo(() => lagOrdRegex(liste?.ord || []), [liste]);
 
   const treff = useMemo(() => {
@@ -76,28 +77,28 @@ export function Overvaking() {
     };
   }, [treff, valgt, liste]);
 
-  if (!lister.length) return <p className="tomt">Ingen overvåkingslister er satt opp. Legg dem inn i <code>config/overvaking.json</code>.</p>;
+  if (!fast && !lister.length) return <p className="tomt">Ingen overvåkingslister er satt opp. Legg dem inn i <code>config/overvaking.json</code>.</p>;
 
   return (
     <>
       <div className="lokale-filtre">
-        <label className="velger">
+        {!fast && <label className="velger">
           <span className="eyebrow">Liste</span>
           <select value={valgt} onChange={(e) => setValgt(e.target.value)}>
             {lister.map((l) => <option key={l.id} value={l.id}>{l.navn}</option>)}
           </select>
-        </label>
+        </label>}
         <Segment etikett="Kilde" verdi={kilde} sett={setKilde} valg={[{ id: 'alle', navn: 'Alle kilder' }, { id: 'stortinget', navn: 'Stortinget' }, { id: 'regjeringen', navn: 'Regjeringen' }, { id: 'innspill', navn: 'Innspill' }, { id: 'debatter', navn: 'Debatter' }, { id: 'nyheter', navn: 'Nyheter' }]} />
       </div>
-      {liste?.beskrivelse && <p className="dempet">{liste.beskrivelse}</p>}
-      <div className="stats">
+      {!fast && liste?.beskrivelse && <p className="dempet">{liste.beskrivelse}</p>}
+      {!skjulStats && <div className="stats">
         <Stat tall={treff.length} etikett="treff totalt" />
         <Stat tall={treff.filter((t) => t.kilde === 'stortinget').length} etikett="i Stortinget" />
         <Stat tall={treff.filter((t) => t.kilde === 'innspill').length} etikett="i høringsinnspill" />
         <Stat tall={treff.filter((t) => t.kilde === 'debatter').length} etikett="i debatter" />
         <Stat tall={treff.filter((t) => t.kilde === 'nyheter').length} etikett="i nyheter" />
         <Stat tall={treff.filter((t) => t.element?.storEndring).length} etikett="store endringer" />
-      </div>
+      </div>}
       <div className="rutenett-sidepanel">
         <Seksjon tittel={`Treff (${vis.length})`}>
           {vis.length === 0 && <p className="tomt">Ingen treff i valgt periode.</p>}

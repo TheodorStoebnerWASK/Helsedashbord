@@ -30,26 +30,25 @@ function useKoblinger(marked: MarkedData | null, acc: AccessData | null) {
     for (const s of marked?.selskaper || []) {
       const rx = regex(s.match);
       if (!rx) continue;
-      ema.set(s.orgnr, (acc?.ema || []).filter((e) => rx.test(e.innehaver || '')));
-      nyh.set(s.orgnr, nyheter.filter((n) => rx.test(`${n.t} ${n.i || ''}`)));
+      ema.set(s.nokkel, (acc?.ema || []).filter((e) => rx.test(e.innehaver || '')));
+      nyh.set(s.nokkel, nyheter.filter((n) => rx.test(`${n.t} ${n.i || ''}`)));
     }
     return { ema, nyh, finnSelskap };
   }, [marked, acc, nyheter]);
 }
 
 function SelskapDetalj({ s, k }: { s: Selskap; k: ReturnType<typeof useKoblinger> }) {
-  const ema = k.ema.get(s.orgnr) || [];
-  const nyh = k.nyh.get(s.orgnr) || [];
+  const ema = k.ema.get(s.nokkel) || [];
+  const nyh = k.nyh.get(s.nokkel) || [];
   const studier = [...(s.studier || [])].sort((a, b) => Number(!!b.norge) - Number(!!a.norge));
   return (
     <div className="selskap-detalj">
       <div className="rutenett-2">
         <div>
           <p className="dempet liten-tekst">
-            {s.offisieltNavn} · org.nr. {s.orgnr}{s.form ? ` · ${s.form}` : ''}{s.kommune ? ` · ${s.kommune}` : ''}{s.stiftet ? ` · stiftet ${s.stiftet.slice(0, 4)}` : ''}<br />
+            {s.offisieltNavn || s.navn} · {s.orgnr ? `org.nr. ${s.orgnr}` : 'Ingen norsk enhet registrert'}{s.form ? ` · ${s.form}` : ''}{s.kommune ? ` · ${s.kommune}` : ''}{s.stiftet ? ` · stiftet ${s.stiftet.slice(0, 4)}` : ''}<br />
             {s.bransje}<br />
-            <a href={`https://virksomhet.brreg.no/nb/oppslag/enheter/${s.orgnr}`} target="_blank" rel="noreferrer">Brønnøysund</a>
-            {' · '}<a href={`https://www.proff.no/bransjes%C3%B8k?q=${s.orgnr}`} target="_blank" rel="noreferrer">Proff</a>
+            {s.orgnr && <><a href={`https://virksomhet.brreg.no/nb/oppslag/enheter/${s.orgnr}`} target="_blank" rel="noreferrer">Brønnøysund</a>{' · '}<a href={`https://www.proff.no/bransjes%C3%B8k?q=${s.orgnr}`} target="_blank" rel="noreferrer">Proff</a></>}
             {s.hjemmeside && <> · <a href={s.hjemmeside.startsWith('http') ? s.hjemmeside : `https://${s.hjemmeside}`} target="_blank" rel="noreferrer">Nettsted</a></>}
           </p>
           {s.regnskap?.length ? (
@@ -86,7 +85,7 @@ function Selskaper({ marked, k }: { marked: MarkedData; k: ReturnType<typeof use
   const sek = marked.sektorer.find((x) => x.id === sektor);
   const liste = useMemo(() => {
     const l = marked.selskaper.filter((s) => s.sektor === sektor);
-    const v = (s: Selskap) => sorter === 'omsetning' ? s.omsetningNok ?? -1 : sorter === 'ansatte' ? s.ansatte ?? -1 : sorter === 'resultat' ? (s.regnskap?.[0]?.resultat ?? -Infinity) : (k.nyh.get(s.orgnr)?.length || 0);
+    const v = (s: Selskap) => sorter === 'omsetning' ? s.omsetningNok ?? -1 : sorter === 'ansatte' ? s.ansatte ?? -1 : sorter === 'resultat' ? (s.regnskap?.[0]?.resultat ?? -Infinity) : (k.nyh.get(s.nokkel)?.length || 0);
     return [...l].sort((a, b) => v(b) - v(a));
   }, [marked, sektor, sorter, k]);
 
@@ -120,8 +119,8 @@ function Selskaper({ marked, k }: { marked: MarkedData; k: ReturnType<typeof use
               const forrige = s.regnskap?.[1];
               const vekst = r?.omsetning && forrige?.omsetning ? (r.omsetning / forrige.omsetning - 1) * 100 : null;
               return (
-                <li key={s.orgnr} className={apen === s.orgnr ? 'apen' : ''}>
-                  <button className="selskap-rad" onClick={() => setApen(apen === s.orgnr ? null : s.orgnr)} aria-expanded={apen === s.orgnr}>
+                <li key={s.nokkel} className={apen === s.nokkel ? 'apen' : ''}>
+                  <button className="selskap-rad" onClick={() => setApen(apen === s.nokkel ? null : s.nokkel)} aria-expanded={apen === s.nokkel}>
                     <span className="nr">{i + 1}</span>
                     <Logo s={s} />
                     <span className="selskap-navn"><strong>{s.navn}</strong><span className="dempet liten-tekst">{s.kommune || ''}</span></span>
@@ -130,7 +129,7 @@ function Selskaper({ marked, k }: { marked: MarkedData; k: ReturnType<typeof use
                     <span className="tall"><b>{mill(r?.resultat)}</b><span>årsresultat</span></span>
                     {s.sponsor && <span className="tall"><b>{s.studier?.length ?? 0}</b><span>fase 3</span></span>}
                   </button>
-                  {apen === s.orgnr && <SelskapDetalj s={s} k={k} />}
+                  {apen === s.nokkel && <SelskapDetalj s={s} k={k} />}
                 </li>
               );
             })}
@@ -209,7 +208,7 @@ function Pipeline({ marked }: { marked: MarkedData }) {
   const [antall, setAntall] = useState(60);
   const pharma = marked.selskaper.filter((s) => s.studier?.length).sort((a, b) => b.studier!.length - a.studier!.length);
   const alle = useMemo(() => pharma.flatMap((s) => s.studier!.map((x) => ({ ...x, selskap: s }))), [pharma]);
-  const liste = alle.filter((x) => (!valgt.length || valgt.includes(x.selskap.orgnr)) && (!kunNorge || x.norge) &&
+  const liste = alle.filter((x) => (!valgt.length || valgt.includes(x.selskap.nokkel)) && (!kunNorge || x.norge) &&
     (!sok || `${x.t} ${x.tilstand.join(' ')} ${x.legemiddel.join(' ')}`.toLowerCase().includes(sok.toLowerCase())))
     .sort((a, b) => Number(!!b.norge) - Number(!!a.norge) || String(a.ferdig).localeCompare(String(b.ferdig)));
   const spec: GrafSpec = useMemo(() => {
@@ -226,18 +225,32 @@ function Pipeline({ marked }: { marked: MarkedData }) {
   }, [pharma]);
   return (
     <>
-      <p className="ingress">Legemidler i sen fase (fase 3) hos selskapene i listen. Studier med norske studiesentre er de tidligste signalene om at et legemiddel kan komme til Norge – og at norske fagmiljøer allerede kjenner det.</p>
+      <div className="forklaringsboks">
+        <p className="eyebrow">Hva er en pipeline?</p>
+        <p>
+          <b>Pipeline</b> er legemidlene et selskap har under utvikling, men som ennå ikke er godkjent. Før et legemiddel kan søkes godkjent hos EMA, må det testes i tre faser:
+        </p>
+        <ul>
+          <li><b>Fase 1</b> – sikkerhet og dosering, på et lite antall personer.</li>
+          <li><b>Fase 2</b> – om legemidlet virker, på noen hundre pasienter.</li>
+          <li><b>Fase 3</b> – store studier, ofte med tusenvis av pasienter i mange land, som sammenligner med dagens behandling. Resultatene er grunnlaget for søknaden til EMA.</li>
+        </ul>
+        <p>
+          Vi viser pågående <b>fase 3-studier</b> fordi de forteller hva som kan komme på markedet de neste 1–3 årene. Studier med <b className="norge">NO</b> har norske sykehus som studiesentre:
+          da kjenner norske fagmiljøer allerede legemidlet, og selskapet har trolig planer for Norge. Det er her Access-modellens «1–2 år før» starter.
+        </p>
+      </div>
       <div className="lokale-filtre">
         <label className="bryter"><input type="checkbox" checked={kunNorge} onChange={(e) => setKunNorge(e.target.checked)} /> Bare studier med norske sentre</label>
         <input className="sokefelt" type="search" placeholder="Søk sykdom eller legemiddel – f.eks. «myelom», «Alzheimer»" value={sok} onChange={(e) => setSok(e.target.value)} />
       </div>
-      <Chips valg={pharma.map((s) => ({ id: s.orgnr, navn: s.navn.replace(/\s*\(.*\)/, '') }))} valgt={valgt} sett={setValgt} />
+      <Chips valg={pharma.map((s) => ({ id: s.nokkel, navn: s.navn.replace(/\s*\(.*\)/, '') }))} valgt={valgt} sett={setValgt} />
       <div className="rutenett-sidepanel">
         <Seksjon tittel={`Studier (${liste.length})`}>
           <table className="tabell bred">
             <thead><tr><th>Legemiddel</th><th>Sykdom</th><th>Selskap</th><th>Ferdig</th></tr></thead>
             <tbody>{liste.slice(0, antall).map((x) => (
-              <tr key={`${x.selskap.orgnr}-${x.id}`}>
+              <tr key={`${x.selskap.nokkel}-${x.id}`}>
                 <td>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a><br /><span className="dempet liten-tekst">{x.t.slice(0, 140)}</span></td>
                 <td className="liten-tekst">{x.tilstand.join(', ')}</td>
                 <td className="liten-tekst">{x.selskap.navn}</td>
