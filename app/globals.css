@@ -480,3 +480,14 @@ html:has(.login) { background: var(--surface-inverse); }
 .utenfor-komite .personlenke span:first-of-type { font-style: italic; color: var(--text-muted); }
 .forslagstillere { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
 .navn-parti { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; }
+.deltakere { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.chips-med-etikett { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.bsf-kalender { border: 1px solid var(--border, #DAD7CF); padding: var(--space-4, 20px); margin-bottom: var(--space-5, 28px); background: var(--surface, #fff); }
+.bsf-kalender h3 { margin: 0 0 12px; }
+.bsf-kalender .eyebrow { margin: 16px 0 6px; }
+.bsf-kalender .kalender li { padding: 6px 0; }
+.mote { scroll-margin-top: 170px; }
+.tabell .kol-vei { min-width: 125px; }
+.tabell .kol-kjent { min-width: 120px; }
+@media (max-width: 720px) { .tabell .kol-vei, .tabell .kol-kjent { min-width: 0; } }
+.rutenett-sidepanel > * { min-width: 0; }

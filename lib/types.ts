@@ -125,7 +125,7 @@ export interface EmaHendelse {
 }
 export interface Metode { tittel: string; selskap?: string; legemiddel?: string; h: { f: 'bf' | 'bsf'; d: string; s: string; b: string; u?: string }[] }
 export interface AccessData {
-  oppdatert?: string; ema?: EmaHendelse[]; emaRegister?: { n: string; v?: string; i?: string; s?: string; u?: string }[]; beslutningsforum?: ForumMote[]; bestillerforum?: ForumMote[]; metoder?: Record<string, Metode>;
+  oppdatert?: string; ema?: EmaHendelse[]; emaRegister?: { n: string; v?: string; i?: string; s?: string; u?: string }[]; beslutningsforum?: ForumMote[]; bestillerforum?: ForumMote[]; moteplan?: { beslutningsforum: string[]; kilde: string; hentet: string }; metoder?: Record<string, Metode>;
 }
 
 // Marked: selskaper fra Brønnøysund, studier fra ClinicalTrials.gov

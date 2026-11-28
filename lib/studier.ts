@@ -18,3 +18,22 @@ export function resultatTekst(ferdig?: string) {
   const passert = ferdig.slice(0, 7) < new Date().toISOString().slice(0, 7);
   return passert ? `Hovedresultat samlet inn ${mnd(ferdig)}, oppfølging pågår` : `Hovedresultater ventes ${mnd(ferdig)}`;
 }
+
+/** Studielegemidlets navn som søkenøkkel: første intervensjon, uten dose og administrasjonsform. «ianalumab s.c. q4w» → «ianalumab». */
+export function legemiddelNokkel(legemiddel: string[]) {
+  const forste = (legemiddel[0] || '').toLowerCase().replace(/\(.*?\)/g, ' ');
+  return forste.split(/\s+|,|\/|\+/).find((o) => /^[a-z][a-z0-9-]{4,}$/.test(o) && !/^(dose|arm|cohort|tablet|injection|oral|placebo|matching)$/.test(o)) || '';
+}
+
+/**
+ * Grovt anslag for når legemidlet kan nå Norge: søknad til EMA 6–12 måneder etter hovedresultatet,
+ * EMA-behandling om lag ett år. Deretter kommer Nye metoder eller blåreseptsøknad.
+ */
+export function veienTilNorge(ferdig?: string): { tekst: string; aar?: number; passert: boolean } {
+  if (!ferdig) return { tekst: 'Ingen dato oppgitt', passert: false };
+  const aar = Number(ferdig.slice(0, 4));
+  const passert = ferdig.slice(0, 7) < new Date().toISOString().slice(0, 7);
+  return passert
+    ? { tekst: `Resultat forelå ${mnd(ferdig)}`, aar, passert }
+    : { tekst: `Resultat ventes ${mnd(ferdig)}, mulig EU-godkjenning ca. ${aar + 1}–${aar + 2}`, aar, passert };
+}

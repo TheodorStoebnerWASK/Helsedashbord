@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useData, Seksjon, Stat, Segment, Chips, ElementListe } from '../felles';
 import { Graf } from '../Graf';
 import { useLat } from './Innspill';
@@ -133,14 +133,68 @@ function Lopet({ b }: { b: Tall }) {
   );
 }
 
-function MoteListe({ moter, kart, status, metoder, norsk }: { moter: ForumMote[]; kart: Record<string, { navn: string; farge: string }>; status: string[]; metoder: Record<string, Metode>; norsk: (n?: string) => string | null }) {
+/** Kalender for Beslutningsforum: kommende møter fra møteplanen og møtene de siste tolv månedene med utfall. */
+function BsfKalender({ acc, velg }: { acc: AccessData; velg: (dato: string) => void }) {
+  const idag = new Date().toISOString().slice(0, 10);
+  const fra = new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10);
+  const arkiv = new Map((acc.beslutningsforum || []).map((m) => [m.dato, m]));
+  const plan = acc.moteplan?.beslutningsforum || [];
+  const kommende = plan.filter((d) => d >= idag);
+  const tidligere = [...new Set([...arkiv.keys(), ...plan])].filter((d) => d >= fra && d < idag).sort().reverse();
+  return (
+    <div className="bsf-kalender">
+      <h3>Kalender</h3>
+      <p className="eyebrow">Kommende møter</p>
+      {kommende.length === 0 ? <p className="tomt">Møteplanen for neste halvår er ikke publisert ennå.</p> : (
+        <ul className="kalender">
+          {kommende.map((d, i) => (
+            <li key={d}>
+              <time>{datoKort(d)}</time>
+              <span>{i === 0 ? 'Neste møte. Saksliste publiseres cirka en uke før.' : 'Planlagt møte'}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="eyebrow">Siste tolv måneder</p>
+      <ul className="kalender">
+        {tidligere.map((d) => {
+          const m = arkiv.get(d);
+          const saker = m?.saker || [];
+          const telle = (s: string) => saker.filter((x) => x.status === s).length;
+          return (
+            <li key={d}>
+              <time>{datoKort(d)}</time>
+              {!m ? <span className="dempet">Protokoll ikke publisert ennå</span>
+                : m.skannet ? <span className="dempet">Skannet protokoll{m.dokumenter.protokoll && <> · <a href={m.dokumenter.protokoll} target="_blank" rel="noreferrer">PDF</a></>}</span>
+                : (
+                  <span>
+                    <button className="lenkeknapp liten" onClick={() => velg(d)}>{saker.length} {saker.length === 1 ? 'beslutning' : 'beslutninger'}</button>
+                    <span className="dempet liten-tekst"> {telle('innfort')} innført · {telle('ikke-innfort')} ikke innført{telle('utsatt') ? ` · ${telle('utsatt')} utsatt` : ''}</span>
+                  </span>
+                )}
+            </li>
+          );
+        })}
+      </ul>
+      <p className="dempet liten-tekst">Møtedatoer fra <a href={acc.moteplan?.kilde || 'https://www.nyemetoder.no/om-systemet/tidsfrister-og-motedatoer/'} target="_blank" rel="noreferrer">nyemetoder.no</a>. Klikk på antall beslutninger for å gå til møtet.</p>
+    </div>
+  );
+}
+
+function MoteListe({ moter, kart, status, metoder, norsk, fokus }: { moter: ForumMote[]; kart: Record<string, { navn: string; farge: string }>; status: string[]; metoder: Record<string, Metode>; norsk: (n?: string) => string | null; fokus?: { dato: string; n: number } }) {
   const [antall, setAntall] = useState(6);
   const vis = moter.map((m) => ({ ...m, saker: (m.saker || []).filter((s) => !status.length || status.includes(s.status)) })).filter((m) => m.saker.length || (m.skannet && !status.length));
+  useEffect(() => {
+    if (!fokus) return;
+    const i = vis.findIndex((m) => m.dato === fokus.dato);
+    if (i >= antall) setAntall(i + 1);
+    requestAnimationFrame(() => document.getElementById(`mote-${fokus.dato}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  }, [fokus]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!vis.length) return <p className="tomt">Ingen saker i utvalget.</p>;
   return (
     <>
       {vis.slice(0, antall).map((m) => (
-        <div key={m.dato} className="mote">
+        <div key={m.dato} id={`mote-${m.dato}`} className="mote">
           <h4>
             {datoKort(m.dato)}
             {m.dokumenter.protokoll && <a className="lenkeknapp liten" href={m.dokumenter.protokoll} target="_blank" rel="noreferrer">Protokoll (PDF)</a>}
@@ -213,6 +267,7 @@ export function Access({ visning, gaTil }: { visning: AccessVisning; gaTil: (v: 
     return (n?: string) => (n ? l.find((x) => x.rx?.test(n))?.navn || null : null);
   }, [marked]);
   const [bsfStatus, setBsfStatus] = useState<string[]>([]);
+  const [bsfFokus, setBsfFokus] = useState<{ dato: string; n: number }>();
   const [bfStatus, setBfStatus] = useState<string[]>([]);
   const [emaType, setEmaType] = useState<EmaHendelse['type'][]>([]);
   const [emaFlagg, setEmaFlagg] = useState<string[]>([]);
@@ -313,9 +368,12 @@ export function Access({ visning, gaTil }: { visning: AccessVisning; gaTil: (v: 
         <div className="rutenett-sidepanel">
           <Seksjon tittel="Møter i Beslutningsforum">
             <Chips valg={Object.entries(BSF).map(([id, x]) => ({ id, navn: x.navn }))} valgt={bsfStatus} sett={setBsfStatus} farge={(id) => BSF[id].farge} />
-            <MoteListe moter={acc.beslutningsforum || []} kart={BSF} status={bsfStatus} metoder={acc.metoder || {}} norsk={norsk} />
+            <MoteListe moter={acc.beslutningsforum || []} kart={BSF} status={bsfStatus} metoder={acc.metoder || {}} norsk={norsk} fokus={bsfFokus} />
           </Seksjon>
-          <aside>{kvartalSpec && <Graf spec={kvartalSpec} />}</aside>
+          <aside>
+            <BsfKalender acc={acc} velg={(dato) => { setBsfStatus([]); setBsfFokus({ dato, n: Date.now() }); }} />
+            {kvartalSpec && <Graf spec={kvartalSpec} />}
+          </aside>
         </div>
       )}
       {visning === 'bestilling' && (

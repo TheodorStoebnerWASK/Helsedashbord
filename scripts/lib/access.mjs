@@ -222,3 +222,25 @@ export function byggMetoder(access) {
   }
   return access;
 }
+
+const MANED = { januar: 1, februar: 2, mars: 3, april: 4, mai: 5, juni: 6, juli: 7, august: 8, september: 9, oktober: 10, november: 11, desember: 12 };
+
+/**
+ * Planlagte møtedatoer for Beslutningsforum fra «Tidsfrister og møtedatoer». Siden skriver dem som tekst,
+ * for eksempel «Høsten 2026 er det planlagt møter i Beslutningsforum … 24. august, 21. september og 7. desember.»
+ */
+export async function hentMoteplan() {
+  const html = await hentTekst('https://www.nyemetoder.no/om-systemet/tidsfrister-og-motedatoer/');
+  const tekst = avkod(html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<[^>]+>/g, ' ')).replace(/[\s​]+/g, ' ');
+  const del = tekst.slice(tekst.search(/Møter for Beslutningsforum/i));
+  const datoer = new Set();
+  // Datoene har punktum («24. august»), så hver periode leses fram til neste periode eller neste avsnitt
+  for (const m of del.matchAll(/(Høsten|Våren)\s+(\d{4})\s+er det planlagt møter([\s\S]*?)(?=Høsten|Våren|Møtetidspunkt|$)/gi)) {
+    const aar = Number(m[2]);
+    for (const d of m[3].matchAll(/(\d{1,2})\.\s+([a-zæøå]+)/gi)) {
+      const mnd = MANED[d[2].toLowerCase()];
+      if (mnd) datoer.add(`${aar}-${String(mnd).padStart(2, '0')}-${d[1].padStart(2, '0')}`);
+    }
+  }
+  return { beslutningsforum: [...datoer].sort(), kilde: 'https://www.nyemetoder.no/om-systemet/tidsfrister-og-motedatoer/', hentet: new Date().toISOString() };
+}

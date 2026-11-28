@@ -8,7 +8,7 @@ import { SammenlignSelskaper } from './SammenlignSelskaper';
 import { datoKort } from '@/lib/analyse';
 import type { AccessData, EmaHendelse, MarkedData, Selskap } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
-import { STATUS, resultatTekst } from '@/lib/studier';
+import { legemiddelNokkel, veienTilNorge } from '@/lib/studier';
 
 const KILDE = 'Kilde: Brønnøysundregistrene (Enhetsregisteret og Regnskapsregisteret). Bearbeidet av Wergeland Apenes.';
 const mill = (n?: number | null) => (n == null ? '–' : `${(n / 1e6).toLocaleString('nb-NO', { maximumFractionDigits: n >= 1e10 ? 0 : 1 })} mill.`);
@@ -67,7 +67,7 @@ function SelskapDetalj({ s, k }: { s: Selskap; k: ReturnType<typeof useKoblinger
           {ema.length ? <ul className="kortliste">{ema.slice(0, 8).map((e, i) => <li key={i}><time>{datoKort(e.dato)}</time> <a href={e.url} target="_blank" rel="noreferrer">{e.navn}</a> · {EMA_NAVN[e.type]}{e.nm ? ` · Nye metoder ${e.nm.join(', ')}` : ''}</li>)}</ul> : <p className="dempet liten-tekst">Ingen.</p>}
           {s.sponsor && <>
             <h4 className="eyebrow">Fase 3-studier pågår ({studier.length}, {studier.filter((x) => x.norge).length} med norske studiesentre)</h4>
-            <ul className="kortliste">{studier.slice(0, 8).map((x) => <li key={x.id}>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a> · {x.tilstand.join(', ')}<br /><span className="dempet liten-tekst">{STATUS[x.status] || x.status} · {resultatTekst(x.ferdig)}</span></li>)}</ul>
+            <ul className="kortliste">{studier.slice(0, 8).map((x) => <li key={x.id}>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a> · {x.tilstand.join(', ')}<br /><span className="dempet liten-tekst">{veienTilNorge(x.ferdig).tekst}</span></li>)}</ul>
           </>}
         </div>
       </div>
@@ -203,16 +203,40 @@ function KommerTilNorge({ marked, acc, k }: { marked: MarkedData; acc: AccessDat
   );
 }
 
-function Pipeline({ marked }: { marked: MarkedData }) {
+function Pipeline({ marked, acc }: { marked: MarkedData; acc: AccessData | null }) {
   const [valgt, setValgt] = useState<string[]>([]);
   const [kunNorge, setKunNorge] = useState(false);
+  const [rekkefolge, setRekkefolge] = useState<'nar' | 'norge'>('nar');
+  const [skjulKjente, setSkjulKjente] = useState(false);
   const [sok, setSok] = useState('');
   const [antall, setAntall] = useState(60);
   const pharma = marked.selskaper.filter((s) => s.studier?.length).sort((a, b) => b.studier!.length - a.studier!.length);
-  const alle = useMemo(() => pharma.flatMap((s) => s.studier!.map((x) => ({ ...x, selskap: s }))), [pharma]);
-  const liste = alle.filter((x) => (!valgt.length || valgt.includes(x.selskap.nokkel)) && (!kunNorge || x.norge) &&
+  // Koble hvert studielegemiddel mot EU-registeret (virkestoff eller merkenavn) og mot metodene i Nye metoder
+  const alle = useMemo(() => {
+    const eu = new Map<string, { navn: string; url?: string }>();
+    for (const r of acc?.emaRegister || []) {
+      if (!/authorised/i.test(r.s || '')) continue;
+      for (const k of [r.v, r.n]) for (const o of (k || '').toLowerCase().split(/[\s,/]+/)) if (o.length >= 5 && !eu.has(o)) eu.set(o, { navn: r.n, url: r.u });
+    }
+    const metoder = Object.entries(acc?.metoder || {}).map(([id, m]) => ({ id, t: m.tittel.toLowerCase() }));
+    return pharma.flatMap((s) => s.studier!.map((x) => {
+      const nokkel = legemiddelNokkel(x.legemiddel);
+      const veien = veienTilNorge(x.ferdig);
+      return {
+        ...x, selskap: s, nokkel, veien,
+        eu: nokkel ? eu.get(nokkel) : undefined,
+        metode: nokkel ? metoder.find((m) => m.t.includes(nokkel))?.id : undefined,
+      };
+    }));
+  }, [pharma, acc]);
+  // «Nærmest markedet»: resultater de siste to årene og de neste årene først, gamle resultater sist
+  const grense = new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 7);
+  const naerhet = (x: (typeof alle)[number]) => (!x.ferdig ? '9999' : x.ferdig.slice(0, 7) < grense ? `5${x.ferdig}` : x.ferdig);
+  const liste = alle.filter((x) => (!valgt.length || valgt.includes(x.selskap.nokkel)) && (!kunNorge || x.norge) && (!skjulKjente || (!x.eu && !x.metode)) &&
     (!sok || `${x.t} ${x.tilstand.join(' ')} ${x.legemiddel.join(' ')}`.toLowerCase().includes(sok.toLowerCase())))
-    .sort((a, b) => Number(!!b.norge) - Number(!!a.norge) || String(a.ferdig).localeCompare(String(b.ferdig)));
+    .sort((a, b) => rekkefolge === 'norge'
+      ? Number(!!b.norge) - Number(!!a.norge) || String(a.ferdig).localeCompare(String(b.ferdig))
+      : naerhet(a).localeCompare(naerhet(b)));
   const spec: GrafSpec = useMemo(() => {
     const topp = pharma.slice(0, 20);
     return {
@@ -230,39 +254,38 @@ function Pipeline({ marked }: { marked: MarkedData }) {
       <div className="forklaringsboks">
         <p className="eyebrow">Hva er en pipeline?</p>
         <p>
-          <b>Pipeline</b> er legemidlene et selskap har under utvikling, men som ennå ikke er godkjent. Før et legemiddel kan søkes godkjent hos EMA, må det testes i tre faser:
-        </p>
-        <ul>
-          <li><b>Fase 1:</b> sikkerhet og dosering, på et lite antall personer.</li>
-          <li><b>Fase 2:</b> om legemidlet virker, på noen hundre pasienter.</li>
-          <li><b>Fase 3:</b> store studier, ofte med tusenvis av pasienter i mange land, som sammenligner med dagens behandling. Resultatene er grunnlaget for søknaden til EMA.</li>
-        </ul>
-        <p>
-          Vi viser pågående <b>fase 3-studier</b> fordi de forteller hva som kan komme på markedet de neste 1–3 årene. Studier med <b className="norge">NO</b> har norske sykehus som studiesentre:
-          da kjenner norske fagmiljøer allerede legemidlet, og selskapet har trolig planer for Norge. Det er her Access-modellens «1–2 år før» starter.
+          <b>Pipeline</b> er legemidlene et selskap har under utvikling, men som ennå ikke er godkjent for bruken som testes. Vi viser <b>fase 3-studier</b>, de siste
+          store studiene før søknad til EMA. De forteller hva som kan komme til Norge de neste 1–3 årene, og hvilke selskaper som da trenger hjelp med tilgang.
         </p>
         <p className="eyebrow">Slik leser du tabellen</p>
         <ul>
-          <li><b>Status</b> sier om studien fortsatt tar inn pasienter («Rekrutterer»), er fulltegnet og følger pasientene («Pågår, tar ikke inn flere»), eller ikke har startet.</li>
-          <li><b>Hovedresultater ventes …</b> er datoen selskapet har oppgitt for når hovedresultatet foreligger. Søknad til EMA kommer typisk 6–12 måneder etter dette, og godkjenning ca. ett år senere.</li>
-          <li><b>Hovedresultat samlet inn …</b> betyr at datoen er passert: dataene for hovedresultatet er samlet inn, men studien følger fortsatt pasientene (for eksempel langtidsoverlevelse). Legemidlet kan da allerede være søkt godkjent, eller godkjent, for denne bruken. Det betyr ikke at ingenting har skjedd i flere år.</li>
+          <li><b>Veien til Norge</b> er et grovt anslag: søknad til EMA kommer typisk 6–12 måneder etter hovedresultatet, og EMA bruker om lag ett år. Deretter starter Nye metoder eller blåreseptsøknaden.</li>
+          <li><b>Kjent fra før</b> viser om virkestoffet allerede er godkjent i EU (da er studien en ny bruk av et kjent legemiddel) eller allerede ligger i Nye metoder.</li>
+          <li><b className="norge">NO</b> betyr at norske sykehus er studiesentre. Da kjenner norske fagmiljøer legemidlet, og selskapet har trolig planer for Norge.</li>
         </ul>
       </div>
       <div className="lokale-filtre">
-        <label className="bryter"><input type="checkbox" checked={kunNorge} onChange={(e) => setKunNorge(e.target.checked)} /> Bare studier med norske sentre</label>
+        <Segment etikett="Rekkefølge" verdi={rekkefolge} sett={setRekkefolge} valg={[{ id: 'nar', navn: 'Nærmest markedet' }, { id: 'norge', navn: 'Norske sentre først' }]} />
+        <label className="bryter"><input type="checkbox" checked={kunNorge} onChange={(e) => setKunNorge(e.target.checked)} /> Bare med norske sentre</label>
+        <label className="bryter"><input type="checkbox" checked={skjulKjente} onChange={(e) => setSkjulKjente(e.target.checked)} /> Bare helt nye legemidler</label>
         <input className="sokefelt" type="search" placeholder="Søk sykdom eller legemiddel, for eksempel «myelom», «Alzheimer»" value={sok} onChange={(e) => setSok(e.target.value)} />
       </div>
       <Chips valg={pharma.map((s) => ({ id: s.nokkel, navn: s.navn.replace(/\s*\(.*\)/, '') }))} valgt={valgt} sett={setValgt} />
       <div className="rutenett-sidepanel">
         <Seksjon tittel={`Studier (${liste.length})`}>
           <table className="tabell bred">
-            <thead><tr><th>Legemiddel</th><th>Sykdom</th><th>Selskap</th><th>Status</th></tr></thead>
+            <thead><tr><th>Legemiddel</th><th>Sykdom</th><th>Selskap</th><th className="kol-vei">Veien til Norge</th><th className="kol-kjent">Kjent fra før</th></tr></thead>
             <tbody>{liste.slice(0, antall).map((x) => (
               <tr key={`${x.selskap.nokkel}-${x.id}`}>
-                <td>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel.join(', ') || x.id}</a><br /><span className="dempet liten-tekst">{x.t.slice(0, 140)}</span></td>
+                <td>{x.norge && <b className="norge">NO </b>}<a href={`https://clinicaltrials.gov/study/${x.id}`} target="_blank" rel="noreferrer">{x.legemiddel[0] || x.id}</a><br /><span className="dempet liten-tekst">{x.t.slice(0, 100)}{x.t.length > 100 ? ' …' : ''}</span></td>
                 <td className="liten-tekst">{x.tilstand.join(', ')}</td>
                 <td className="liten-tekst">{x.selskap.navn}</td>
-                <td className="liten-tekst">{STATUS[x.status] || x.status}<br /><span className="dempet">{resultatTekst(x.ferdig)}</span></td>
+                <td className="liten-tekst kol-vei">{x.veien.tekst}</td>
+                <td className="liten-tekst">
+                  {x.eu && <>{x.eu.url ? <a href={x.eu.url} target="_blank" rel="noreferrer">Godkjent i EU</a> : 'Godkjent i EU'} som {x.eu.navn}<br /></>}
+                  {x.metode && <span>I Nye metoder ({x.metode})</span>}
+                  {!x.eu && !x.metode && <span className="dempet">Nytt legemiddel</span>}
+                </td>
               </tr>
             ))}</tbody>
           </table>
@@ -282,7 +305,7 @@ export function Marked({ visning }: { visning: 'selskaper' | 'sammenlign' | 'kom
   if (!marked) return <p className="laster"><span className="spinner" /> Laster selskaper …</p>;
   if (!marked.selskaper?.length) return <p className="tomt">Selskapsdata hentes ved neste automatiske oppdatering.</p>;
   if (visning === 'kommer') return acc ? <KommerTilNorge marked={marked} acc={acc} k={k} /> : <p className="laster"><span className="spinner" /> Laster EMA-data …</p>;
-  if (visning === 'pipeline') return <Pipeline marked={marked} />;
+  if (visning === 'pipeline') return <Pipeline marked={marked} acc={acc} />;
   if (visning === 'sammenlign') return <SammenlignSelskaper marked={marked} acc={acc} />;
   return <Selskaper marked={marked} k={k} />;
 }

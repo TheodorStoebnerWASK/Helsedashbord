@@ -1,10 +1,10 @@
 'use client';
 import { useMemo, useState } from 'react';
-import { useData, Seksjon, Stat, KategoriMerke, Chips, Segment, PartiMerke, Portrett, RolleMerke } from '../felles';
+import { useData, Seksjon, Stat, KategoriMerke, Chips, Segment, PartiMerke, Portrett, RolleMerke, PersonLenke } from '../felles';
 import { Graf } from '../Graf';
 import { useLat } from './Innspill';
 import { datoKort } from '@/lib/analyse';
-import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort, partiLogo } from '@/lib/parti';
+import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort } from '@/lib/parti';
 import type { DebattData, Debattdel, Innlegg } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
 
@@ -73,7 +73,7 @@ export function Debatter() {
       <div className="lokale-filtre">
         <input className="sokefelt" type="search" placeholder="Hvem sa hva? Søk i debattene, for eksempel «fritt behandlingsvalg», «terskelverdi»" value={sok} onChange={(e) => setSok(e.target.value)} aria-label="Søk i debattene" />
         <Segment etikett="Type" verdi={type} sett={setType} valg={[{ id: 'alle', navn: 'Alle' }, { id: 'sak', navn: 'Debatter' }, { id: 'spørretime', navn: 'Spørretimen' }]} />
-        <Chips valg={PARTI_REKKEFOLGE.map((p) => ({ id: p, navn: partiKort(p) }))} valgt={partier} sett={setPartier} farge={partiFarge} bilde={(p) => partiLogo(p)?.src} />
+        <div className="chips-med-etikett"><span className="eyebrow">Parti</span><Chips valg={PARTI_REKKEFOLGE.map((p) => ({ id: p, navn: partiKort(p) }))} valgt={partier} sett={setPartier} farge={partiFarge} /></div>
       </div>
       <div className="rutenett-2">
         <Graf spec={partiSpec} />
@@ -86,6 +86,28 @@ export function Debatter() {
         {utvalg.length > 80 && <p className="dempet liten-tekst">Viser 80 av {utvalg.length}. Bruk søk eller filtre for å snevre inn.</p>}
       </Seksjon>
     </>
+  );
+}
+
+/** Hvem som deltok: i spørretimen hvem som spurte hvem, i debatter de mest aktive talerne. */
+function Deltakere({ d }: { d: Debatt }) {
+  const { data } = useData();
+  const person = (i: Innlegg) => (i.p && data.personer[i.p] ? <PersonLenke key={i.navn} id={i.p} /> : <span key={i.navn} className="navn-parti">{i.navn.replace(/^Statsråd\s+/i, '')} {partiAv(i) && <PartiMerke parti={partiAv(i)} />}</span>);
+  if (d.type === 'spørretime') {
+    const spor = d.innlegg[0];
+    const svar = d.innlegg.find((i) => i.navn !== spor?.navn && (/statsråd/i.test(i.navn) || !i.parti));
+    if (!spor) return null;
+    return <span className="deltakere"><span className="dempet">Spørsmål fra</span>{person(spor)}{svar && <><span className="dempet">til statsråd</span>{person(svar)}</>}</span>;
+  }
+  const antall = new Map<string, { i: Innlegg; n: number }>();
+  for (const i of d.innlegg) { const x = antall.get(i.navn) || { i, n: 0 }; x.n++; antall.set(i.navn, x); }
+  const topp = [...antall.values()].sort((a, b) => b.n - a.n);
+  return (
+    <span className="deltakere">
+      <span className="dempet">Talere:</span>
+      {topp.slice(0, 3).map((x) => person(x.i))}
+      {topp.length > 3 && <span className="dempet">og {topp.length - 3} til</span>}
+    </span>
   );
 }
 
@@ -104,7 +126,8 @@ function DebattRad({ d, q, partier }: { d: Debatt; q: string; partier: string[] 
       <div className="element-innhold">
         <p className="element-tittel"><a href={sakUrl} target="_blank" rel="noreferrer">{d.tittel}</a></p>
         <div className="element-detaljer">
-          <span className="dempet">{d.innlegg.length} innlegg · <span className="parti-rad">{[...new Set(d.innlegg.map((i) => partiAv(i)).filter((p): p is string => !!p && !!PARTIER[p]))].sort((a, b) => PARTI_REKKEFOLGE.indexOf(a) - PARTI_REKKEFOLGE.indexOf(b)).map((p) => <PartiMerke key={p} parti={p} />)}</span></span>
+          <Deltakere d={d} />
+          <span className="dempet">{d.innlegg.length} innlegg</span>
           <a className="dempet" href={referatUrl(d.refId, d.sesjon)} target="_blank" rel="noreferrer">Referat ↗</a>
         </div>
         <div className="element-merker">

@@ -10,7 +10,7 @@ import { hentVoteringer } from './lib/voteringer.mjs';
 import { hentInnspill } from './lib/innspill.mjs';
 import { hentDebatter } from './lib/debatter.mjs';
 import { hentNyheter, KILDER as NYHETSKILDER } from './lib/nyheter.mjs';
-import { hentEma, hentNyeMetoder, byggMetoder } from './lib/access.mjs';
+import { hentEma, hentNyeMetoder, byggMetoder, hentMoteplan } from './lib/access.mjs';
 import { hentSelskaper } from './lib/selskaper.mjs';
 
 const ROT = new URL('..', import.meta.url).pathname;
@@ -351,6 +351,11 @@ try {
   access.emaRegister = ema.register;
   logg(`Access: EMA ${access.ema.length} hendelser siden ${fra}`);
 } catch (e) { logg(`ADVARSEL: EMA feilet (${e.message})`); }
+try {
+  const plan = await hentMoteplan();
+  if (plan.beslutningsforum.length) access.moteplan = plan;
+  logg(`Access: møteplan med ${plan.beslutningsforum.length} datoer for Beslutningsforum`);
+} catch (e) { logg(`ADVARSEL: møteplan feilet (${e.message})`); }
 byggMetoder(access);
 access.oppdatert = new Date().toISOString();
 access.kilder = { nyheter: nyhetStatus };
