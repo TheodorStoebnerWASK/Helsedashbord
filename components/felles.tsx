@@ -156,6 +156,19 @@ export function Segment<T extends string>({ valg, verdi, sett, etikett }: { valg
 }
 
 // ---------- Elementliste ----------
+/** Hvem som fremmet et representantforslag: de fire første med bilde og partilogo, resten kan foldes ut. */
+function Forslagstillere({ ider }: { ider: string[] }) {
+  const [alle, setAlle] = useState(false);
+  const vis = alle ? ider : ider.slice(0, 4);
+  return (
+    <span className="forslagstillere">
+      <span className="dempet">Fremmet av</span>
+      {vis.map((id) => <PersonLenke key={id} id={id} />)}
+      {ider.length > 4 && <button className="lenkeknapp liten" onClick={() => setAlle(!alle)}>{alle ? 'Vis færre' : `og ${ider.length - 4} til`}</button>}
+    </span>
+  );
+}
+
 export function ElementRad({ e }: { e: Element }) {
   const { data, temaNavn, undertemaNavn, visTema } = useData();
   const [apen, setApen] = useState(false);
@@ -177,11 +190,12 @@ export function ElementRad({ e }: { e: Element }) {
         {e.beskrivelse && e.type === 'regjering' && <p className="dempet liten-tekst">{e.beskrivelse}</p>}
         <div className="element-detaljer">
           {e.fra && <PersonLenke id={e.fra} />}
+          {e.forslagstillere?.length ? <Forslagstillere ider={e.forslagstillere} /> : null}
           {e.til && <span className="dempet">til {e.til}{e.besvartDato ? ' · besvart' : ' · ubesvart'}</span>}
           {e.henvisning && <span className="dempet">{e.henvisning}</span>}
           {e.status && <span className="dempet">{e.status}</span>}
           {e.komite && e.komite !== data.komite.id && <span className="dempet">{data.komiteNavn[e.komite] || e.komite}</span>}
-          {e.saksordforere?.length ? <span className="dempet">Saksordfører: {e.saksordforere.map((id) => data.personer[id]?.navn || id).join(', ')}</span> : null}
+          {e.saksordforere?.length ? <span className="dempet">Saksordfører: {e.saksordforere.map((id) => <span key={id} className="navn-parti">{data.personer[id]?.navn || id} <PartiMerke parti={data.personer[id]?.parti} /></span>)}</span> : null}
           {e.type === 'horing' && e.horingStatus && <span className="dempet">{e.horingStatus}{e.skriftlig ? ' · skriftlig' : ''}{e.frist ? ` · frist ${datoKort(e.frist)}` : ''}</span>}
         </div>
         <div className="element-merker">

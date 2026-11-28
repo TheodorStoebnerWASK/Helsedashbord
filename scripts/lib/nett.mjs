@@ -1,5 +1,10 @@
 // Felles hjelpere for å hente åpne nettsider (nyhetssaker, Nye metoder, DMP, EMA).
-const HODER = { 'Accept-Language': 'nb-NO,nb;q=0.9,en;q=0.5' };
+// Vanlig nettleser-identitet: enkelte nettsteder (bl.a. LMI) avviser forespørsler uten.
+const HODER = {
+  'Accept-Language': 'nb-NO,nb;q=0.9,en;q=0.5',
+  'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+};
 
 export async function hentTekst(url, { forsøk = 2, tidsavbrudd = 30000 } = {}) {
   for (let i = 0; i < forsøk; i++) {

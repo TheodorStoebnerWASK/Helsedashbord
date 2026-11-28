@@ -478,3 +478,5 @@ html:has(.login) { background: var(--surface-inverse); }
 .hero h1 em { color: var(--wa-blue); }
 .hero-tekst { font: var(--type-body); color: var(--text-secondary); max-width: 68ch; margin: 0 0 var(--space-3); }
 .utenfor-komite .personlenke span:first-of-type { font-style: italic; color: var(--text-muted); }
+.forslagstillere { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.navn-parti { display: inline-flex; align-items: center; gap: 4px; margin-right: 8px; }

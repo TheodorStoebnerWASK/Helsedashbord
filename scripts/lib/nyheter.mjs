@@ -25,13 +25,8 @@ export const KILDER = [
   },
   {
     id: 'healthtalk', navn: 'HealthTalk', type: 'medie',
-    finn: async () => {
-      // Prøv RSS først (WordPress-standard), ellers lenker fra forsiden
-      for (const f of ['https://www.healthtalk.no/feed/', 'https://www.healthtalk.no/rss']) {
-        try { const items = rssItems(await hentTekst(f, { forsøk: 1 })); if (items.length) return items; } catch { /* prøv neste */ }
-      }
-      return lenkerFraSider('https://www.healthtalk.no', ['/'], /href="((?:https:\/\/www\.healthtalk\.no)?\/[a-z0-9-]+\/[a-z0-9-]{25,}\/?)"/g);
-    },
+    // Sitemapet har alle artikler med tidspunkt for siste endring (ingen RSS)
+    finn: () => fraSitemap('https://www.healthtalk.no/sitemap.xml', /^https:\/\/www\.healthtalk\.no\/[a-z0-9-]+\/[a-z0-9-]{15,}\/\d+$/),
   },
   {
     id: 'dmp', navn: 'DMP', type: 'etat',
@@ -39,17 +34,28 @@ export const KILDER = [
   },
   {
     id: 'sykehusinnkjop', navn: 'Sykehusinnkjøp', type: 'etat',
-    finn: () => lenkerFraSider('https://sykehusinnkjop.no', ['/', '/nyheter', '/aktuelt'], /href="((?:https:\/\/sykehusinnkjop\.no)?\/(?:nyheter|aktuelt)\/[a-z0-9-]{10,}\/?)"/g),
+    // Nyhetssidene lastes med JavaScript, men sitemapet lister alle saker under /nyheter/
+    finn: () => fraSitemap('https://www.sykehusinnkjop.no/sitemap.xml', /^https:\/\/www\.sykehusinnkjop\.no\/nyheter\/(?:[a-z0-9-]+\/)?[a-z0-9-]{12,}\/$/),
   },
   {
     id: 'nyemetoder', navn: 'Nye metoder', type: 'etat',
-    finn: () => lenkerFraSider('https://www.nyemetoder.no', ['/', '/aktuelt/'], /href="(\/aktuelt\/[a-z0-9-]{8,}\/?)"/g),
+    // Aktuelt-siden lastes med JavaScript; sitemapet har alle sakene
+    finn: () => fraSitemap('https://www.nyemetoder.no/sitemap.xml', /^https:\/\/www\.nyemetoder\.no\/aktuelt\/[a-z0-9-]{8,}\/$/),
   },
   {
     id: 'ema', navn: 'EMA', type: 'etat',
     finn: async () => rssItems(await hentTekst('https://www.ema.europa.eu/en/news.xml')),
   },
 ];
+
+/** Artikler fra et sitemap, nyest endret først. */
+async function fraSitemap(url, filter) {
+  const t = await hentTekst(url);
+  return [...t.matchAll(/<url>([\s\S]*?)<\/url>/g)]
+    .map((m) => ({ url: (/<loc>([^<]+)<\/loc>/.exec(m[1])?.[1] || '').trim(), endret: /<lastmod>([^<]+)<\/lastmod>/.exec(m[1])?.[1] || '' }))
+    .filter((x) => filter.test(x.url))
+    .sort((a, b) => b.endret.localeCompare(a.endret));
+}
 
 function rssItems(tekst) {
   let items = xml.parse(tekst.replace(/^﻿/, '')).rss?.channel?.item || [];

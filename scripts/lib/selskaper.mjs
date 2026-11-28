@@ -68,15 +68,13 @@ export async function hentLmiLogoer(selskaper, dir, logg) {
   let html;
   try { html = await hentTekst('https://www.lmi.no/lmi/om-legemiddelindustrien/medlemmer/', { forsøk: 2 }); }
   catch (e) { logg?.(`LMI-logoer: siden kunne ikke hentes (${e.message.slice(0, 60)})`); return ut; }
-  const base = 'https://www.lmi.no';
-  // Ta med lenken rundt bildet (ofte selskapets nettsted) som ekstra matchgrunnlag
-  const bilder = [...html.matchAll(/(?:<a[^>]+href=["']([^"']+)["'][^>]*>\s*)?<img[^>]+>/gi)].map((m) => {
-    const tag = m[0];
-    const src = /(?:data-src|src)=["']([^"']+)["']/i.exec(tag.slice(tag.lastIndexOf('<img')))?.[1];
-    const alt = /alt=["']([^"']*)["']/i.exec(tag)?.[1] || '';
-    const tittel = /title=["']([^"']*)["']/i.exec(tag)?.[1] || '';
-    return src ? { src: new URL(src, base).href, tekst: `${alt} ${tittel} ${decodeURIComponent(src.split('/').pop() || '').replace(/[-_]/g, ' ')} ${m[1] || ''}`.toLowerCase() } : null;
-  }).filter((b) => b && !/logo-lmi|lmi_logo|icon|sprite/i.test(b.src));
+  // Hvert medlem er et kort: logo som CSS-bakgrunn, navn i <h3 class="title"> og lenke til nettstedet
+  const bilder = html.split(/<div class="thumb/).slice(1).map((blokk) => {
+    const src = /background-image:\s*url\(['"]?([^'")]+)/i.exec(blokk)?.[1];
+    const navn = /<h3[^>]*class="title"[^>]*>([\s\S]*?)<\/h3>/i.exec(blokk)?.[1]?.replace(/\s+/g, ' ').trim() || '';
+    const nett = /href=["'](https?:\/\/(?!www\.lmi\.no)[^"']+)["']/i.exec(blokk)?.[1] || '';
+    return src ? { src, tekst: `${navn} ${nett} ${decodeURIComponent(src.split('/').pop() || '').replace(/[-_]/g, ' ')}`.toLowerCase() } : null;
+  }).filter(Boolean);
   for (const s of selskaper) {
     if (!s.match) continue;
     let rx; try { rx = new RegExp(s.match, 'i'); } catch { continue; }
@@ -84,7 +82,7 @@ export async function hentLmiLogoer(selskaper, dir, logg) {
     const b = bilder.find((x) => rx.test(x.tekst) || (domene.length > 3 && x.tekst.includes(domene)));
     if (!b) continue;
     try {
-      const res = await fetch(b.src, { signal: AbortSignal.timeout(20000) });
+      const res = await fetch(b.src, { signal: AbortSignal.timeout(20000), headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) Chrome/124.0' } });
       if (!res.ok) continue;
       const type = res.headers.get('content-type') || '';
       const ext = /svg/.test(type) ? 'svg' : /png/.test(type) ? 'png' : /webp/.test(type) ? 'webp' : /jpe?g/.test(type) ? 'jpg' : null;
