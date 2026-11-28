@@ -1,0 +1,18 @@
+<svg version="1.1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 30 30">
+    <defs>
+        <style>
+            .farge{fill:#0d539e;}
+            @media (prefers-color-scheme: dark) {
+                .farge{fill: white;}
+        </style>
+    </defs>
+    <title>Fürst Logo Bokstav</title>
+    <path class="farge"
+          d="M74.2,81.45V55.56h15.9a3.33,3.33,0,0,0-3.25-2.64h-12c-1.6,0-3.27,1.49-3.27,2.84V78.19a3.3,3.3,0,0,0,2.63,3.25V55.56"
+          transform="translate(-65 -52)"/>
+    <path class="farge" d="M75.4,66.29H90.07A3.16,3.16,0,0,0,87,63.77h-8.7V59.25H87a3.18,3.18,0,0,0,3.09-2.52H75.4v9.55"
+          transform="translate(-65 -52)"/>
+    <path class="farge" d="M78.27,70.08H87a3.17,3.17,0,0,0,3.09-2.52H75.43V81.44a3.5,3.5,0,0,0,2.83-3.25V70.08"
+          transform="translate(-65 -52)"/>
+</svg>

@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head><meta name="ROBOTS" content="INDEX,FOLLOW"><meta name="keywords" content=""><meta name="description" content="">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Temporary Disruption</title>
+<style>
+body {
+  margin: 0;
+  background: #f5f7fa;
+  color: #243746;
+  font: 18px Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+main {
+  max-width: 800px;
+  padding: 32px;
+  text-align: center;
+  margin: auto;
+}
+img {
+  width: 200px;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 24px;
+}
+h1 { font-size: 30px; }
+p { line-height: 1.6; }
+footer {
+  text-align: center;
+  padding: 20px 24px;
+}
+</style>
+</head>
+<body>
+<main>
+  <img src="https://image.mail.viatrisconnect.com/lib/fe2a117171640475711279/m/1/4fcf1922-c0f5-40e4-9375-ccb7724bae97.png" alt="Viatris">
+
+  <h1>Temporary Website Service Disruption</h1>
+
+  <p>Our website is temporarily unavailable due to a technical disruption.<br>
+  We are working to restore access as quickly as possible and apologize for any inconvenience.</p>
+
+  <p>If you need assistance, please refer to our
+  <a href="https://image.mail.viatrisconnect.com/lib/fe2a117171640475711279/m/1/2ea4efb3-578e-46fa-a15e-89e87bd57aae.pdf">Country Customer Service Contact List</a></p>
+</main>
+
+<footer>
+  <a href="https://www.viatris.com/en/privacy-policy">Viatris Privacy Policy</a>
+</footer>
+</body>
+</html>
