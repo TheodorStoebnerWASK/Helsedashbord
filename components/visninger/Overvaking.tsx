@@ -120,9 +120,9 @@ export function Overvaking({ fast, skjulStats }: { fast?: Overvakingsliste; skju
         </Seksjon>
         <aside>
           <Graf spec={tidSpec} />
-          <Seksjon tittel="Søkeord">
+          <Seksjon tittel={fast ? 'Hva traff' : 'Søkeord'}>
             <div className="stikkord-sky">{ordTelling.map(([o, n]) => <span key={o} className="stikkord">{o} <b>{n}</b></span>)}</div>
-            <p className="dempet liten-tekst">Listen har {liste?.ord.length} søkeord. De redigeres i <code>config/overvaking.json</code> på GitHub, der du også kan legge til nye kunder.</p>
+            {!fast && <p className="dempet liten-tekst">Listen har {liste?.ord.length} søkeord. De redigeres i <code>config/overvaking.json</code> på GitHub, der du også kan legge til nye kunder.</p>}
           </Seksjon>
         </aside>
       </div>

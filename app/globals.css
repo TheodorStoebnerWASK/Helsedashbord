@@ -491,3 +491,36 @@ html:has(.login) { background: var(--surface-inverse); }
 .tabell .kol-kjent { min-width: 120px; }
 @media (max-width: 720px) { .tabell .kol-vei, .tabell .kol-kjent { min-width: 0; } }
 .rutenett-sidepanel > * { min-width: 0; }
+
+/* --- Kundeprofil ------------------------------------------------------------- */
+.kunde-hode { display: flex; gap: 20px; align-items: flex-start; margin: 8px 0 24px; }
+.kunde-hode h2 { margin: 2px 0 6px; }
+.kunde-hode .eyebrow { margin: 0; }
+.logo.stor { width: 96px; height: 96px; object-fit: contain; background: #fff; border: 1px solid var(--border-hairline); padding: 8px; flex: none; }
+.logo.stor.tom { display: grid; place-items: center; font: var(--type-label); text-transform: uppercase; color: var(--text-secondary); }
+.kunde-lenker { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0 0; font-size: 14px; }
+.opp { color: #2E9E6E; } .ned { color: #E5402A; }
+.stats.seks { grid-template-columns: repeat(6, 1fr); }
+.anledninger { list-style: none; margin: 0 0 12px; padding: 0; }
+.anledninger li { border-left: 3px solid var(--af); padding: 8px 0 8px 14px; margin-bottom: 10px; background: color-mix(in srgb, var(--af) 6%, transparent); }
+.anledninger p { margin: 4px 0 0; }
+.anledning-type, .hendelse-type { font: var(--type-label); letter-spacing: var(--tracking-wide); text-transform: uppercase; font-size: 11px; color: var(--af, var(--hf)); }
+.tidslinje { list-style: none; margin: 0; padding: 0; }
+.tidslinje li { display: grid; grid-template-columns: 82px 120px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-hairline); align-items: baseline; }
+.tidslinje time { font-size: 12px; color: var(--text-secondary); }
+.tidslinje .hendelse-type { color: var(--hf); }
+.tavle { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 10px; }
+.tavle-kolonne { border-top: 3px solid var(--tf); background: color-mix(in srgb, var(--tf) 5%, transparent); padding: 10px; min-width: 0; }
+.tavle-kolonne h4 { margin: 0; display: flex; justify-content: space-between; }
+.tavle-kolonne h4 span { color: var(--tf); }
+.tavle-kort { background: var(--surface, #fff); border: 1px solid var(--border-hairline); padding: 10px; margin-top: 10px; }
+.tavle-kort p { margin: 0 0 4px; }
+.tavle-navn { font-weight: 500; }
+@media (max-width: 1000px) { .stats.seks { grid-template-columns: repeat(3, 1fr); } .tavle { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 720px) {
+  .stats.seks { grid-template-columns: repeat(2, 1fr); }
+  .tavle { grid-template-columns: 1fr; }
+  .kunde-hode { gap: 12px; } .logo.stor { width: 64px; height: 64px; }
+  .tidslinje li { grid-template-columns: 1fr; gap: 2px; }
+}
+.sokefelt.bred { width: 100%; max-width: 640px; margin-bottom: 12px; }

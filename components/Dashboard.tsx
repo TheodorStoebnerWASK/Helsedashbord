@@ -86,9 +86,16 @@ export default function Dashboard() {
       .then((r) => { if (r.status === 401) { location.href = '/login'; throw new Error('401'); } return r.json(); })
       .then(setData)
       .catch((e) => e.message !== '401' && setFeil('Kunne ikke laste data.'));
-    const [a, b] = location.hash.slice(1).split('/');
-    const h = FORELDER[b || a] || FORELDER[a];
-    if (h) { setHoved(h); const u = b || (a !== h ? a : ''); if (u && FORELDER[u] === h && u !== h) setUnder((x) => ({ ...x, [h]: u })); }
+    const lesHash = () => {
+      const [a, b] = location.hash.slice(1).split('/');
+      const h = FORELDER[b || a] || FORELDER[a];
+      if (h) { setHoved(h); const u = b || (a !== h ? a : ''); if (u && FORELDER[u] === h && u !== h) setUnder((x) => ({ ...x, [h]: u })); }
+    };
+    lesHash();
+    // Interne lenker som «#marked/sammenlign» bytter fane uten ny innlasting
+    const vedEndring = () => { lesHash(); window.scrollTo({ top: 0 }); };
+    window.addEventListener('hashchange', vedEndring);
+    return () => window.removeEventListener('hashchange', vedEndring);
   }, []);
   // Gå til en hovedfane eller en undervisning (f.eks. 'sporsmal' åpner Politikk › Spørsmål)
   const byttFane = useCallback((v: Visning | 'overvaking') => {
@@ -190,7 +197,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-        {MED_FILTER.has(hoved) && <div className="filterlinje">
+        {MED_FILTER.has(hoved) && !(hoved === 'kunder' && aktivUnder === 'radar') && <div className="filterlinje">
           <button className="filterknapp innhold" aria-expanded={visFiltre} onClick={() => setVisFiltre(!visFiltre)}>
             Filtre og søk{((filtre.sesjon !== 'p:2025-2029' ? 1 : 0) + filtre.kategorier.length + (filtre.sok ? 1 : 0) + (filtre.kunStore ? 1 : 0)) > 0 ? ` (${(filtre.sesjon !== 'p:2025-2029' ? 1 : 0) + filtre.kategorier.length + (filtre.sok ? 1 : 0) + (filtre.kunStore ? 1 : 0)} aktive)` : ''} <span aria-hidden>{visFiltre ? '▴' : '▾'}</span>
           </button>

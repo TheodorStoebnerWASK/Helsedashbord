@@ -37,3 +37,18 @@ export function veienTilNorge(ferdig?: string): { tekst: string; aar?: number; p
     ? { tekst: `Resultat forelå ${mnd(ferdig)}`, aar, passert }
     : { tekst: `Resultat ventes ${mnd(ferdig)}, mulig EU-godkjenning ca. ${aar + 1}–${aar + 2}`, aar, passert };
 }
+
+// Grove terapiområder fra sykdomsnavn (engelsk fra ClinicalTrials.gov, norsk fra Nye metoder)
+const OMRADER: [string, RegExp][] = [
+  ['Kreft', /cancer|carcinom|tumou?r|lymphom|lymfom|leuka?emi|myelom|neoplasm|melanom|sarcom|sarkom|glioblastom|nsclc|kreft|onkolog|hodgkin|metasta/i],
+  ['Nevrologi', /sclerosis|sklerose|alzheimer|parkinson|migr|epilep|muscular|muskel|neuro|nevro|myasthen|huntington|amyotroph|\bals\b|demens|optikus/i],
+  ['Øye', /macula|makula|retin|\beye|ocular|okul|uveit|glaukom|glaucom|øye|syn\b/i],
+  ['Immunologi og betennelse', /arthrit|artritt|psoria|lupus|colitis|kolitt|crohn|dermatit|eksem|eczem|asthma|astma|urticari|urtikari|nephropath|nefropati|vaskulitt|vasculit|hidradenit|still'?s/i],
+  ['Hjerte, kar og metabolsk', /cardi|kardi|heart|hjerte|hypertens|diabet|obes|fedme|lipid|cholesterol|kolesterol|kidney|renal|nyre|atrial/i],
+  ['Infeksjon og vaksiner', /infect|infeksj|hiv|hepatit|influensa|influenza|covid|vaccin|vaksin|\brsv\b|pneumo|bacter|bakter|sepsis/i],
+  ['Blod', /hemophil|hemofili|blødersykdom|an(a)?emi|sickle|sigdcelle|thalass|hemoglobinuri|trombocyt|thrombocyt/i],
+];
+export function terapiomrade(tekst: string) {
+  return OMRADER.find(([, rx]) => rx.test(tekst))?.[0] || 'Annet';
+}
+export const OMRADE_REKKEFOLGE = [...OMRADER.map(([n]) => n), 'Annet'];
