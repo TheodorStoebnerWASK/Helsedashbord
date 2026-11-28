@@ -46,7 +46,7 @@ export function Debatter() {
     for (const i of innlegg) { const p = partiAv(i); if (p && PARTIER[p]) m.set(p, (m.get(p) || 0) + 1); }
     const ps = PARTI_REKKEFOLGE.filter((p) => m.has(p)).sort((a, b) => m.get(b)! - m.get(a)!);
     return { id: `debatt-parti-${q}`, tittel: q ? `Innlegg som nevner «${q}», per parti` : 'Innlegg i helsedebatter per parti', undertittel: 'Hovedinnlegg og replikker. Statsråder uten parti er ikke med.', form: 'liggende', enhet: 'innlegg',
-      kategorier: ps.map((p) => PARTIER[p].navn), kategoriBilder: ps.map(partiLogo), serier: [{ navn: 'Innlegg', data: ps.map((p) => m.get(p)!), fargerPerPunkt: ps.map(partiFarge) }] };
+      kategorier: ps.map((p) => PARTIER[p].navn), serier: [{ navn: 'Innlegg', data: ps.map((p) => m.get(p)!), fargerPerPunkt: ps.map(partiFarge) }] };
   }, [innlegg, q]);
   const talerSpec: GrafSpec = useMemo(() => {
     const m = new Map<string, { n: number; parti?: string; p?: string }>();
@@ -104,7 +104,7 @@ function DebattRad({ d, q, partier }: { d: Debatt; q: string; partier: string[] 
       <div className="element-innhold">
         <p className="element-tittel"><a href={sakUrl} target="_blank" rel="noreferrer">{d.tittel}</a></p>
         <div className="element-detaljer">
-          <span className="dempet">{d.innlegg.length} innlegg · {[...new Set(d.innlegg.map((i) => partiKort(partiAv(i))).filter((p) => p && p !== 'Ukjent'))].join(', ')}</span>
+          <span className="dempet">{d.innlegg.length} innlegg · <span className="parti-rad">{[...new Set(d.innlegg.map((i) => partiAv(i)).filter((p): p is string => !!p && !!PARTIER[p]))].sort((a, b) => PARTI_REKKEFOLGE.indexOf(a) - PARTI_REKKEFOLGE.indexOf(b)).map((p) => <PartiMerke key={p} parti={p} />)}</span></span>
           <a className="dempet" href={referatUrl(d.refId, d.sesjon)} target="_blank" rel="noreferrer">Referat ↗</a>
         </div>
         <div className="element-merker">

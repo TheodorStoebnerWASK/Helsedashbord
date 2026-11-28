@@ -2,7 +2,7 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 import type { Data, Element } from '@/lib/types';
 import { TYPE_NAVN } from '@/lib/types';
-import { bildeUrl, partiFarge, partiKort } from '@/lib/parti';
+import { PARTIER, bildeUrl, partiFarge, partiKort, partiLogo } from '@/lib/parti';
 import { datoKort } from '@/lib/analyse';
 
 // ---------- Kontekst: data + globale filtre ----------
@@ -39,7 +39,11 @@ export function KategoriMerke({ id }: { id: string }) {
   );
 }
 
+/** Partiet som logo der vi har den (navnet ligger i alt-tekst og verktøytips), ellers som farget forkortelse. */
 export function PartiMerke({ parti }: { parti?: string }) {
+  const logo = partiLogo(parti);
+  const navn = (parti && PARTIER[parti]?.navn) || partiKort(parti);
+  if (logo) return <img className="parti-logo" src={logo.src} alt={navn} title={navn} />;
   return (
     <span className="parti" style={{ ['--pf' as string]: partiFarge(parti) }}>
       {partiKort(parti)}

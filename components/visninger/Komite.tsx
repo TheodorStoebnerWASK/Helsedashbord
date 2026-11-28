@@ -4,7 +4,6 @@ import { useData, Seksjon, Portrett, PartiMerke, Segment } from '../felles';
 import { Graf } from '../Graf';
 import { perParti } from '@/lib/byggere';
 import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort } from '@/lib/parti';
-import { partiLogo } from '@/lib/parti';
 import { SPORSMAL_TYPER } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
 
@@ -37,7 +36,7 @@ export function Komite() {
     const ps = PARTI_REKKEFOLGE.filter((p) => m.has(p));
     return {
       id: 'komite-seter', tittel: 'Helse- og omsorgskomiteens sammensetning', undertittel: `${data.komite.medlemmer.length} medlemmer per parti`, form: 'stolpe', enhet: 'medlemmer',
-      kategorier: ps.map((p) => PARTIER[p].kort), kategoriBilder: ps.map(partiLogo), serier: [{ navn: 'Medlemmer', data: ps.map((p) => m.get(p)!), fargerPerPunkt: ps.map(partiFarge) }],
+      kategorier: ps.map((p) => PARTIER[p].kort), serier: [{ navn: 'Medlemmer', data: ps.map((p) => m.get(p)!), fargerPerPunkt: ps.map(partiFarge) }],
     };
   }, [data]);
   const perMedlem: GrafSpec = useMemo(() => {

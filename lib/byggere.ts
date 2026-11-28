@@ -1,7 +1,7 @@
 // Ferdige grafoppskrifter som brukes på tvers av visningene.
 import type { Data, Element } from './types';
 import type { GrafSpec } from './graf';
-import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort, partiLogo } from './parti';
+import { PARTIER, PARTI_REKKEFOLGE, partiFarge, partiKort } from './parti';
 import { telle, maneder, mndNokkel, mndNavn, sesjonKort, dagISesjon } from './analyse';
 
 type Ctx = { data: Data; temaNavn: (id: string) => string; katFarge: (id: string) => string; katNavn: (id: string) => string };
@@ -13,7 +13,7 @@ export function perParti(liste: Element[], c: Ctx, o: { tittel: string; undertit
   if (o.etterKategori) {
     return {
       id: o.id, tittel: o.tittel, undertittel: o.undertittel, form: 'liggende', stablet: true,
-      kategorier: partier.map((p) => PARTIER[p].navn), kategoriBilder: partier.map(partiLogo),
+      kategorier: partier.map((p) => PARTIER[p].navn),
       serier: c.data.taksonomi.kategorier.map((k) => ({
         navn: k.navn, farge: k.farge,
         data: partier.map((p) => liste.filter((e) => partiAv(c.data, e) === p && e.kategori === k.id).length),
@@ -24,7 +24,7 @@ export function perParti(liste: Element[], c: Ctx, o: { tittel: string; undertit
   const sortert = partier.sort((a, b) => (m.get(b) || 0) - (m.get(a) || 0));
   return {
     id: o.id, tittel: o.tittel, undertittel: o.undertittel, form: 'liggende', enhet: 'stk',
-    kategorier: sortert.map((p) => PARTIER[p].navn), kategoriBilder: sortert.map(partiLogo),
+    kategorier: sortert.map((p) => PARTIER[p].navn),
     serier: [{ navn: 'Antall', data: sortert.map((p) => m.get(p) || 0), fargerPerPunkt: sortert.map(partiFarge) }],
   };
 }
