@@ -9,6 +9,8 @@ import { datoKort } from '@/lib/analyse';
 import { legemiddelNokkel, veienTilNorge, terapiomrade, OMRADE_REKKEFOLGE } from '@/lib/studier';
 import type { AccessData, MarkedData, Metode, Overvakingsliste, Selskap } from '@/lib/types';
 import type { GrafSpec } from '@/lib/graf';
+import { sakslisteTreff, blaresept, konkurrenter, BLA_STATUS_FORKLARING } from '@/lib/kundesignal';
+import { KundeKort, useKunder, STATUS_NAVN, STATUS_FARGE } from './kunder';
 
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const rxAv = (s?: string) => { try { return s ? new RegExp(s, 'i') : null; } catch { return null; } };
@@ -70,6 +72,9 @@ export function Selskapsradar() {
 
   const selskaper = useMemo(() => [...(marked?.selskaper || [])].sort((a, b) => a.navn.localeCompare(b.navn, 'nb')), [marked]);
   const s = selskaper.find((x) => x.nokkel === valgt);
+  const { data: kunder } = useKunder();
+  // Fra kundeoversikten: åpne profilen til selskapet som ble klikket
+  useEffect(() => { try { const v = sessionStorage.getItem('kunde-valgt'); if (v) { setValgt(v); sessionStorage.removeItem('kunde-valgt'); } } catch { /* ok */ } }, []);
   useEffect(() => { if (!valgt && selskaper.length) setValgt(selskaper.find((x) => /^roche norge/i.test(x.navn))?.nokkel || selskaper[0].nokkel); }, [selskaper, valgt]);
   useEffect(() => {
     if (!valgt) return;
@@ -124,6 +129,11 @@ export function Selskapsradar() {
     for (const x of [...snart].sort((a, b) => Number(!!b.norge) - Number(!!a.norge)).slice(0, 3)) {
       anl.push({ type: 'Fase 3-resultat snart', farge: '#DDA21A', dato: x.ferdig!, vekt: x.norge ? 1.8 : 1.2, tekst: <><b>{x.legemiddel[0]}</b> mot {x.tilstand[0]?.toLowerCase()}: hovedresultat ventes {veienTilNorge(x.ferdig).tekst.replace(/^Resultat ventes /, '').split(',')[0]}.{x.norge ? ' Norske sykehus deltar i studien.' : ''}</> });
     }
+    const saksliste = sakslisteTreff(s, acc, merker);
+    for (const t of saksliste) anl.push({ type: `På sakslisten: ${t.forum}`, farge: '#B5651D', dato: t.dato, vekt: 5, tekst: <><b>{t.tittel.split(/\s+(?:til|som|i kombinasjon)\s/)[0]}</b> ({t.id}) skal opp i {t.forum} {datoKort(t.dato)}. {t.url && <a href={t.url} target="_blank" rel="noreferrer">Se sakslisten</a>}</> });
+    const bla = blaresept(s, acc, merker);
+    for (const b of bla.saker.filter((b) => !b.avsluttet)) anl.push({ type: 'Blå resept under behandling', farge: '#3D99C7', dato: b.akseptert || b.mt || '', vekt: b.status === 'Klokkestopp' ? 3.5 : 2.2, tekst: <><b>{b.preparat}</b> ({b.sykdom?.toLowerCase()}): {b.status?.toLowerCase()}{BLA_STATUS_FORKLARING[b.status || ''] ? `, ${BLA_STATUS_FORKLARING[b.status || ''].toLowerCase()}` : ''}. {b.dager ? `${b.dager} dager totalt hos DMP så langt.` : ''}</> });
+    for (const b of bla.saker.filter((b) => b.avsluttet && b.avsluttet >= aarSiden)) anl.push({ type: /avslag/i.test(b.status || '') ? 'Avslag blå resept' : 'Blå resept avgjort', farge: /avslag/i.test(b.status || '') ? '#E5402A' : '#2E9E6E', dato: b.avsluttet!, vekt: /avslag/i.test(b.status || '') ? 3 : 1.5, tekst: <><b>{b.preparat}</b> ({b.sykdom?.toLowerCase()}): {BLA_STATUS_FORKLARING[b.status || '']?.toLowerCase() || b.status} {datoKort(b.avsluttet!)}.</> });
     anl.sort((a, b) => b.vekt - a.vekt || b.dato.localeCompare(a.dato));
 
     // Tidslinje siste 12 måneder
@@ -136,10 +146,15 @@ export function Selskapsradar() {
     }
     for (const e of ema.filter((e) => e.dato >= aarSiden)) hend.push({ dato: e.dato, type: 'EMA', farge: '#8A5AB0', tekst: <><a href={e.url} target="_blank" rel="noreferrer">{e.navn}</a>: {({ opinion: 'positiv CHMP-opinion', godkjent: 'godkjent i EU', avslag: 'avslag', trukket: 'søknad trukket' } as Record<string, string>)[e.type] || e.type}</> });
     for (const n of omtale.filter((n) => n.d >= aarSiden)) hend.push({ dato: n.d.slice(0, 10), type: 'Media', farge: '#685048', tekst: <a href={n.url} target="_blank" rel="noreferrer">{n.t}</a> });
+    for (const b of bla.saker) {
+      if (b.akseptert && b.akseptert >= aarSiden) hend.push({ dato: b.akseptert, type: 'Blå resept', farge: '#3D99C7', tekst: <><b>{b.preparat}</b>: søknad tatt til behandling hos DMP</> });
+      if (b.avsluttet && b.avsluttet >= aarSiden) hend.push({ dato: b.avsluttet, type: 'Blå resept', farge: '#3D99C7', tekst: <><b>{b.preparat}</b>: {BLA_STATUS_FORKLARING[b.status || '']?.toLowerCase() || b.status}</> });
+    }
     hend.sort((a, b) => b.dato.localeCompare(a.dato));
 
-    return { merker, metoder, ema, liste, omtale, pipeline, anl, hend, nesteMote, snart, aarSiden };
-  }, [s, acc, ekstra, nyheter]);
+    const konk = marked ? konkurrenter(s, marked, acc) : [];
+    return { merker, metoder, ema, liste, omtale, pipeline, anl, hend, nesteMote, snart, aarSiden, saksliste, bla, konk };
+  }, [s, acc, ekstra, nyheter, marked]);
 
   const grafer = useMemo(() => {
     if (!s || !r) return [];
@@ -192,7 +207,7 @@ export function Selskapsradar() {
             {s.logo ? <img className="logo stor" src={s.logo} alt="" /> : <span className="logo stor tom">{sokenavn(s).slice(0, 2)}</span>}
             <div>
               <p className="eyebrow">{marked.sektorer.find((x) => x.id === s.sektor)?.navn}</p>
-              <h2>{s.navn}</h2>
+              <h2>{s.navn} {kunder?.kunder[s.nokkel]?.status && <span className="status-merke" style={{ ['--sf' as string]: STATUS_FARGE[kunder.kunder[s.nokkel].status!] }}>{STATUS_NAVN[kunder.kunder[s.nokkel].status!]}</span>}</h2>
               <p className="dempet">
                 {s.orgnr ? (
                   <>
@@ -211,6 +226,10 @@ export function Selskapsradar() {
               </p>
             </div>
           </div>
+
+          <Seksjon tittel="Kundestatus og notater">
+            <KundeKort nokkel={s.nokkel} />
+          </Seksjon>
 
           <div className="stats kompakt seks">
             <Stat tall={telle('vurdering')} etikett="under vurdering" hint="i Nye metoder nå" />
@@ -299,6 +318,48 @@ export function Selskapsradar() {
               <p className="dempet liten-tekst">Sortert med de som er nærmest markedet først. Se Marked, Pipeline for forklaring.</p>
             </Seksjon>
             <aside>{grafer.map((g) => <Graf key={g.id} spec={g} />)}</aside>
+          </div>
+
+          <div className="rutenett-2">
+            <Seksjon tittel={`Blå resept hos DMP (${r.bla.saker.length + r.bla.vurderinger.length})`}>
+              {r.bla.saker.length === 0 && r.bla.vurderinger.length === 0 ? <p className="tomt">Ingen blåreseptsaker funnet for selskapet.</p> : (
+                <>
+                  {r.bla.saker.length > 0 && (
+                    <>
+                      <p className="eyebrow">Saker hos DMP nå</p>
+                      <ul className="kortliste">{r.bla.saker.map((b, i) => (
+                        <li key={i}><b>{b.preparat}</b> · {b.sykdom} · <em>{b.status}</em>{BLA_STATUS_FORKLARING[b.status || ''] ? <span className="dempet"> ({BLA_STATUS_FORKLARING[b.status || ''].toLowerCase()})</span> : null}
+                          <br /><span className="dempet liten-tekst">{b.akseptert ? `Tatt til behandling ${datoKort(b.akseptert)}` : ''}{b.avsluttet ? ` · avsluttet ${datoKort(b.avsluttet)}` : ''}{b.dager ? ` · ${b.dager} dager totalt` : ''}</span></li>
+                      ))}</ul>
+                    </>
+                  )}
+                  {r.bla.vurderinger.length > 0 && (
+                    <>
+                      <p className="eyebrow">Fullførte vurderinger for blå resept</p>
+                      <ul className="kortliste">{r.bla.vurderinger.slice(0, 10).map((v, i) => (
+                        <li key={i}><time>{v.aar}</time> {v.lenke ? <a href={v.lenke} target="_blank" rel="noreferrer">{v.produkt}</a> : v.produkt} · {v.indikasjon}{v.kommentar ? <span className="dempet"> · {v.kommentar}</span> : null}</li>
+                      ))}</ul>
+                    </>
+                  )}
+                </>
+              )}
+              <p className="dempet liten-tekst">Kilde: DMPs saksbehandlingsstatus for folketrygden og oversikten over metodevurderinger. Oppdateres når DMP publiserer nye tall (månedlig).</p>
+            </Seksjon>
+            <Seksjon tittel="Konkurrenter i samme terapiområder">
+              {r.konk.length === 0 ? <p className="tomt">Fant ingen tydelige konkurrenter i dataene.</p> : (
+                <ul className="konkurrenter">{r.konk.map((k) => (
+                  <li key={k.selskap.nokkel}>
+                    {k.selskap.logo ? <img className="logo" src={k.selskap.logo} alt="" width={36} height={36} /> : <span className="logo tom">{k.selskap.navn.slice(0, 2)}</span>}
+                    <div>
+                      <button className="navnlenke" onClick={() => { setValgt(k.selskap.nokkel); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>{k.selskap.navn}</button>
+                      {kunder?.kunder[k.selskap.nokkel]?.status && <span className="status-merke" style={{ ['--sf' as string]: STATUS_FARGE[kunder.kunder[k.selskap.nokkel].status!], marginLeft: 8 }}>{STATUS_NAVN[kunder.kunder[k.selskap.nokkel].status!]}</span>}
+                      <p className="dempet liten-tekst">Overlapp: {k.felles.slice(0, 3).map((f) => f.omrade.toLowerCase()).join(', ')}</p>
+                    </div>
+                  </li>
+                ))}</ul>
+              )}
+              <p className="dempet liten-tekst">Selskaper i samme sektor med metoder i Nye metoder og fase 3-studier innen de samme terapiområdene. Nyttig for å se hvem som konkurrerer om de samme pasientene og budsjettene.</p>
+            </Seksjon>
           </div>
 
           <Seksjon tittel="Omtale i politikken og mediene">

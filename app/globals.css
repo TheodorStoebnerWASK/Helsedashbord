@@ -524,3 +524,28 @@ html:has(.login) { background: var(--surface-inverse); }
   .tidslinje li { grid-template-columns: 1fr; gap: 2px; }
 }
 .sokefelt.bred { width: 100%; max-width: 640px; margin-bottom: 12px; }
+.kundekort { border: 1px solid var(--border-hairline); background: var(--surface-card, #fff); padding: 18px; }
+.kundekort-topp { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: flex-end; margin-bottom: 14px; }
+.velger.liten input { border: 0; border-bottom: 1px solid var(--border-hairline); background: transparent; padding: 6px 0; font: var(--type-body-sm); min-width: 190px; }
+.velger.liten input:focus { outline: none; border-bottom-color: var(--wa-blue); }
+.notat-ny { display: flex; gap: 10px; align-items: flex-start; }
+.notat-ny textarea { flex: 1; font: var(--type-body-sm); padding: 8px 10px; border: 1px solid var(--border-hairline); background: var(--surface, #fff); resize: vertical; }
+.notater { list-style: none; margin: 14px 0 0; padding: 0; }
+.notater li { border-top: 1px solid var(--border-hairline); padding: 10px 0; }
+.notater p { margin: 0 0 4px; white-space: pre-wrap; }
+.feilmelding { color: #C0392B; font-size: 14px; }
+.status-merke { display: inline-block; padding: 2px 8px; font: var(--type-label); font-size: 11px; letter-spacing: var(--tracking-wide); text-transform: uppercase; color: #fff; background: var(--sf); }
+@media (max-width: 720px) { .notat-ny { flex-direction: column; align-items: stretch; } .velger.liten input { min-width: 0; width: 100%; } .kundekort-topp .velger { width: 100%; } }
+.konkurrenter { list-style: none; margin: 0 0 10px; padding: 0; }
+.konkurrenter li { display: flex; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-hairline); }
+.konkurrenter .logo { width: 36px; height: 36px; object-fit: contain; background: #fff; flex: none; }
+.konkurrenter p { margin: 2px 0 0; }
+.selskap-navn { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.selskap-navn .logo { width: 28px; height: 28px; object-fit: contain; background: #fff; flex: none; }
+.signal { padding-left: 8px; border-left: 3px solid; margin-bottom: 4px; }
+.signal.oransje { border-color: #B5651D; } .signal.bla { border-color: #3D99C7; }
+.kortliste li.uthevet { background: color-mix(in srgb, #2E9E6E 8%, transparent); padding-left: 8px; border-left: 3px solid #2E9E6E; }
+.navnlenke { border: 0; background: none; padding: 0; font: inherit; color: var(--text-primary); text-align: left; cursor: pointer; border-bottom: 1px solid var(--border-hairline); }
+.navnlenke:hover { border-bottom-color: var(--wa-blue); }
+.selskap-navn { flex-wrap: nowrap; vertical-align: middle; }
+.selskap-navn .logo, .selskap-navn .logo.tom { display: inline-grid; place-items: center; margin: 0; }

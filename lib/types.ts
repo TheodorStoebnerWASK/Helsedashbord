@@ -117,7 +117,7 @@ export interface Nyhetskilde { id: string; navn: string; type: 'medie' | 'etat';
 
 // Access
 export interface MetodeSak { sak?: string; ider: string[]; tittel: string; beslutning: string; status: string }
-export interface ForumMote { dato: string; skannet?: boolean; dokumenter: { saksliste?: string; sakspapirer?: string; protokoll?: string }; saker?: MetodeSak[] }
+export interface ForumMote { dato: string; skannet?: boolean; sakslisteSaker?: { ider: string[]; tittel: string }[]; dokumenter: { saksliste?: string; sakspapirer?: string; protokoll?: string }; saker?: MetodeSak[] }
 export interface EmaHendelse {
   navn: string; virkestoff?: string; url?: string; omrade: string[]; innehaver?: string; atc?: string; indikasjon?: string;
   orphan?: boolean; prime?: boolean; betinget?: boolean; biotilsvarende?: boolean; generisk?: boolean; atmp?: boolean;
@@ -125,7 +125,8 @@ export interface EmaHendelse {
 }
 export interface Metode { tittel: string; selskap?: string; legemiddel?: string; h: { f: 'bf' | 'bsf'; d: string; s: string; b: string; u?: string }[] }
 export interface AccessData {
-  oppdatert?: string; ema?: EmaHendelse[]; emaRegister?: { n: string; v?: string; i?: string; s?: string; u?: string }[]; beslutningsforum?: ForumMote[]; bestillerforum?: ForumMote[]; moteplan?: { beslutningsforum: string[]; kilde: string; hentet: string }; metoder?: Record<string, Metode>;
+  oppdatert?: string; ema?: EmaHendelse[]; emaRegister?: { n: string; v?: string; i?: string; s?: string; u?: string }[]; beslutningsforum?: ForumMote[]; bestillerforum?: ForumMote[]; moteplan?: { beslutningsforum: string[]; kilde: string; hentet: string };
+  blaresept?: BlaResept; metoder?: Record<string, Metode>;
 }
 
 // Marked: selskaper fra Brønnøysund, studier fra ClinicalTrials.gov
@@ -137,3 +138,14 @@ export interface Selskap {
   regnskap?: Regnskap[]; omsetningNok?: number | null; logo?: string | null; studier?: Studie[];
 }
 export interface MarkedData { oppdatert?: string; sektorer: { id: string; navn: string; kategori: string }[]; selskaper: Selskap[] }
+
+// Blå resept (folketrygden) fra DMP
+export interface BlaReseptSak { preparat: string; indikasjon?: string; sykdom?: string; firma?: string; status?: string; mt?: string | null; akseptert?: string | null; avsluttet?: string | null; dager?: number | null }
+export interface BlaReseptVurdering { produkt: string; virkestoff?: string; indikasjon?: string; aar?: number | null; kommentar?: string; nm?: string; lenke?: string }
+export interface BlaResept { kilde: string; hentet: string; status: BlaReseptSak[]; vurderinger: BlaReseptVurdering[]; statusFil?: string; oversiktFil?: string }
+
+// Kundestatus og notater (delt i teamet, lagret i Vercel Blob)
+export type KundeStatus = 'kunde' | 'prospekt' | 'tidligere';
+export interface KundeNotat { id: string; tekst: string; av: string; dato: string }
+export interface KundeInfo { status?: KundeStatus; kontakt?: string; ansvarlig?: string; notater: KundeNotat[]; endret?: string; endretAv?: string }
+export interface KundeData { aktivert: boolean; kunder: Record<string, KundeInfo>; feil?: string }

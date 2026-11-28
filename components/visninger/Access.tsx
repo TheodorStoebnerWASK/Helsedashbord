@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { useData, Seksjon, Stat, Segment, Chips, ElementListe } from '../felles';
+import { BLA_STATUS_FORKLARING } from '@/lib/kundesignal';
 import { Graf } from '../Graf';
 import { useLat } from './Innspill';
 import { useNyheter, NyhetRad } from './Nyheter';
@@ -150,7 +151,9 @@ function BsfKalender({ acc, velg }: { acc: AccessData; velg: (dato: string) => v
           {kommende.map((d, i) => (
             <li key={d}>
               <time>{datoKort(d)}</time>
-              <span>{i === 0 ? 'Neste møte. Saksliste publiseres cirka en uke før.' : 'Planlagt møte'}</span>
+              {arkiv.get(d)?.sakslisteSaker?.length
+                ? <span>Saksliste publisert: {arkiv.get(d)!.sakslisteSaker!.length} metoder · <a href={arkiv.get(d)!.dokumenter.saksliste} target="_blank" rel="noreferrer">PDF</a><br /><span className="dempet liten-tekst">{arkiv.get(d)!.sakslisteSaker!.map((x) => /\(([^)]+)\)/.exec(x.tittel)?.[1] || x.ider[0]).join(', ')}</span></span>
+                : <span>{i === 0 ? 'Neste møte. Saksliste publiseres cirka en uke før.' : 'Planlagt møte'}</span>}
             </li>
           ))}
         </ul>
@@ -431,6 +434,29 @@ export function Access({ visning, gaTil }: { visning: AccessVisning; gaTil: (v: 
             ]} />
             <p className="dempet liten-tekst">Kilde: Legemiddelforskriften § 14-7 (fullmaktsgrense, presisert per bruksområde fra 1. juli 2026); WA Helses Access-modell. Se Kalender-fanen for budsjettåret.</p>
           </Seksjon>
+          {acc.blaresept && (
+            <div className="rutenett-2">
+              <Seksjon tittel={`Søknader om blå resept hos DMP nå (${acc.blaresept.status.length})`}>
+                <table className="tabell">
+                  <thead><tr><th>Legemiddel</th><th>Firma</th><th>Status</th><th>Tid hos DMP</th></tr></thead>
+                  <tbody>{[...acc.blaresept.status].sort((a, b) => Number(!!a.avsluttet) - Number(!!b.avsluttet) || (b.akseptert || '').localeCompare(a.akseptert || '')).map((b, i) => (
+                    <tr key={i}>
+                      <td><b>{b.preparat}</b><br /><span className="dempet liten-tekst">{b.sykdom}</span></td>
+                      <td className="liten-tekst">{b.firma}</td>
+                      <td className="liten-tekst">{b.status}{b.avsluttet ? ` ${datoKort(b.avsluttet)}` : ''}{BLA_STATUS_FORKLARING[b.status || ''] && <><br /><span className="dempet">{BLA_STATUS_FORKLARING[b.status || '']}</span></>}</td>
+                      <td className="liten-tekst">{b.dager ? `${b.dager} dager` : ''}{b.akseptert ? <><br /><span className="dempet">fra {datoKort(b.akseptert)}</span></> : null}</td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+                <p className="dempet liten-tekst">Kilde: <a href={acc.blaresept.kilde} target="_blank" rel="noreferrer">DMP, saksbehandlingsstatus for folketrygden</a>. Klokkestopp betyr at DMP venter på dokumentasjon eller svar fra firmaet, og tiden telles ikke som DMPs saksbehandlingstid.</p>
+              </Seksjon>
+              <Seksjon tittel="Ferdige vurderinger for blå resept, siste to år">
+                <ul className="kortliste">{acc.blaresept.vurderinger.filter((v) => (v.aar || 0) >= new Date().getFullYear() - 1).sort((a, b) => (b.aar || 0) - (a.aar || 0)).slice(0, 40).map((v, i) => (
+                  <li key={i}><time>{v.aar}</time> {v.lenke ? <a href={v.lenke} target="_blank" rel="noreferrer">{v.produkt}</a> : v.produkt} · {v.indikasjon}{v.kommentar ? <span className="dempet"> · {v.kommentar}</span> : null}</li>
+                ))}</ul>
+              </Seksjon>
+            </div>
+          )}
           <div className="rutenett-2">
             <Seksjon tittel={`Siste fra DMP, Sykehusinnkjøp og EMA (${etatNyheter.length})`}>
               {etatNyheter.length === 0 ? <p className="tomt">Ingen saker ennå.</p> : <ul className="elementer">{etatNyheter.slice(0, 25).map((n) => <NyhetRad key={n.url} n={n} />)}</ul>}

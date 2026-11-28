@@ -154,6 +154,17 @@ export function parseBestillerforum(tekst) {
  * Henter møter fra Bestillerforum og Beslutningsforum og tolker protokollene. Protokoller som er lest
  * før (samme URL) gjenbrukes fra cache.
  */
+/** Saksliste: hver metode står som «IDåååå_nnn Tittel …» fram til neste sak. */
+export function parseSaksliste(tekst) {
+  const ren = tekst.replace(/\s+/g, ' ');
+  const ut = [];
+  for (const m of ren.matchAll(/(ID\d{4}_\d{3}(?:\s*(?:og|,)\s*ID\d{4}_\d{3})*)\s+(.+?)(?=\s+Sak\s+\d+\s*[-–]\s*\d{4}|\s+ID\d{4}_\d{3}\s|\s+(?:Stjørdal|Oslo|Bodø|Hamar|Tromsø|Bergen),\s+\d|$)/g)) {
+    const ider = m[1].match(/ID\d{4}_\d{3}/g);
+    if (!ut.some((x) => x.ider.join() === ider.join())) ut.push({ ider, tittel: m[2].replace(/\s+(?:Anmodning|Forslag om|Forslag:|Saksbehandler)[\s\S]*$/, '').trim().slice(0, 300) });
+  }
+  return ut;
+}
+
 export async function hentNyeMetoder(cache, { fra, logg = console.log }) {
   const ut = {};
   for (const [forum, sti, parse] of [
@@ -168,7 +179,14 @@ export async function hentNyeMetoder(cache, { fra, logg = console.log }) {
       const g = gamle.get(m.dato);
       const prot = m.dokumenter.protokoll;
       if (g && g.kilde === prot && g.v === TOLKER && (g.saker?.length || g.skannet)) { m.saker = g.saker; m.kilde = g.kilde; m.v = g.v; m.skannet = g.skannet; continue; }
-      if (!prot) continue;
+      if (!prot) {
+        // Kommende møte: les sakslisten (publiseres ca. en uke før) så vi ser hvilke metoder som skal opp
+        const sl = m.dokumenter.saksliste;
+        if (sl && g?.sakslisteKilde === sl && g.sakslisteSaker) { m.sakslisteSaker = g.sakslisteSaker; m.sakslisteKilde = sl; continue; }
+        if (sl) try { m.sakslisteSaker = parseSaksliste(pdfTilTekst(await hentBuffer(sl), false)); m.sakslisteKilde = sl; }
+        catch (e) { logg(`Access: kunne ikke lese saksliste ${m.dato} (${e.message.slice(0, 80)})`); }
+        continue;
+      }
       try {
         const tekst = pdfTilTekst(await hentBuffer(prot), forum === 'beslutningsforum');
         m.saker = parse(tekst); m.kilde = prot; m.v = TOLKER; lest++;
@@ -243,4 +261,49 @@ export async function hentMoteplan() {
     }
   }
   return { beslutningsforum: [...datoer].sort(), kilde: 'https://www.nyemetoder.no/om-systemet/tidsfrister-og-motedatoer/', hentet: new Date().toISOString() };
+}
+
+/**
+ * Blå resept fra DMP: (1) månedlig saksbehandlingsstatus for folketrygden, med legemiddelfirma og status,
+ * og (2) oversikten over alle metodevurderinger, filtrert på folketrygdfinansiering.
+ */
+export async function hentBlaresept({ logg = console.log } = {}) {
+  const { lesXlsx, excelDato } = await import('./xlsx.mjs');
+  const DMP = 'https://www.dmp.no';
+  const MV = `${DMP}/offentlig-finansiering/metodevurdering-av-medisinske-produkter/metodevurdering-av-legemidler`;
+  const finnXlsx = async (side, rx) => {
+    const html = await hentTekst(`${MV}/${side}`);
+    const href = [...html.matchAll(/href="([^"]+\.xlsx)"/gi)].map((m) => avkod(m[1])).find((h) => rx.test(h));
+    return href ? new URL(href, DMP).href : null;
+  };
+  const ut = { kilde: `${MV}/saksbehandlingsstatus`, hentet: new Date().toISOString(), status: [], vurderinger: [] };
+
+  const statusUrl = await finnXlsx('saksbehandlingsstatus', /folketrygd/i);
+  if (statusUrl) {
+    const rader = lesXlsx(await hentBuffer(statusUrl));
+    const hode = rader[0]?.celler || [];
+    const i = (rx) => hode.findIndex((h) => rx.test(h));
+    const [cP, cI, cS, cF, cSt, cMt, cA, cAv, cT] = [/preparat/i, /^indikasjon/i, /sykdom/i, /firma/i, /status/i, /dato mt/i, /akseptert/i, /avsluttet/i, /totaltid/i].map(i);
+    ut.status = rader.slice(1).map(({ celler: c }) => ({
+      preparat: c[cP], indikasjon: c[cI], sykdom: c[cS], firma: c[cF], status: c[cSt],
+      mt: excelDato(c[cMt]), akseptert: excelDato(c[cA]), avsluttet: excelDato(c[cAv]), dager: Number(c[cT]) || null,
+    })).filter((x) => x.preparat);
+    ut.statusFil = statusUrl;
+  }
+  const oversiktUrl = await finnXlsx('fullforte-metodevurderinger-for-legemidler', /oversikt/i);
+  if (oversiktUrl) {
+    const rader = lesXlsx(await hentBuffer(oversiktUrl));
+    const hi = rader.findIndex((r) => r.celler.includes('Produktnavn'));
+    const hode = rader[hi]?.celler || [];
+    const i = (rx) => hode.findIndex((h) => rx.test(h || ''));
+    const [cP, cV, cI, cL, cAar, cFin, cK, cNm] = [/produktnavn/i, /virkestoff/i, /^indikasjon/i, /lenke/i, /^år$/i, /finansiering/i, /kommentar/i, /nye metoder/i].map(i);
+    ut.vurderinger = rader.slice(hi + 1).map(({ celler: c, lenker }) => ({
+      produkt: c[cP], virkestoff: c[cV], indikasjon: c[cI], aar: Number(c[cAar]) || null, finansiering: c[cFin],
+      kommentar: c[cK] || undefined, nm: /^ID/i.test(c[cNm] || '') ? c[cNm] : undefined,
+      lenke: lenker[cL] || (/^https?:/.test(c[cL] || '') ? c[cL] : undefined),
+    })).filter((x) => x.produkt && /folketrygd/i.test(x.finansiering || '')).map(({ finansiering, ...x }) => x);
+    ut.oversiktFil = oversiktUrl;
+  }
+  logg(`Blå resept: ${ut.status.length} saker under behandling, ${ut.vurderinger.length} metodevurderinger for folketrygden`);
+  return ut;
 }

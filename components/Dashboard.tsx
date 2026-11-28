@@ -21,6 +21,7 @@ import { Nyheter } from './visninger/Nyheter';
 import { Access, type AccessVisning } from './visninger/Access';
 import { Marked } from './visninger/Marked';
 import { Selskapsradar } from './visninger/Selskapsradar';
+import { KundeOversikt } from './visninger/KundeOversikt';
 
 // Seks hovedfaner; de med flere visninger har undervalg. Adressen er #hovedfane/undervalg.
 const FANER = [
@@ -39,7 +40,7 @@ const FANER = [
     { id: 'selskaper', navn: 'Selskaper' }, { id: 'sammenlign', navn: 'Sammenlign' }, { id: 'kommer', navn: 'Kommer til Norge' }, { id: 'pipeline', navn: 'Pipeline' },
   ] },
   { id: 'nyheter', navn: 'Nyheter', under: [] },
-  { id: 'kunder', navn: 'Kunder', under: [{ id: 'radar', navn: 'Selskapsradar' }, { id: 'lister', navn: 'Egne søkelister' }] },
+  { id: 'kunder', navn: 'Kunder', under: [{ id: 'kundeoversikt', navn: 'Kundeoversikt' }, { id: 'radar', navn: 'Selskapsradar' }, { id: 'lister', navn: 'Egne søkelister' }] },
 ] as const;
 type Hoved = (typeof FANER)[number]['id'];
 export type Visning = Hoved | (typeof FANER)[number]['under'][number]['id'];
@@ -68,6 +69,8 @@ const INTRO: Record<string, string> = {
   blaresept: 'Her kan du følge det politiske løpet for legemidler på blå resept, og hva som skjer på Stortinget og hos etatene.',
   selskaper: 'Her kan du se de største helseselskapene i Norge per sektor, med ansatte, omsetning og resultat. Klikk på et selskap for regnskap, EMA-saker, studier og omtale.',
   nyheter: 'Her kan du lese siste nytt fra Dagens Medisin, Medwatch og helsemyndighetene, sortert etter tema. Søkefeltet og kategoriene øverst gjelder også her.',
+  radar: 'Her kan du velge et selskap og se alt om det samlet: kundestatus og notater, anledninger til kontakt, metoder i Nye metoder, blå resept, pipeline, konkurrenter og omtale.',
+  kundeoversikt: 'Her ser du selskapene dere har markert som kunde eller prospekt, hva som er aktuelt for hver av dem, og hvilke selskaper som står på kommende sakslister i Nye metoder og har saker om blå resept hos DMP.',
   lister: 'Her kan du sette opp egne søkelister, for eksempel for en kunde eller et produkt, og se alle treff i Stortinget, regjeringen, høringsinnspill, debatter og nyheter.',
 };
 
@@ -75,7 +78,7 @@ export default function Dashboard() {
   const [data, setData] = useState<Data | null>(null);
   const [feil, setFeil] = useState('');
   const [hoved, setHoved] = useState<Hoved>('oversikt');
-  const [under, setUnder] = useState<Record<string, string>>({ oversikt: 'sammendrag', politikk: 'sporsmal', access: 'lopet', marked: 'selskaper', kunder: 'radar' });
+  const [under, setUnder] = useState<Record<string, string>>({ oversikt: 'sammendrag', politikk: 'sporsmal', access: 'lopet', marked: 'selskaper', kunder: 'kundeoversikt' });
   const [filtre, setF] = useState<Filtre>({ sesjon: 'p:2025-2029', kategorier: [], sok: '', kunStore: false });
   const [person, setPerson] = useState<string | null>(null);
   const [visFiltre, setVisFiltre] = useState(false);
@@ -197,7 +200,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-        {MED_FILTER.has(hoved) && !(hoved === 'kunder' && aktivUnder === 'radar') && <div className="filterlinje">
+        {MED_FILTER.has(hoved) && !(hoved === 'kunder' && aktivUnder !== 'lister') && <div className="filterlinje">
           <button className="filterknapp innhold" aria-expanded={visFiltre} onClick={() => setVisFiltre(!visFiltre)}>
             Filtre og søk{((filtre.sesjon !== 'p:2025-2029' ? 1 : 0) + filtre.kategorier.length + (filtre.sok ? 1 : 0) + (filtre.kunStore ? 1 : 0)) > 0 ? ` (${(filtre.sesjon !== 'p:2025-2029' ? 1 : 0) + filtre.kategorier.length + (filtre.sok ? 1 : 0) + (filtre.kunStore ? 1 : 0)} aktive)` : ''} <span aria-hidden>{visFiltre ? '▴' : '▾'}</span>
           </button>
@@ -249,6 +252,7 @@ export default function Dashboard() {
           {hoved === 'access' && <Access visning={aktivUnder as AccessVisning} gaTil={byttFane} />}
           {hoved === 'marked' && <Marked visning={aktivUnder as 'selskaper' | 'sammenlign' | 'kommer' | 'pipeline'} />}
           {vis('nyheter') && <Nyheter />}
+          {vis('kundeoversikt') && <KundeOversikt />}
           {vis('radar') && <Selskapsradar />}
           {vis('lister') && <Overvaking />}
         </main>
